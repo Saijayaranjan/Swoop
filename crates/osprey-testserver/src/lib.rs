@@ -78,7 +78,9 @@ impl TestServer {
             .route("/bytes/{*name}", get(serve_bytes).head(serve_bytes))
             .route("/stats", get(stats))
             .with_state(inner.clone());
-        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.expect("bind");
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0")
+            .await
+            .expect("bind");
         let addr = listener.local_addr().unwrap();
         let (tx, rx) = oneshot::channel::<()>();
         tokio::spawn(async move {
@@ -89,7 +91,11 @@ impl TestServer {
                 .await
                 .ok();
         });
-        Self { addr, inner, shutdown: Some(tx) }
+        Self {
+            addr,
+            inner,
+            shutdown: Some(tx),
+        }
     }
 
     pub fn url(&self, path: &str) -> String {
@@ -101,15 +107,24 @@ impl TestServer {
     }
 
     pub fn add_html(&self, name: &str, html: &str) {
-        self.inner.html.lock().insert(name.to_owned(), html.to_owned());
+        self.inner
+            .html
+            .lock()
+            .insert(name.to_owned(), html.to_owned());
     }
 
     pub fn add_text(&self, path: &str, content_type: &str, body: &str) {
-        self.inner.text.lock().insert(path.to_owned(), (content_type.to_owned(), body.to_owned()));
+        self.inner
+            .text
+            .lock()
+            .insert(path.to_owned(), (content_type.to_owned(), body.to_owned()));
     }
 
     pub fn add_bytes(&self, path: &str, content_type: &str, body: Bytes) {
-        self.inner.bytes.lock().insert(path.to_owned(), (body, content_type.to_owned()));
+        self.inner
+            .bytes
+            .lock()
+            .insert(path.to_owned(), (body, content_type.to_owned()));
     }
 
     pub fn request_count(&self) -> u64 {
@@ -171,7 +186,11 @@ pub fn sha256_hex(data: &[u8]) -> String {
 }
 
 fn etag_for(name: &str, size: u64) -> String {
-    format!("\"{}-{}\"", name.len() * 7919 + name.bytes().map(|b| b as usize).sum::<usize>(), size)
+    format!(
+        "\"{}-{}\"",
+        name.len() * 7919 + name.bytes().map(|b| b as usize).sum::<usize>(),
+        size
+    )
 }
 
 fn parse_range(h: &str, size: u64) -> Option<(u64, u64)> {
@@ -186,7 +205,11 @@ fn parse_range(h: &str, size: u64) -> Option<(u64, u64)> {
         return Some((start, size - 1));
     }
     let start: u64 = a.parse().ok()?;
-    let end: u64 = if b.is_empty() { size.saturating_sub(1) } else { b.parse().ok()? };
+    let end: u64 = if b.is_empty() {
+        size.saturating_sub(1)
+    } else {
+        b.parse().ok()?
+    };
     if start >= size || end < start {
         return None;
     }
@@ -220,9 +243,18 @@ async fn serve_file(
     inner.log.lock().push(RequestRecord {
         method: method.to_string(),
         path: format!("/file/{name}"),
-        range: headers.get(header::RANGE).and_then(|v| v.to_str().ok()).map(String::from),
-        user_agent: headers.get(header::USER_AGENT).and_then(|v| v.to_str().ok()).map(String::from),
-        referer: headers.get(header::REFERER).and_then(|v| v.to_str().ok()).map(String::from),
+        range: headers
+            .get(header::RANGE)
+            .and_then(|v| v.to_str().ok())
+            .map(String::from),
+        user_agent: headers
+            .get(header::USER_AGENT)
+            .and_then(|v| v.to_str().ok())
+            .map(String::from),
+        referer: headers
+            .get(header::REFERER)
+            .and_then(|v| v.to_str().ok())
+            .map(String::from),
         authorization: headers.contains_key(header::AUTHORIZATION),
     });
 
@@ -234,7 +266,10 @@ async fn serve_file(
         tokio::time::sleep(Duration::from_millis(ms)).await;
     }
 
-    let size: u64 = q.get("size").and_then(|v| v.parse().ok()).unwrap_or(1024 * 1024);
+    let size: u64 = q
+        .get("size")
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(1024 * 1024);
 
     if let Some(n) = q.get("fail_first").and_then(|v| v.parse::<u64>().ok()) {
         if count <= n {
@@ -242,7 +277,9 @@ async fn serve_file(
         }
     }
     if let Some(code) = q.get("status").and_then(|v| v.parse::<u16>().ok()) {
-        return StatusCode::from_u16(code).unwrap_or(StatusCode::INTERNAL_SERVER_ERROR).into_response();
+        return StatusCode::from_u16(code)
+            .unwrap_or(StatusCode::INTERNAL_SERVER_ERROR)
+            .into_response();
     }
     if let Some(n) = q.get("redirect").and_then(|v| v.parse::<u32>().ok()) {
         if n > 0 {
@@ -254,10 +291,21 @@ async fn serve_file(
         }
     }
     if let Some(cred) = q.get("auth") {
-        let expected = format!("Basic {}", base64::Engine::encode(&base64::engine::general_purpose::STANDARD, cred));
-        let ok = headers.get(header::AUTHORIZATION).and_then(|v| v.to_str().ok()).map(|v| v == expected).unwrap_or(false);
+        let expected = format!(
+            "Basic {}",
+            base64::Engine::encode(&base64::engine::general_purpose::STANDARD, cred)
+        );
+        let ok = headers
+            .get(header::AUTHORIZATION)
+            .and_then(|v| v.to_str().ok())
+            .map(|v| v == expected)
+            .unwrap_or(false);
         if !ok {
-            return (StatusCode::UNAUTHORIZED, [(header::WWW_AUTHENTICATE, "Basic realm=\"test\"")]).into_response();
+            return (
+                StatusCode::UNAUTHORIZED,
+                [(header::WWW_AUTHENTICATE, "Basic realm=\"test\"")],
+            )
+                .into_response();
         }
     }
     if let Some(max) = q.get("max_conn").and_then(|v| v.parse::<usize>().ok()) {
@@ -269,10 +317,16 @@ async fn serve_file(
     *inner.in_flight.lock().entry(name.clone()).or_insert(0) += 1;
     let guard = InFlightGuard(inner.clone(), name.clone());
 
-    let etag = q.get("etag").cloned().unwrap_or_else(|| etag_for(&name, size));
+    let etag = q
+        .get("etag")
+        .cloned()
+        .unwrap_or_else(|| etag_for(&name, size));
     let norange = q.get("norange").map(|v| v == "1").unwrap_or(false);
     let nolength = q.get("nolength").map(|v| v == "1").unwrap_or(false);
-    let ctype = q.get("ctype").cloned().unwrap_or_else(|| "application/octet-stream".into());
+    let ctype = q
+        .get("ctype")
+        .cloned()
+        .unwrap_or_else(|| "application/octet-stream".into());
     let throttle: Option<u64> = q.get("throttle").and_then(|v| v.parse().ok());
     let fail_after: Option<u64> = q.get("fail_after").and_then(|v| v.parse().ok());
     let corrupt = q.get("corrupt").map(|v| v == "1").unwrap_or(false);
@@ -288,9 +342,15 @@ async fn serve_file(
     let mut resp_headers = HeaderMap::new();
     resp_headers.insert(header::CONTENT_TYPE, HeaderValue::from_str(&ctype).unwrap());
     resp_headers.insert(header::ETAG, HeaderValue::from_str(&etag).unwrap());
-    resp_headers.insert(header::LAST_MODIFIED, HeaderValue::from_static("Wed, 01 Jan 2025 00:00:00 GMT"));
+    resp_headers.insert(
+        header::LAST_MODIFIED,
+        HeaderValue::from_static("Wed, 01 Jan 2025 00:00:00 GMT"),
+    );
     if let Some(d) = q.get("disposition") {
-        resp_headers.insert(header::CONTENT_DISPOSITION, HeaderValue::from_str(&format!("attachment; filename=\"{d}\"")).unwrap());
+        resp_headers.insert(
+            header::CONTENT_DISPOSITION,
+            HeaderValue::from_str(&format!("attachment; filename=\"{d}\"")).unwrap(),
+        );
     }
     if !norange {
         resp_headers.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
@@ -300,14 +360,20 @@ async fn serve_file(
         Some(r) if !norange => match parse_range(r, size) {
             Some((s, e)) => (StatusCode::PARTIAL_CONTENT, s, e + 1),
             None => {
-                resp_headers.insert(header::CONTENT_RANGE, HeaderValue::from_str(&format!("bytes */{size}")).unwrap());
+                resp_headers.insert(
+                    header::CONTENT_RANGE,
+                    HeaderValue::from_str(&format!("bytes */{size}")).unwrap(),
+                );
                 return (StatusCode::RANGE_NOT_SATISFIABLE, resp_headers).into_response();
             }
         },
         _ => (StatusCode::OK, 0, size),
     };
     if status == StatusCode::PARTIAL_CONTENT {
-        resp_headers.insert(header::CONTENT_RANGE, HeaderValue::from_str(&format!("bytes {start}-{}/{size}", end - 1)).unwrap());
+        resp_headers.insert(
+            header::CONTENT_RANGE,
+            HeaderValue::from_str(&format!("bytes {start}-{}/{size}", end - 1)).unwrap(),
+        );
     }
     if !nolength {
         resp_headers.insert(header::CONTENT_LENGTH, HeaderValue::from(end - start));
@@ -341,7 +407,13 @@ fn async_stream_body(
         }
         if let Some(f) = fail_after {
             if sent >= f {
-                return Some((Err(std::io::Error::new(std::io::ErrorKind::ConnectionReset, "simulated disconnect")), (data, sent, guard)));
+                return Some((
+                    Err(std::io::Error::new(
+                        std::io::ErrorKind::ConnectionReset,
+                        "simulated disconnect",
+                    )),
+                    (data, sent, guard),
+                ));
             }
         }
         let end = ((sent as usize) + chunk).min(data.len());
@@ -360,28 +432,53 @@ fn async_stream_body(
 
 async fn serve_html(State(inner): State<Arc<Inner>>, Path(name): Path<String>) -> Response {
     inner.request_count.fetch_add(1, Ordering::Relaxed);
-    inner.log.lock().push(RequestRecord { method: "GET".into(), path: format!("/html/{name}"), range: None, user_agent: None, referer: None, authorization: false });
+    inner.log.lock().push(RequestRecord {
+        method: "GET".into(),
+        path: format!("/html/{name}"),
+        range: None,
+        user_agent: None,
+        referer: None,
+        authorization: false,
+    });
     match inner.html.lock().get(&name) {
-        Some(h) => ([(header::CONTENT_TYPE, "text/html; charset=utf-8")], h.clone()).into_response(),
+        Some(h) => (
+            [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
+            h.clone(),
+        )
+            .into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
     }
 }
 
 async fn serve_text(State(inner): State<Arc<Inner>>, Path(name): Path<String>) -> Response {
     inner.request_count.fetch_add(1, Ordering::Relaxed);
-    inner.log.lock().push(RequestRecord { method: "GET".into(), path: format!("/text/{name}"), range: None, user_agent: None, referer: None, authorization: false });
+    inner.log.lock().push(RequestRecord {
+        method: "GET".into(),
+        path: format!("/text/{name}"),
+        range: None,
+        user_agent: None,
+        referer: None,
+        authorization: false,
+    });
     match inner.text.lock().get(&name) {
         Some((ct, body)) => ([(header::CONTENT_TYPE, ct.clone())], body.clone()).into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
     }
 }
 
-async fn serve_bytes(State(inner): State<Arc<Inner>>, Path(name): Path<String>, headers: HeaderMap) -> Response {
+async fn serve_bytes(
+    State(inner): State<Arc<Inner>>,
+    Path(name): Path<String>,
+    headers: HeaderMap,
+) -> Response {
     inner.request_count.fetch_add(1, Ordering::Relaxed);
     inner.log.lock().push(RequestRecord {
         method: "GET".into(),
         path: format!("/bytes/{name}"),
-        range: headers.get(header::RANGE).and_then(|v| v.to_str().ok()).map(String::from),
+        range: headers
+            .get(header::RANGE)
+            .and_then(|v| v.to_str().ok())
+            .map(String::from),
         user_agent: None,
         referer: None,
         authorization: false,
@@ -393,9 +490,21 @@ async fn serve_bytes(State(inner): State<Arc<Inner>>, Path(name): Path<String>, 
             let mut h = HeaderMap::new();
             h.insert(header::CONTENT_TYPE, HeaderValue::from_str(&ct).unwrap());
             h.insert(header::ACCEPT_RANGES, HeaderValue::from_static("bytes"));
-            if let Some((s, e)) = headers.get(header::RANGE).and_then(|v| v.to_str().ok()).and_then(|r| parse_range(r, size)) {
-                h.insert(header::CONTENT_RANGE, HeaderValue::from_str(&format!("bytes {s}-{e}/{size}")).unwrap());
-                return (StatusCode::PARTIAL_CONTENT, h, body.slice(s as usize..=e as usize)).into_response();
+            if let Some((s, e)) = headers
+                .get(header::RANGE)
+                .and_then(|v| v.to_str().ok())
+                .and_then(|r| parse_range(r, size))
+            {
+                h.insert(
+                    header::CONTENT_RANGE,
+                    HeaderValue::from_str(&format!("bytes {s}-{e}/{size}")).unwrap(),
+                );
+                return (
+                    StatusCode::PARTIAL_CONTENT,
+                    h,
+                    body.slice(s as usize..=e as usize),
+                )
+                    .into_response();
             }
             (StatusCode::OK, h, body).into_response()
         }
@@ -422,7 +531,10 @@ mod tests {
         let part = reqwest_lite::get(&url, Some("bytes=10-19")).await;
         assert_eq!(part.0, 206);
         assert_eq!(part.1, content_for("a.bin", 100_000).slice(10..20));
-        assert!(s.requests().iter().any(|r| r.range.as_deref() == Some("bytes=10-19")));
+        assert!(s
+            .requests()
+            .iter()
+            .any(|r| r.range.as_deref() == Some("bytes=10-19")));
     }
 
     /// Tiny HTTP/1.1 client so the test server's own tests do not depend on reqwest.
@@ -432,7 +544,8 @@ mod tests {
             let u = url.strip_prefix("http://").unwrap();
             let (hostport, path) = u.split_once('/').unwrap();
             let mut s = tokio::net::TcpStream::connect(hostport).await.unwrap();
-            let mut req = format!("GET /{path} HTTP/1.1\r\nHost: {hostport}\r\nConnection: close\r\n");
+            let mut req =
+                format!("GET /{path} HTTP/1.1\r\nHost: {hostport}\r\nConnection: close\r\n");
             if let Some(r) = range {
                 req.push_str(&format!("Range: {r}\r\n"));
             }

@@ -78,12 +78,18 @@ impl TaskState {
 
     /// Terminal states: the task will not change without a user action.
     pub fn is_terminal(self) -> bool {
-        matches!(self, TaskState::Completed | TaskState::Failed | TaskState::Cancelled)
+        matches!(
+            self,
+            TaskState::Completed | TaskState::Failed | TaskState::Cancelled
+        )
     }
 
     /// The task is waiting for the queue/scheduler to pick it up.
     pub fn is_waiting(self) -> bool {
-        matches!(self, TaskState::Pending | TaskState::Queued | TaskState::Scheduled)
+        matches!(
+            self,
+            TaskState::Pending | TaskState::Queued | TaskState::Scheduled
+        )
     }
 
     pub fn can_pause(self) -> bool {
@@ -100,30 +106,83 @@ impl TaskState {
     }
 
     pub fn can_resume(self) -> bool {
-        matches!(self, TaskState::Paused | TaskState::Failed | TaskState::Cancelled | TaskState::Pending)
+        matches!(
+            self,
+            TaskState::Paused | TaskState::Failed | TaskState::Cancelled | TaskState::Pending
+        )
     }
 
-    /// Validates a transition. `to == self` is never a transition.
+    /// Validates a transition. `to == self` is never a transition (callers that only change
+    /// `blocked_by` or details must not call `transition`).
     pub fn can_transition_to(self, to: TaskState) -> bool {
         use TaskState::*;
         if self == to {
             return false;
         }
         match self {
-            Pending => matches!(to, Queued | Scheduled | Paused | Cancelled),
-            Queued => matches!(to, Resolving | Connecting | Scheduled | Paused | Cancelled | Failed),
+            Pending => matches!(to, Queued | Scheduled | Paused | Cancelled | Failed),
+            Queued => matches!(
+                to,
+                Resolving | Connecting | Scheduled | Paused | Cancelled | Failed
+            ),
             Scheduled => matches!(to, Queued | Paused | Cancelled),
-            Resolving => matches!(to, Connecting | Downloading | Retrying | Paused | Failed | Cancelled | Verifying | Completed),
-            Connecting => matches!(to, Downloading | Retrying | Paused | Failed | Cancelled | Verifying),
-            Downloading => matches!(to, Paused | Retrying | Verifying | Processing | Completed | Failed | Cancelled | Seeding | Connecting),
+            // Resolving → Seeding: resuming an already-complete torrent.
+            // Resolving → Queued/Scheduled: pre-empted by the queue or gated by a schedule.
+            Resolving => matches!(
+                to,
+                Connecting
+                    | Downloading
+                    | Retrying
+                    | Paused
+                    | Failed
+                    | Cancelled
+                    | Verifying
+                    | Completed
+                    | Seeding
+                    | Queued
+                    | Scheduled
+            ),
+            Connecting => matches!(
+                to,
+                Downloading
+                    | Retrying
+                    | Paused
+                    | Failed
+                    | Cancelled
+                    | Verifying
+                    | Queued
+                    | Scheduled
+            ),
+            Downloading => matches!(
+                to,
+                Paused
+                    | Retrying
+                    | Verifying
+                    | Processing
+                    | Completed
+                    | Failed
+                    | Cancelled
+                    | Seeding
+                    | Connecting
+                    | Queued
+                    | Scheduled
+            ),
             Paused => matches!(to, Queued | Scheduled | Cancelled | Resolving),
-            Retrying => matches!(to, Connecting | Resolving | Failed | Paused | Cancelled),
-            Verifying => matches!(to, Processing | Completed | Failed | Cancelled | Retrying | Seeding),
-            Processing => matches!(to, Completed | Failed | Cancelled | Seeding),
-            Completed => matches!(to, Queued | Seeding | Processing),
-            Failed => matches!(to, Queued | Scheduled | Cancelled),
-            Cancelled => matches!(to, Queued | Scheduled),
-            Seeding => matches!(to, Completed | Paused | Cancelled | Failed),
+            // Retrying → Queued/Scheduled: the timer fired but the queue is full/paused/gated.
+            Retrying => matches!(
+                to,
+                Connecting | Resolving | Failed | Paused | Cancelled | Queued | Scheduled
+            ),
+            Verifying => matches!(
+                to,
+                Processing | Completed | Failed | Cancelled | Retrying | Seeding
+            ),
+            Processing => matches!(to, Completed | Failed | Cancelled | Seeding | Retrying),
+            Completed => matches!(to, Queued | Seeding | Processing | Pending),
+            Failed => matches!(to, Queued | Scheduled | Cancelled | Pending),
+            Cancelled => matches!(to, Queued | Scheduled | Pending),
+            // Seeding → Downloading: the user selected additional files.
+            Seeding => matches!(to, Completed | Paused | Cancelled | Failed | Downloading),
         }
     }
 
@@ -176,8 +235,10 @@ impl fmt::Display for TaskState {
     }
 }
 
-/// Why a task is paused; lets the UI explain "Paused by Night queue schedule".
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// Why a task is not running. A task may be blocked by several reasons at once (user pause
+/// during a closed schedule window); it resumes only when the set is empty, and a user pause is
+/// never cleared by an automatic event.
+#[derive(Clone, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "reason", content = "detail")]
 pub enum PauseReason {
     User,
@@ -187,6 +248,26 @@ pub enum PauseReason {
     Shutdown,
     DiskSpace,
     NetworkUnavailable,
+    VolumeUnavailable,
+}
+
+impl PauseReason {
+    /// Automatic reasons are cleared by the services layer when their cause goes away.
+    pub fn is_automatic(&self) -> bool {
+        !matches!(self, PauseReason::User)
+    }
+    pub fn label_key(&self) -> &'static str {
+        match self {
+            PauseReason::User => "pause.user",
+            PauseReason::Queue(_) => "pause.queue",
+            PauseReason::Schedule(_) => "pause.schedule",
+            PauseReason::Condition(_) => "pause.condition",
+            PauseReason::Shutdown => "pause.shutdown",
+            PauseReason::DiskSpace => "pause.disk_space",
+            PauseReason::NetworkUnavailable => "pause.network",
+            PauseReason::VolumeUnavailable => "pause.volume",
+        }
+    }
 }
 
 #[cfg(test)]
@@ -210,6 +291,12 @@ mod tests {
         assert!(TaskState::Failed.can_transition_to(TaskState::Queued));
         assert!(TaskState::Seeding.can_transition_to(TaskState::Completed));
         assert!(!TaskState::Cancelled.can_transition_to(TaskState::Downloading));
+        assert!(TaskState::Resolving.can_transition_to(TaskState::Seeding));
+        assert!(TaskState::Seeding.can_transition_to(TaskState::Downloading));
+        assert!(TaskState::Retrying.can_transition_to(TaskState::Queued));
+        assert!(TaskState::Downloading.can_transition_to(TaskState::Queued));
+        assert!(TaskState::Pending.can_transition_to(TaskState::Failed));
+        assert!(TaskState::Downloading.can_transition_to(TaskState::Scheduled));
     }
 
     #[test]

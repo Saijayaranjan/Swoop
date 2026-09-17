@@ -1,9 +1,11 @@
 //! The download task: the central entity of the product.
 
-use crate::{CategoryId, CredentialId, Millis, ProxyId, QueueId, ScheduleId, TaskError, TaskId, TaskState};
 use crate::health::HealthScore;
 use crate::media::MediaInfo;
 use crate::torrent::TorrentInfo;
+use crate::{
+    CategoryId, CredentialId, Millis, ProxyId, QueueId, ScheduleId, TaskError, TaskId, TaskState,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -52,14 +54,27 @@ impl TaskKind {
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Source {
     /// One or more URLs serving identical content (mirrors). The first is the primary.
-    Urls { urls: Vec<String> },
+    Urls {
+        urls: Vec<String>,
+    },
     /// Raw `.torrent` bytes (stored by the persistence layer, referenced here by hash).
-    TorrentFile { info_hash: String, name: String },
-    Magnet { uri: String },
+    TorrentFile {
+        info_hash: String,
+        name: String,
+    },
+    Magnet {
+        uri: String,
+    },
     /// A Metalink document (v3 or v4) fetched from `url` or supplied inline.
-    Metalink { url: Option<String>, document: Option<String> },
+    Metalink {
+        url: Option<String>,
+        document: Option<String>,
+    },
     /// An HLS master or media playlist.
-    Hls { playlist_url: String, variant: Option<String> },
+    Hls {
+        playlist_url: String,
+        variant: Option<String>,
+    },
 }
 
 impl Source {
@@ -75,7 +90,10 @@ impl Source {
     pub fn urls(&self) -> Vec<String> {
         match self {
             Source::Urls { urls } => urls.clone(),
-            _ => self.primary_url().map(|u| vec![u.to_owned()]).unwrap_or_default(),
+            _ => self
+                .primary_url()
+                .map(|u| vec![u.to_owned()])
+                .unwrap_or_default(),
         }
     }
     pub fn domain(&self) -> Option<String> {
@@ -85,7 +103,9 @@ impl Source {
     }
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, Default)]
+#[derive(
+    Clone, Copy, Debug, PartialEq, Eq, Hash, PartialOrd, Ord, Serialize, Deserialize, Default,
+)]
 #[serde(rename_all = "snake_case")]
 pub enum Priority {
     Low,
@@ -179,10 +199,14 @@ pub struct Checksum {
 
 impl Checksum {
     pub fn new(algorithm: ChecksumAlgorithm, value: impl Into<String>) -> Self {
-        Self { algorithm, value: value.into().to_ascii_lowercase() }
+        Self {
+            algorithm,
+            value: value.into().to_ascii_lowercase(),
+        }
     }
     pub fn is_well_formed(&self) -> bool {
-        self.value.len() == self.algorithm.hex_len() && self.value.chars().all(|c| c.is_ascii_hexdigit())
+        self.value.len() == self.algorithm.hex_len()
+            && self.value.chars().all(|c| c.is_ascii_hexdigit())
     }
     /// Parse `sha256:abcd…` or `sha256=abcd…` or a bare 64-hex string (assumed sha256).
     pub fn parse(s: &str) -> Option<Self> {
@@ -320,7 +344,13 @@ pub struct Segment {
 
 impl Segment {
     pub fn new(index: u32, start: u64, end: u64) -> Self {
-        Self { index, start, end, committed: start, source_index: 0 }
+        Self {
+            index,
+            start,
+            end,
+            committed: start,
+            source_index: 0,
+        }
     }
     pub fn len(&self) -> u64 {
         self.end.saturating_sub(self.start)
@@ -351,7 +381,10 @@ pub struct SegmentMap {
 
 impl SegmentMap {
     pub fn committed_bytes(&self) -> u64 {
-        self.segments.iter().map(|s| s.committed.saturating_sub(s.start)).sum()
+        self.segments
+            .iter()
+            .map(|s| s.committed.saturating_sub(s.start))
+            .sum()
     }
     pub fn remaining_bytes(&self) -> u64 {
         self.segments.iter().map(Segment::remaining).sum()
@@ -375,8 +408,17 @@ pub struct Task {
     #[serde(default)]
     pub file_path: Option<PathBuf>,
     pub state: TaskState,
+    /// Everything currently preventing the task from running (see [`crate::state::PauseReason`]).
     #[serde(default)]
-    pub pause_reason: Option<crate::state::PauseReason>,
+    pub blocked_by: Vec<crate::state::PauseReason>,
+    /// Monotonic revision, bumped on every persisted change; consumers drop stale updates.
+    #[serde(default)]
+    pub rev: u64,
+    /// The user edited the name / directory; engine-resolved metadata must not overwrite them.
+    #[serde(default)]
+    pub name_locked: bool,
+    #[serde(default)]
+    pub directory_locked: bool,
     #[serde(default)]
     pub status_detail: Option<String>,
     #[serde(default)]
@@ -431,7 +473,13 @@ pub struct Task {
 
 impl Task {
     /// Build a new task in `Pending` state with sensible defaults.
-    pub fn new(kind: TaskKind, source: Source, name: impl Into<String>, directory: PathBuf, queue_id: QueueId) -> Self {
+    pub fn new(
+        kind: TaskKind,
+        source: Source,
+        name: impl Into<String>,
+        directory: PathBuf,
+        queue_id: QueueId,
+    ) -> Self {
         let now = Millis::now();
         Self {
             id: TaskId::new(),
@@ -441,7 +489,10 @@ impl Task {
             directory,
             file_path: None,
             state: TaskState::Pending,
-            pause_reason: None,
+            blocked_by: Vec::new(),
+            rev: 0,
+            name_locked: false,
+            directory_locked: false,
             status_detail: None,
             error: None,
             progress: Progress::default(),
@@ -474,7 +525,9 @@ impl Task {
     }
 
     pub fn target_path(&self) -> PathBuf {
-        self.file_path.clone().unwrap_or_else(|| self.directory.join(&self.name))
+        self.file_path
+            .clone()
+            .unwrap_or_else(|| self.directory.join(&self.name))
     }
 
     pub fn extension(&self) -> Option<String> {
@@ -494,25 +547,96 @@ impl Task {
         }
         let from = self.state;
         self.state = to;
-        self.updated_at = Millis::now();
+        self.touch();
         match to {
-            TaskState::Downloading if self.started_at.is_none() => self.started_at = Some(self.updated_at),
+            TaskState::Downloading if self.started_at.is_none() => {
+                self.started_at = Some(self.updated_at)
+            }
             TaskState::Completed => self.completed_at = Some(self.updated_at),
             _ => {}
         }
-        if to != TaskState::Paused {
-            self.pause_reason = None;
+        if !matches!(to, TaskState::Paused | TaskState::Scheduled) {
+            self.blocked_by.clear();
         }
-        if !matches!(to, TaskState::Failed) {
-            // keep the last error visible on Failed only; clear it when we move on
-            if matches!(to, TaskState::Queued | TaskState::Resolving | TaskState::Connecting) {
-                self.error = None;
-            }
+        // keep the last error visible on Failed only; clear it when we move on
+        if matches!(
+            to,
+            TaskState::Queued | TaskState::Resolving | TaskState::Connecting
+        ) {
+            self.error = None;
         }
         if to != TaskState::Retrying {
             self.next_retry_at = None;
         }
         Ok(from)
+    }
+
+    /// Bump the revision and `updated_at`. Every persisted mutation goes through here.
+    pub fn touch(&mut self) {
+        self.rev = self.rev.wrapping_add(1);
+        self.updated_at = Millis::now();
+    }
+
+    /// Add a block reason (idempotent). Returns true if it was newly added.
+    pub fn block(&mut self, reason: crate::state::PauseReason) -> bool {
+        if self.blocked_by.contains(&reason) {
+            return false;
+        }
+        self.blocked_by.push(reason);
+        self.touch();
+        true
+    }
+
+    /// Remove a block reason. Returns true if it was present.
+    pub fn unblock(&mut self, reason: &crate::state::PauseReason) -> bool {
+        let before = self.blocked_by.len();
+        self.blocked_by.retain(|r| r != reason);
+        let changed = self.blocked_by.len() != before;
+        if changed {
+            self.touch();
+        }
+        changed
+    }
+
+    /// Remove every automatic block reason (schedule, condition, disk…), leaving a user pause.
+    pub fn clear_automatic_blocks(&mut self) -> bool {
+        let before = self.blocked_by.len();
+        self.blocked_by.retain(|r| !r.is_automatic());
+        let changed = self.blocked_by.len() != before;
+        if changed {
+            self.touch();
+        }
+        changed
+    }
+
+    pub fn is_user_paused(&self) -> bool {
+        self.blocked_by.contains(&crate::state::PauseReason::User)
+    }
+
+    /// Prepare a Completed/Failed/Cancelled task to run again. `keep_partial = false` discards
+    /// resume data (the services layer deletes the part file).
+    pub fn reset_for_rerun(&mut self, keep_partial: bool) {
+        self.progress = Progress::default();
+        self.error = None;
+        self.completed_at = None;
+        self.started_at = None;
+        self.verified_checksum = None;
+        self.attempt = 0;
+        self.next_retry_at = None;
+        self.blocked_by.clear();
+        self.stats = TaskStats {
+            range_supported: self.stats.range_supported,
+            http_version: None,
+            ..TaskStats::default()
+        };
+        self.health = HealthScore::default();
+        if !keep_partial {
+            self.segment_map = None;
+            if let Some(m) = &mut self.media {
+                m.segments_done = 0;
+            }
+        }
+        self.touch();
     }
 }
 
@@ -521,8 +645,9 @@ impl Task {
 pub struct ProgressUpdate {
     pub task_id: TaskId,
     pub progress: Progress,
+    /// Task revision the update belongs to; consumers ignore updates older than what they hold.
     #[serde(default)]
-    pub state: Option<TaskState>,
+    pub rev: u64,
 }
 
 /// Input for creating a task through any front door (UI, API, CLI, extension, grabber).
@@ -587,7 +712,9 @@ mod tests {
     fn transition_updates_timestamps() {
         let mut t = Task::new(
             TaskKind::Http,
-            Source::Urls { urls: vec!["https://example.com/a.zip".into()] },
+            Source::Urls {
+                urls: vec!["https://example.com/a.zip".into()],
+            },
             "a.zip",
             PathBuf::from("/tmp"),
             QueueId::default_queue(),
@@ -596,10 +723,18 @@ mod tests {
         t.transition(TaskState::Connecting).unwrap();
         t.transition(TaskState::Downloading).unwrap();
         assert!(t.started_at.is_some());
-        assert!(t.transition(TaskState::Queued).is_err());
+        assert!(t.transition(TaskState::Pending).is_err());
         t.transition(TaskState::Verifying).unwrap();
         t.transition(TaskState::Completed).unwrap();
         assert!(t.completed_at.is_some());
+        let rev = t.rev;
+        t.reset_for_rerun(false);
+        assert!(t.completed_at.is_none() && t.segment_map.is_none() && t.rev > rev);
+        assert!(t.block(crate::state::PauseReason::User));
+        assert!(!t.block(crate::state::PauseReason::User));
+        t.block(crate::state::PauseReason::DiskSpace);
+        assert!(t.clear_automatic_blocks());
+        assert!(t.is_user_paused());
         assert_eq!(t.domain().as_deref(), Some("example.com"));
         assert_eq!(t.extension().as_deref(), Some("zip"));
     }

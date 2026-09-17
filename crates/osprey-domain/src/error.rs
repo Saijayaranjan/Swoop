@@ -59,6 +59,12 @@ pub enum ErrorKind {
     ProtectedContent,
     MirrorExhausted,
     NetworkUnavailable,
+    /// The body was an HTML page (login/captcha/interstitial) instead of the expected file.
+    UnexpectedContent,
+    /// HLS playlist without `#EXT-X-ENDLIST` (live stream) — not supported.
+    LiveStreamUnsupported,
+    /// Server-side quota / bandwidth cap reached.
+    QuotaExceeded,
     Cancelled,
     /// Internal invariant broken; always a bug.
     Internal,
@@ -81,6 +87,10 @@ pub enum FailureClass {
     Permanent,
     /// Discard partial data and start again (checksum mismatch, source changed).
     RestartFromScratch,
+    /// Continue with reduced capability (single connection, no resume).
+    Degrade,
+    /// Pause and wait for an external condition (disk space, volume, network) to change.
+    WaitForCondition,
 }
 
 impl ErrorKind {
@@ -88,18 +98,31 @@ impl ErrorKind {
         use ErrorKind::*;
         match self {
             DnsFailure | ConnectionTimeout | ConnectionReset | ReadTimeout | Truncated
-            | ServerError | NetworkUnavailable | NoPeers | DhtUnavailable | TrackerFailure => {
+            | ServerError | NoPeers | DhtUnavailable | TrackerFailure | TlsFailure => {
                 FailureClass::Transient
             }
-            Throttled => FailureClass::Throttled,
-            ConnectionRefused | ExpiredUrl | MirrorExhausted | RedirectLoop | ProxyError => {
-                FailureClass::SourceProblem
-            }
-            AuthenticationRequired | Forbidden | DiskFull | DiskWriteError | DiskReadError
-            | PermissionDenied | VolumeUnavailable | FileExists | CertificateInvalid
-            | TlsFailure => FailureClass::NeedsUser,
-            InvalidUrl | UnsupportedScheme | NotFound | RangeNotSupported | InvalidFilename
-            | PathTraversal | InvalidTorrent | ParseError | ProtectedContent | Cancelled
+            Throttled | QuotaExceeded => FailureClass::Throttled,
+            ConnectionRefused | ExpiredUrl | MirrorExhausted | RedirectLoop | Forbidden
+            | UnexpectedContent => FailureClass::SourceProblem,
+            AuthenticationRequired
+            | DiskWriteError
+            | DiskReadError
+            | PermissionDenied
+            | FileExists
+            | CertificateInvalid
+            | ProxyError => FailureClass::NeedsUser,
+            DiskFull | VolumeUnavailable | NetworkUnavailable => FailureClass::WaitForCondition,
+            RangeNotSupported => FailureClass::Degrade,
+            InvalidUrl
+            | UnsupportedScheme
+            | NotFound
+            | InvalidFilename
+            | PathTraversal
+            | InvalidTorrent
+            | ParseError
+            | ProtectedContent
+            | LiveStreamUnsupported
+            | Cancelled
             | Internal => FailureClass::Permanent,
             ChecksumMismatch | SourceChanged => FailureClass::RestartFromScratch,
             Unknown => FailureClass::Transient,
@@ -154,6 +177,9 @@ impl ErrorKind {
             ProtectedContent => "error.protected",
             MirrorExhausted => "error.mirrors_exhausted",
             NetworkUnavailable => "error.network_unavailable",
+            UnexpectedContent => "error.unexpected_content",
+            LiveStreamUnsupported => "error.live_stream",
+            QuotaExceeded => "error.quota",
             Cancelled => "error.cancelled",
             Internal => "error.internal",
             Unknown => "error.unknown",
@@ -177,7 +203,18 @@ pub struct TaskError {
     /// Which source URL / mirror produced it.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_url: Option<String>,
+    /// Server-suggested delay (`Retry-After`) that overrides the backoff policy.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub retry_after_ms: Option<u64>,
     pub at: crate::Millis,
+}
+
+/// Where an I/O error came from; the same `std::io::ErrorKind` means different things on a
+/// socket and on a file.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IoContext {
+    Disk,
+    Network,
 }
 
 impl TaskError {
@@ -188,8 +225,13 @@ impl TaskError {
             status_code: None,
             detail: None,
             source_url: None,
+            retry_after_ms: None,
             at: crate::Millis::now(),
         }
+    }
+    pub fn with_retry_after_ms(mut self, ms: u64) -> Self {
+        self.retry_after_ms = Some(ms);
+        self
     }
     pub fn with_status(mut self, status: u16) -> Self {
         self.status_code = Some(status);
@@ -216,14 +258,24 @@ impl TaskError {
         Self::new(ErrorKind::Internal, msg)
     }
 
-    /// Classify an HTTP status code.
+    /// Classify an HTTP status code. 403 on a URL that carries signature/expiry parameters is
+    /// treated as an expired link (S3/CloudFront behaviour) rather than a hard forbidden.
     pub fn from_http_status(status: u16, url: &str) -> Self {
         let kind = match status {
             401 | 407 => ErrorKind::AuthenticationRequired,
-            403 => ErrorKind::Forbidden,
+            403 => {
+                if url_looks_signed(url) {
+                    ErrorKind::ExpiredUrl
+                } else {
+                    ErrorKind::Forbidden
+                }
+            }
             404 | 410 => ErrorKind::NotFound,
-            416 => ErrorKind::RangeNotSupported,
+            // 416 on a resume means the resource changed size (or is already complete — the
+            // engine checks `committed == total` before reporting this).
+            416 => ErrorKind::SourceChanged,
             429 => ErrorKind::Throttled,
+            509 => ErrorKind::QuotaExceeded,
             500..=599 => ErrorKind::ServerError,
             _ => ErrorKind::Unknown,
         };
@@ -232,29 +284,40 @@ impl TaskError {
             .with_source(url.to_owned())
     }
 
-    /// Classify a std::io error.
-    pub fn from_io(err: &std::io::Error, context: &str) -> Self {
+    /// Classify a std::io error given where it happened.
+    pub fn from_io_ctx(err: &std::io::Error, context: &str, io: IoContext) -> Self {
         use std::io::ErrorKind as IoKind;
-        let kind = match err.kind() {
-            IoKind::PermissionDenied => ErrorKind::PermissionDenied,
-            IoKind::NotFound => ErrorKind::VolumeUnavailable,
-            IoKind::AlreadyExists => ErrorKind::FileExists,
-            IoKind::TimedOut => ErrorKind::ConnectionTimeout,
-            IoKind::ConnectionRefused => ErrorKind::ConnectionRefused,
-            IoKind::ConnectionReset | IoKind::ConnectionAborted | IoKind::BrokenPipe => {
-                ErrorKind::ConnectionReset
-            }
-            IoKind::UnexpectedEof => ErrorKind::Truncated,
-            IoKind::Interrupted => ErrorKind::Cancelled,
-            _ => {
-                if err.raw_os_error() == Some(28) {
-                    ErrorKind::DiskFull // ENOSPC
-                } else {
-                    ErrorKind::DiskWriteError
-                }
-            }
+        let kind = match (err.kind(), io) {
+            (IoKind::PermissionDenied, IoContext::Disk) => ErrorKind::PermissionDenied,
+            (IoKind::NotFound, IoContext::Disk) => ErrorKind::VolumeUnavailable,
+            (IoKind::AlreadyExists, IoContext::Disk) => ErrorKind::FileExists,
+            (IoKind::TimedOut, _) => ErrorKind::ConnectionTimeout,
+            (IoKind::ConnectionRefused, _) => ErrorKind::ConnectionRefused,
+            (
+                IoKind::ConnectionReset
+                | IoKind::ConnectionAborted
+                | IoKind::BrokenPipe
+                | IoKind::NotConnected,
+                _,
+            ) => ErrorKind::ConnectionReset,
+            (IoKind::UnexpectedEof, _) => ErrorKind::Truncated,
+            (IoKind::Interrupted, _) => ErrorKind::Cancelled,
+            (_, IoContext::Disk) => match err.raw_os_error() {
+                Some(28) => ErrorKind::DiskFull,  // ENOSPC
+                Some(122) => ErrorKind::DiskFull, // EDQUOT (Linux)
+                Some(69) if cfg!(target_os = "macos") => ErrorKind::DiskFull, // EDQUOT (macOS)
+                Some(30) => ErrorKind::PermissionDenied, // EROFS
+                Some(63) | Some(36) => ErrorKind::InvalidFilename, // ENAMETOOLONG
+                _ => ErrorKind::DiskWriteError,
+            },
+            (_, IoContext::Network) => ErrorKind::ConnectionReset,
         };
         Self::new(kind, format!("{context}: {err}"))
+    }
+
+    /// Classify a std::io error from a disk operation (the common case).
+    pub fn from_io(err: &std::io::Error, context: &str) -> Self {
+        Self::from_io_ctx(err, context, IoContext::Disk)
     }
 }
 
@@ -296,22 +359,82 @@ impl DomainError {
 
 pub type DomainResult<T> = Result<T, DomainError>;
 
+/// Does the URL look like a pre-signed/expiring link?
+pub fn url_looks_signed(url: &str) -> bool {
+    let lower = url.to_ascii_lowercase();
+    let q = match lower.split_once('?') {
+        Some((_, q)) => q,
+        None => return false,
+    };
+    [
+        "x-amz-signature",
+        "x-amz-expires",
+        "x-goog-signature",
+        "signature=",
+        "sig=",
+        "expires=",
+        "expiry=",
+        "token=",
+        "x-amz-credential",
+        "policy=",
+    ]
+    .iter()
+    .any(|k| q.contains(k))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
     fn http_status_classification() {
-        assert_eq!(TaskError::from_http_status(404, "u").kind, ErrorKind::NotFound);
-        assert_eq!(TaskError::from_http_status(429, "u").class(), FailureClass::Throttled);
-        assert_eq!(TaskError::from_http_status(503, "u").class(), FailureClass::Transient);
-        assert_eq!(TaskError::from_http_status(401, "u").class(), FailureClass::NeedsUser);
+        assert_eq!(
+            TaskError::from_http_status(404, "u").kind,
+            ErrorKind::NotFound
+        );
+        assert_eq!(
+            TaskError::from_http_status(429, "u").class(),
+            FailureClass::Throttled
+        );
+        assert_eq!(
+            TaskError::from_http_status(503, "u").class(),
+            FailureClass::Transient
+        );
+        assert_eq!(
+            TaskError::from_http_status(401, "u").class(),
+            FailureClass::NeedsUser
+        );
         assert!(!TaskError::from_http_status(404, "u").is_retryable());
+        assert_eq!(
+            TaskError::from_http_status(403, "https://b.s3.amazonaws.com/k?X-Amz-Signature=abc")
+                .kind,
+            ErrorKind::ExpiredUrl
+        );
+        assert_eq!(
+            TaskError::from_http_status(403, "https://x/y").kind,
+            ErrorKind::Forbidden
+        );
+        assert_eq!(
+            TaskError::from_http_status(416, "u").class(),
+            FailureClass::RestartFromScratch
+        );
+        assert_eq!(ErrorKind::RangeNotSupported.class(), FailureClass::Degrade);
+        assert_eq!(ErrorKind::DiskFull.class(), FailureClass::WaitForCondition);
+        assert_eq!(ErrorKind::TlsFailure.class(), FailureClass::Transient);
     }
 
     #[test]
     fn enospc_is_disk_full() {
         let e = std::io::Error::from_raw_os_error(28);
         assert_eq!(TaskError::from_io(&e, "write").kind, ErrorKind::DiskFull);
+        let other = std::io::Error::other("weird");
+        assert_eq!(
+            TaskError::from_io_ctx(&other, "read", IoContext::Network).kind,
+            ErrorKind::ConnectionReset
+        );
+        assert_eq!(
+            TaskError::from_io_ctx(&other, "write", IoContext::Disk).kind,
+            ErrorKind::DiskWriteError
+        );
     }
 }

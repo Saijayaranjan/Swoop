@@ -4,30 +4,51 @@
 
 use osprey_domain::{ErrorKind, TaskError};
 use std::path::{Component, Path, PathBuf};
+use unicode_normalization::UnicodeNormalization;
 
-pub const MAX_FILENAME_BYTES: usize = 255;
+/// Filesystem limit is 255 bytes; we reserve room for the part suffix (`.osprey-part`) and a
+/// ` (9999)` uniqueness suffix so derived names never hit `ENAMETOOLONG`.
+pub const MAX_FILENAME_BYTES: usize = 255 - 12 - 8;
+pub const MAX_PATH_BYTES: usize = 1024;
+pub const MAX_PATH_DEPTH: usize = 32;
 
 const WINDOWS_RESERVED: &[&str] = &[
-    "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8", "COM9", "LPT1", "LPT2", "LPT3", "LPT4",
-    "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
+    "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4", "COM5", "COM6", "COM7", "COM8",
+    "COM9", "LPT1", "LPT2", "LPT3", "LPT4", "LPT5", "LPT6", "LPT7", "LPT8", "LPT9",
 ];
 
 /// Make an untrusted string safe to use as a single path component.
-/// Never returns an empty string, `.` or `..`.
+/// Never returns an empty string, `.` or `..`. Output is NFC-normalised so comparisons against
+/// existing files behave the same on normalisation-insensitive filesystems (APFS) and others.
 pub fn sanitize_filename(input: &str) -> String {
+    let input: String = input.nfc().collect();
     let mut out = String::with_capacity(input.len());
     for ch in input.chars() {
         let replaced = match ch {
             '/' | '\\' | ':' | '*' | '?' | '"' | '<' | '>' | '|' => '_',
             c if c.is_control() => '_',
-            '\u{200B}'..='\u{200F}' | '\u{202A}'..='\u{202E}' | '\u{2066}'..='\u{2069}' | '\u{FEFF}' => '_',
+            '\u{200B}'..='\u{200F}'
+            | '\u{202A}'..='\u{202E}'
+            | '\u{2066}'..='\u{2069}'
+            | '\u{FEFF}' => '_',
             c => c,
         };
         out.push(replaced);
     }
-    // trim spaces and dots (Windows strips them, macOS hides dotfiles)
-    let trimmed = out.trim().trim_end_matches('.').trim_start_matches('.').trim().to_owned();
-    let mut name = if trimmed.is_empty() { "download".to_owned() } else { trimmed };
+    // trim spaces and dots to a fixpoint (Windows strips them, macOS hides dotfiles)
+    let mut trimmed = out.as_str();
+    loop {
+        let next = trimmed.trim().trim_end_matches('.').trim_start_matches('.');
+        if next.len() == trimmed.len() {
+            break;
+        }
+        trimmed = next;
+    }
+    let mut name = if trimmed.is_empty() {
+        "download".to_owned()
+    } else {
+        trimmed.to_owned()
+    };
     let stem_upper = name.split('.').next().unwrap_or("").to_ascii_uppercase();
     if WINDOWS_RESERVED.contains(&stem_upper.as_str()) {
         name = format!("_{name}");
@@ -60,20 +81,34 @@ pub fn truncate_filename(name: &str, max_bytes: usize) -> String {
 pub fn sanitize_relative_path(input: &str) -> Result<PathBuf, TaskError> {
     let raw = input.replace('\\', "/");
     let mut out = PathBuf::new();
+    let mut depth = 0usize;
     for comp in Path::new(&raw).components() {
         match comp {
             Component::Normal(c) => {
+                depth += 1;
+                if depth > MAX_PATH_DEPTH {
+                    return Err(TaskError::new(
+                        ErrorKind::PathTraversal,
+                        format!("path deeper than {MAX_PATH_DEPTH} components"),
+                    ));
+                }
                 let s = c.to_string_lossy();
                 out.push(sanitize_filename(&s));
             }
             Component::CurDir => {}
             Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
-                return Err(TaskError::new(ErrorKind::PathTraversal, format!("rejected path component in {input:?}")));
+                return Err(TaskError::new(
+                    ErrorKind::PathTraversal,
+                    format!("rejected path component in {input:?}"),
+                ));
             }
         }
     }
     if out.as_os_str().is_empty() {
         return Err(TaskError::new(ErrorKind::InvalidFilename, "empty path"));
+    }
+    if out.as_os_str().len() > MAX_PATH_BYTES {
+        return Err(TaskError::new(ErrorKind::InvalidFilename, "path too long"));
     }
     Ok(out)
 }
@@ -86,7 +121,10 @@ pub fn ensure_within(root: &Path, candidate: &Path) -> Result<PathBuf, TaskError
     if cand_c.starts_with(&root_c) {
         Ok(cand_c)
     } else {
-        Err(TaskError::new(ErrorKind::PathTraversal, format!("{} escapes {}", candidate.display(), root.display())))
+        Err(TaskError::new(
+            ErrorKind::PathTraversal,
+            format!("{} escapes {}", candidate.display(), root.display()),
+        ))
     }
 }
 
@@ -110,17 +148,123 @@ pub fn canonical_prefix(p: &Path) -> PathBuf {
     base
 }
 
-/// Reject destination directories that are dangerous (root, system dirs) or not absolute.
+/// Reject destination directories that are dangerous (system locations, launch agents, SSH
+/// keys, shell config) or not absolute. Matching is prefix-based on the canonicalised path.
 pub fn validate_destination_dir(dir: &Path) -> Result<(), TaskError> {
     if !dir.is_absolute() {
-        return Err(TaskError::new(ErrorKind::InvalidFilename, "destination must be an absolute path"));
+        return Err(TaskError::new(
+            ErrorKind::InvalidFilename,
+            "destination must be an absolute path",
+        ));
     }
-    let s = dir.to_string_lossy();
-    let forbidden = ["/", "/System", "/bin", "/sbin", "/usr", "/etc", "/private/etc", "/Library", "/var", "/private/var/root", "C:\\Windows", "C:\\"];
+    if dir.as_os_str().len() > MAX_PATH_BYTES {
+        return Err(TaskError::new(
+            ErrorKind::InvalidFilename,
+            "destination path too long",
+        ));
+    }
+    let canon = canonical_prefix(dir);
+    let s = canon.to_string_lossy().to_string();
     let normalised = s.trim_end_matches('/');
-    let normalised = if normalised.is_empty() { "/" } else { normalised };
-    if forbidden.iter().any(|f| normalised.eq_ignore_ascii_case(f)) {
-        return Err(TaskError::new(ErrorKind::PermissionDenied, format!("refusing to download into {normalised}")));
+    let normalised = if normalised.is_empty() {
+        "/"
+    } else {
+        normalised
+    };
+    let system_prefixes = [
+        "/",
+        "/System",
+        "/bin",
+        "/sbin",
+        "/usr",
+        "/etc",
+        "/private/etc",
+        "/Library",
+        "/var",
+        "/private/var",
+        "/dev",
+        "/cores",
+        "/Applications",
+        "/opt",
+        "/boot",
+        "/proc",
+        "/sys",
+        "/root",
+        "C:\\Windows",
+        "C:\\Program Files",
+    ];
+    for f in system_prefixes {
+        if normalised.eq_ignore_ascii_case(f) {
+            return Err(TaskError::new(
+                ErrorKind::PermissionDenied,
+                format!("refusing to download into {normalised}"),
+            ));
+        }
+        // exact system dir or anything under it, except /Users, /home and /private/tmp trees
+        if f != "/"
+            && (normalised
+                .to_ascii_lowercase()
+                .starts_with(&format!("{}/", f.to_ascii_lowercase()))
+                || normalised
+                    .to_ascii_lowercase()
+                    .starts_with(&format!("{}\\", f.to_ascii_lowercase())))
+        {
+            let lower = normalised.to_ascii_lowercase();
+            let allowed = lower.starts_with("/private/tmp/")
+                || lower.starts_with("/var/folders/")
+                || lower.starts_with("/private/var/folders/")
+                || lower.starts_with("/var/tmp/")
+                || lower.starts_with("/private/var/tmp/")
+                || lower.starts_with("/usr/local/")
+                || lower.starts_with("/opt/")
+                || lower.starts_with("/var/lib/osprey")
+                || lower.starts_with("/var/osprey")
+                || lower.starts_with("/private/var/lib/osprey");
+            if !allowed {
+                return Err(TaskError::new(
+                    ErrorKind::PermissionDenied,
+                    format!("refusing to download into {normalised}"),
+                ));
+            }
+        }
+    }
+    // User-level sensitive locations (LaunchAgents can execute code at login; ~/.ssh holds keys).
+    if let Some(home) = directories::BaseDirs::new().map(|b| b.home_dir().to_path_buf()) {
+        let home = canonical_prefix(&home).to_string_lossy().to_string();
+        let home = home.trim_end_matches('/');
+        let sensitive = [
+            "/Library/LaunchAgents",
+            "/Library/LaunchDaemons",
+            "/.ssh",
+            "/.gnupg",
+            "/.config",
+            "/.aws",
+            "/.kube",
+            "/Library/Application Support/com.apple.",
+            "/Library/Preferences",
+            "/Library/Keychains",
+            "/.zshrc",
+            "/.bashrc",
+            "/.profile",
+            "/.zprofile",
+            "/Library/Application Scripts",
+        ];
+        for suffix in sensitive {
+            let candidate = format!("{home}{suffix}");
+            if normalised.eq_ignore_ascii_case(&candidate)
+                || normalised
+                    .to_ascii_lowercase()
+                    .starts_with(&candidate.to_ascii_lowercase())
+            {
+                return Err(TaskError::new(
+                    ErrorKind::PermissionDenied,
+                    format!("refusing to download into {normalised}"),
+                ));
+            }
+        }
+        if normalised.eq_ignore_ascii_case(home) {
+            // the home directory root itself is allowed (some users want ~), nothing to do
+        }
     }
     Ok(())
 }
@@ -141,8 +285,15 @@ pub fn unique_path(path: &Path) -> PathBuf {
     if !path.exists() {
         return path.to_path_buf();
     }
-    let stem = path.file_stem().and_then(|s| s.to_str()).unwrap_or("download");
-    let ext = path.extension().and_then(|s| s.to_str()).map(|e| format!(".{e}")).unwrap_or_default();
+    let stem = path
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("download");
+    let ext = path
+        .extension()
+        .and_then(|s| s.to_str())
+        .map(|e| format!(".{e}"))
+        .unwrap_or_default();
     let parent = path.parent().unwrap_or_else(|| Path::new("."));
     for n in 2..10_000 {
         let candidate = parent.join(format!("{stem} ({n}){ext}"));
@@ -154,7 +305,13 @@ pub fn unique_path(path: &Path) -> PathBuf {
 }
 
 fn uuid_suffix() -> String {
-    format!("{:x}", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0))
+    format!(
+        "{:x}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .map(|d| d.as_nanos())
+            .unwrap_or(0)
+    )
 }
 
 #[cfg(test)]
@@ -169,19 +326,32 @@ mod tests {
         assert_eq!(sanitize_filename("a\u{202E}b.exe"), "a_b.exe");
         assert_eq!(sanitize_filename("..."), "download");
         assert_eq!(sanitize_filename(".hidden"), "hidden");
+        assert_eq!(sanitize_filename(". .hidden"), "hidden");
+        // NFD input is normalised to NFC
+        assert_eq!(
+            sanitize_filename("Re\u{0301}sume\u{0301}.pdf"),
+            "Résumé.pdf"
+        );
         let long = "x".repeat(300) + ".tar.gz";
         let t = sanitize_filename(&long);
-        assert!(t.len() <= 255);
+        assert!(t.len() <= MAX_FILENAME_BYTES);
         assert!(t.ends_with(".gz"));
     }
 
     #[test]
     fn relative_paths() {
-        assert_eq!(sanitize_relative_path("a/b/c.txt").unwrap(), PathBuf::from("a/b/c.txt"));
+        assert_eq!(
+            sanitize_relative_path("a/b/c.txt").unwrap(),
+            PathBuf::from("a/b/c.txt")
+        );
         assert!(sanitize_relative_path("../x").is_err());
+        assert!(sanitize_relative_path(&"a/".repeat(40)).is_err());
         assert!(sanitize_relative_path("/abs").is_err());
-        assert_eq!(sanitize_relative_path("a\\..\\b").is_err(), true);
-        assert_eq!(sanitize_relative_path("./a/./b").unwrap(), PathBuf::from("a/b"));
+        assert!(sanitize_relative_path("a\\..\\b").is_err());
+        assert_eq!(
+            sanitize_relative_path("./a/./b").unwrap(),
+            PathBuf::from("a/b")
+        );
     }
 
     #[test]
@@ -199,6 +369,15 @@ mod tests {
         assert!(validate_destination_dir(Path::new("/System")).is_err());
         assert!(validate_destination_dir(Path::new("relative")).is_err());
         assert!(validate_destination_dir(Path::new("/Users/me/Downloads")).is_ok());
+        assert!(validate_destination_dir(Path::new("/Library/LaunchDaemons")).is_err());
+        assert!(validate_destination_dir(Path::new("/usr/lib/x")).is_err());
+        assert!(validate_destination_dir(Path::new("/usr/local/share")).is_ok());
+        assert!(validate_destination_dir(Path::new("/private/tmp/osprey-test")).is_ok());
+        if let Some(home) = directories::BaseDirs::new().map(|b| b.home_dir().to_path_buf()) {
+            assert!(validate_destination_dir(&home.join("Library/LaunchAgents")).is_err());
+            assert!(validate_destination_dir(&home.join(".ssh")).is_err());
+            assert!(validate_destination_dir(&home.join("Downloads")).is_ok());
+        }
     }
 
     #[test]

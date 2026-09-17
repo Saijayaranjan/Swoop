@@ -34,12 +34,13 @@ impl Scope {
             _ => None,
         }
     }
-    /// Admin implies everything; Control implies Read and Add.
+    /// Admin implies everything; Control implies Read and Add. `Add` alone is deliberately
+    /// narrow (a share-sheet device may add URLs without listing what else was downloaded).
     pub fn implies(self, other: Scope) -> bool {
         match self {
             Scope::Admin => true,
             Scope::Control => matches!(other, Scope::Read | Scope::Add | Scope::Control),
-            Scope::Add => matches!(other, Scope::Add | Scope::Read),
+            Scope::Add => other == Scope::Add,
             Scope::Read => other == Scope::Read,
         }
     }

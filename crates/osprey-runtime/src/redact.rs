@@ -10,16 +10,18 @@ fn patterns() -> &'static [(Regex, &'static str)] {
         vec![
             // userinfo in URLs: scheme://user:pass@host
             (Regex::new(r"(?i)([a-z][a-z0-9+.-]*://)([^/\s:@]+)(:[^/\s@]*)?@").unwrap(), "$1[redacted]@"),
-            // header values
-            (Regex::new(r"(?i)\b(authorization|proxy-authorization|cookie|set-cookie|x-api-key|x-auth-token)\s*[:=]\s*[^\r\n]+").unwrap(), "$1: [redacted]"),
+            // header values, including JSON-quoted keys ("authorization":"…")
+            (Regex::new(r#"(?i)"?\b(authorization|proxy-authorization|cookie|set-cookie|x-api-key|x-auth-token)"?\s*[:=]\s*"?[^\r\n",}]+"?"#).unwrap(), "$1: [redacted]"),
             // bearer / basic tokens anywhere
             (Regex::new(r"(?i)\b(bearer|basic)\s+[A-Za-z0-9+/=_\-.]{8,}").unwrap(), "$1 [redacted]"),
             // query parameters that look like secrets
             (Regex::new(r"(?i)([?&](?:token|access_token|auth|key|api_key|apikey|signature|sig|password|passwd|pwd|secret|session|sid|x-amz-signature|x-amz-credential)=)[^&\s]+").unwrap(), "$1[redacted]"),
             // pairing codes / long hex secrets
             (Regex::new(r"(?i)\b(pairing[_ -]?code|device[_ -]?token|api[_ -]?token)\s*[:=]\s*\S+").unwrap(), "$1=[redacted]"),
-            // magnet link tracker passkeys
-            (Regex::new(r"(?i)(passkey|announce_key|authkey)=[A-Za-z0-9]+").unwrap(), "$1=[redacted]"),
+            // tracker passkeys as query params, percent-encoded inside magnet `tr=` values,
+            // and as path segments (`/<hex>/announce`)
+            (Regex::new(r"(?i)(passkey|announce_key|authkey|torrent_pass|pid|secure)(=|%3D)[A-Za-z0-9]+").unwrap(), "$1$2[redacted]"),
+            (Regex::new(r"(?i)/[0-9a-f]{20,64}(/announce|%2Fannounce)").unwrap(), "/[redacted]$1"),
         ]
     })
 }
@@ -44,11 +46,35 @@ mod tests {
 
     #[test]
     fn redacts_userinfo_and_tokens() {
-        assert_eq!(redact("ftp://bob:hunter2@files.example.com/x"), "ftp://[redacted]@files.example.com/x");
-        assert_eq!(redact("https://h/x?a=1&token=abc123&b=2"), "https://h/x?a=1&token=[redacted]&b=2");
-        assert_eq!(redact("Authorization: Bearer eyJhbGciOi"), "Authorization: [redacted]");
+        assert_eq!(
+            redact("ftp://bob:hunter2@files.example.com/x"),
+            "ftp://[redacted]@files.example.com/x"
+        );
+        assert_eq!(
+            redact("https://h/x?a=1&token=abc123&b=2"),
+            "https://h/x?a=1&token=[redacted]&b=2"
+        );
+        assert_eq!(
+            redact("Authorization: Bearer eyJhbGciOi"),
+            "Authorization: [redacted]"
+        );
         assert_eq!(redact("cookie=session=abc; other=1"), "cookie: [redacted]");
         assert_eq!(redact("plain text stays"), "plain text stays");
-        assert_eq!(redact("http://t/announce?passkey=ABCDEF1234&x=1"), "http://t/announce?passkey=[redacted]&x=1");
+        assert_eq!(
+            redact("http://t/announce?passkey=ABCDEF1234&x=1"),
+            "http://t/announce?passkey=[redacted]&x=1"
+        );
+        assert_eq!(
+            redact("https://t.example/0123456789abcdef0123456789abcdef/announce"),
+            "https://t.example/[redacted]/announce"
+        );
+        assert_eq!(
+            redact("magnet:?xt=urn:btih:abc&tr=https%3A%2F%2Ft%2Fannounce%3Fpasskey%3DABC123"),
+            "magnet:?xt=urn:btih:abc&tr=https%3A%2F%2Ft%2Fannounce%3Fpasskey%3D[redacted]"
+        );
+        assert_eq!(
+            redact(r#"{"authorization":"Bearer x","n":1}"#),
+            r#"{authorization: [redacted],"n":1}"#
+        );
     }
 }

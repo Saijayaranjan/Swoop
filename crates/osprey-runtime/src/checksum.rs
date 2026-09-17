@@ -57,13 +57,14 @@ impl Hasher {
 pub async fn hash_file(
     path: &Path,
     algorithm: ChecksumAlgorithm,
-    cancel: osprey_domain::engine::tokio_util_lite::CancellationToken,
+    cancel: tokio_util::sync::CancellationToken,
     on_progress: impl Fn(u64) + Send + 'static,
 ) -> Result<Checksum, TaskError> {
     let path = path.to_path_buf();
     tokio::task::spawn_blocking(move || {
         use std::io::Read;
-        let mut f = std::fs::File::open(&path).map_err(|e| TaskError::from_io(&e, "open for checksum"))?;
+        let mut f =
+            std::fs::File::open(&path).map_err(|e| TaskError::from_io(&e, "open for checksum"))?;
         let mut hasher = Hasher::new(algorithm);
         let mut buf = vec![0u8; 1024 * 1024];
         let mut done = 0u64;
@@ -72,7 +73,9 @@ pub async fn hash_file(
             if cancel.is_cancelled() {
                 return Err(TaskError::cancelled());
             }
-            let n = f.read(&mut buf).map_err(|e| TaskError::from_io(&e, "read for checksum"))?;
+            let n = f
+                .read(&mut buf)
+                .map_err(|e| TaskError::from_io(&e, "read for checksum"))?;
             if n == 0 {
                 break;
             }
@@ -91,13 +94,20 @@ pub async fn hash_file(
 }
 
 /// Verify a file against an expected checksum.
-pub async fn verify_file(path: &Path, expected: &Checksum, cancel: osprey_domain::engine::tokio_util_lite::CancellationToken) -> Result<Checksum, TaskError> {
+pub async fn verify_file(
+    path: &Path,
+    expected: &Checksum,
+    cancel: tokio_util::sync::CancellationToken,
+) -> Result<Checksum, TaskError> {
     let actual = hash_file(path, expected.algorithm, cancel, |_| {}).await?;
     if actual.value == expected.value.to_ascii_lowercase() {
         Ok(actual)
     } else {
-        Err(TaskError::new(ErrorKind::ChecksumMismatch, format!("{} mismatch", expected.algorithm.as_str()))
-            .with_detail(format!("expected {} got {}", expected.value, actual.value)))
+        Err(TaskError::new(
+            ErrorKind::ChecksumMismatch,
+            format!("{} mismatch", expected.algorithm.as_str()),
+        )
+        .with_detail(format!("expected {} got {}", expected.value, actual.value)))
     }
 }
 
@@ -110,13 +120,26 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         let p = dir.path().join("f");
         std::fs::write(&p, b"abc").unwrap();
-        let c = osprey_domain::engine::tokio_util_lite::CancellationToken::new();
-        let sha = hash_file(&p, ChecksumAlgorithm::Sha256, c.clone(), |_| {}).await.unwrap();
-        assert_eq!(sha.value, "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad");
-        let md5 = hash_file(&p, ChecksumAlgorithm::Md5, c.clone(), |_| {}).await.unwrap();
+        let c = tokio_util::sync::CancellationToken::new();
+        let sha = hash_file(&p, ChecksumAlgorithm::Sha256, c.clone(), |_| {})
+            .await
+            .unwrap();
+        assert_eq!(
+            sha.value,
+            "ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad"
+        );
+        let md5 = hash_file(&p, ChecksumAlgorithm::Md5, c.clone(), |_| {})
+            .await
+            .unwrap();
         assert_eq!(md5.value, "900150983cd24fb0d6963f7d28e17f72");
-        let sha1 = hash_file(&p, ChecksumAlgorithm::Sha1, c.clone(), |_| {}).await.unwrap();
+        let sha1 = hash_file(&p, ChecksumAlgorithm::Sha1, c.clone(), |_| {})
+            .await
+            .unwrap();
         assert_eq!(sha1.value, "a9993e364706816aba3e25717850c26c9cd0d89d");
-        assert!(verify_file(&p, &Checksum::new(ChecksumAlgorithm::Sha256, "00"), c).await.is_err());
+        assert!(
+            verify_file(&p, &Checksum::new(ChecksumAlgorithm::Sha256, "00"), c)
+                .await
+                .is_err()
+        );
     }
 }

@@ -35,36 +35,67 @@ impl AutomationEvent {
     ];
 }
 
-/// Actions. Anything that executes external code carries a `consent_hash`: a BLAKE3 hash of the
-/// exact command/script that the user approved. The engine refuses to run it if the hash does
-/// not match the current definition, so editing a command silently revokes consent.
+/// Actions. Anything that executes external code requires a [`ConsentRecord`] stored by the
+/// services layer (never inside the rule JSON, which a remote admin could author). The record
+/// holds a BLAKE3 hash of the exact command/script the user approved through the local UI; the
+/// engine refuses to run an action whose current definition hashes differently, so editing a
+/// command silently revokes consent. Remote clients cannot create or modify these actions.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum AutomationAction {
-    Move { directory: PathBuf },
-    Rename { template: String },
-    Copy { directory: PathBuf },
+    Move {
+        directory: PathBuf,
+    },
+    Rename {
+        template: String,
+    },
+    Copy {
+        directory: PathBuf,
+    },
     Open,
     RevealInFinder,
-    FinderTag { tags: Vec<String> },
-    Notify { title: String, body: String },
+    FinderTag {
+        tags: Vec<String>,
+    },
+    Notify {
+        title: String,
+        body: String,
+    },
     /// POST JSON to a URL. Only https:// or http://localhost are accepted.
-    Webhook { url: String, headers: BTreeMap<String, String> },
-    /// Run an executable with arguments. Variables are substituted per argument, never through a
-    /// shell. `consent_hash` must equal `blake3(program + \0 + args.join(\0))`.
-    RunCommand { program: String, args: Vec<String>, consent_hash: String },
+    Webhook {
+        url: String,
+        headers: BTreeMap<String, String>,
+    },
+    /// Run an executable with arguments. `program` must be an absolute path (no PATH lookup);
+    /// variables are substituted per argument, never through a shell.
+    RunCommand {
+        program: String,
+        args: Vec<String>,
+    },
     /// Run a shell snippet via `/bin/sh -c`. Variables are exported as environment variables
     /// (`OSPREY_FILE_PATH`, …) and never interpolated into the script text.
-    RunShell { script: String, consent_hash: String },
+    RunShell {
+        script: String,
+    },
     /// macOS only: executed by the app layer through `NSAppleScript`.
-    RunAppleScript { script: String, consent_hash: String },
-    /// Runs inside the sandboxed JS mini-runtime (no I/O, no network; receives variables, returns
-    /// an optional new filename/directory). Limited to `max_ms` CPU time.
-    RunSandboxedScript { script: String, max_ms: u32, consent_hash: String },
+    RunAppleScript {
+        script: String,
+    },
+    /// Runs inside the sandboxed expression mini-runtime (no I/O, no network; receives
+    /// variables, returns an optional new filename/directory). Limited to `max_ms` CPU time.
+    RunSandboxedScript {
+        script: String,
+        max_ms: u32,
+    },
     /// Emit a local event on the WebSocket stream for external integrations.
-    EmitEvent { name: String, payload: BTreeMap<String, String> },
+    EmitEvent {
+        name: String,
+        payload: BTreeMap<String, String>,
+    },
     /// Add the file to another queue as a new task (e.g. mirror to a NAS via FTP upload later).
-    AddTag { tags: Vec<String> },
+    AddTag {
+        tags: Vec<String>,
+    },
 }
 
 impl AutomationAction {
@@ -79,30 +110,20 @@ impl AutomationAction {
         )
     }
 
-    /// Canonical string whose BLAKE3 hash is the consent hash.
+    /// Canonical string whose BLAKE3 hash is recorded as consent.
     pub fn consent_material(&self) -> Option<String> {
         match self {
-            AutomationAction::RunCommand { program, args, .. } => {
-                let mut s = program.clone();
+            AutomationAction::RunCommand { program, args } => {
+                let mut s = format!("cmd\0{program}");
                 for a in args {
                     s.push('\0');
                     s.push_str(a);
                 }
                 Some(s)
             }
-            AutomationAction::RunShell { script, .. } => Some(format!("sh\0{script}")),
-            AutomationAction::RunAppleScript { script, .. } => Some(format!("applescript\0{script}")),
+            AutomationAction::RunShell { script } => Some(format!("sh\0{script}")),
+            AutomationAction::RunAppleScript { script } => Some(format!("applescript\0{script}")),
             AutomationAction::RunSandboxedScript { script, .. } => Some(format!("js\0{script}")),
-            _ => None,
-        }
-    }
-
-    pub fn consent_hash(&self) -> Option<&str> {
-        match self {
-            AutomationAction::RunCommand { consent_hash, .. }
-            | AutomationAction::RunShell { consent_hash, .. }
-            | AutomationAction::RunAppleScript { consent_hash, .. }
-            | AutomationAction::RunSandboxedScript { consent_hash, .. } => Some(consent_hash),
             _ => None,
         }
     }
@@ -111,7 +132,10 @@ impl AutomationAction {
     pub fn is_platform_action(&self) -> bool {
         matches!(
             self,
-            AutomationAction::Open | AutomationAction::RevealInFinder | AutomationAction::FinderTag { .. } | AutomationAction::RunAppleScript { .. }
+            AutomationAction::Open
+                | AutomationAction::RevealInFinder
+                | AutomationAction::FinderTag { .. }
+                | AutomationAction::RunAppleScript { .. }
         )
     }
 }
@@ -223,9 +247,23 @@ impl AutomationContext {
             out = out.replace(k, v);
         }
         out = out.replace("{size}", &self.size.to_string());
-        let stem = std::path::Path::new(&self.file_name).file_stem().and_then(|s| s.to_str()).unwrap_or("");
+        let stem = std::path::Path::new(&self.file_name)
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("");
         out.replace("{stem}", stem)
     }
+}
+
+/// A user's approval of one code-executing action. Stored by the services layer and written
+/// only through the local (non-remote) API.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ConsentRecord {
+    pub automation_id: AutomationId,
+    pub action_index: u32,
+    /// Hex BLAKE3 of [`AutomationAction::consent_material`].
+    pub hash: String,
+    pub granted_at: Millis,
 }
 
 /// Record of an automation run, kept for the Automation log.

@@ -13,7 +13,11 @@ pub struct BackoffPolicy {
 
 impl Default for BackoffPolicy {
     fn default() -> Self {
-        Self { base: Duration::from_secs(1), max: Duration::from_secs(60), max_retries: 8 }
+        Self {
+            base: Duration::from_secs(1),
+            max: Duration::from_secs(60),
+            max_retries: 8,
+        }
     }
 }
 
@@ -26,21 +30,50 @@ impl BackoffPolicy {
         }
     }
 
-    /// Delay before attempt number `attempt` (1-based). Returns `None` when retries are exhausted.
+    /// Delay before attempt number `attempt` (1-based). Returns `None` when retries are exhausted
+    /// or the class must not be retried automatically. `retry_after` (from the server) overrides
+    /// the computed delay when present.
     pub fn delay_for(&self, attempt: u32, class: FailureClass) -> Option<Duration> {
-        if attempt == 0 || attempt > self.max_retries {
+        self.delay_for_with_hint(attempt, class, None)
+    }
+
+    pub fn delay_for_with_hint(
+        &self,
+        attempt: u32,
+        class: FailureClass,
+        retry_after: Option<Duration>,
+    ) -> Option<Duration> {
+        if attempt == 0 {
+            return None;
+        }
+        // Throttling is usually temporary; allow more attempts than plain transient errors.
+        let cap = match class {
+            FailureClass::Throttled => self.max_retries.saturating_mul(2).max(self.max_retries),
+            _ => self.max_retries,
+        };
+        if attempt > cap {
             return None;
         }
         let multiplier = match class {
             FailureClass::Transient => 1.0,
             FailureClass::Throttled => 3.0,
             FailureClass::SourceProblem => 2.0,
-            FailureClass::NeedsUser | FailureClass::Permanent => return None,
             FailureClass::RestartFromScratch => 1.0,
+            FailureClass::Degrade => 0.5,
+            FailureClass::NeedsUser | FailureClass::Permanent | FailureClass::WaitForCondition => {
+                return None
+            }
         };
-        let exp = self.base.as_millis() as f64 * 2f64.powi((attempt - 1).min(16) as i32) * multiplier;
+        if let Some(ra) = retry_after {
+            return Some(
+                ra.min(Duration::from_secs(3600))
+                    .max(Duration::from_millis(250)),
+            );
+        }
+        let exp =
+            self.base.as_millis() as f64 * 2f64.powi((attempt - 1).min(16) as i32) * multiplier;
         let capped = exp.min(self.max.as_millis() as f64);
-        // full jitter: uniform in [capped/2, capped]
+        // equal jitter: uniform in [capped/2, capped]
         let jittered = rand::thread_rng().gen_range((capped / 2.0)..=capped);
         Some(Duration::from_millis(jittered as u64))
     }
@@ -52,12 +85,23 @@ mod tests {
 
     #[test]
     fn grows_and_caps() {
-        let p = BackoffPolicy { base: Duration::from_millis(100), max: Duration::from_millis(1000), max_retries: 5 };
+        let p = BackoffPolicy {
+            base: Duration::from_millis(100),
+            max: Duration::from_millis(1000),
+            max_retries: 5,
+        };
         let d1 = p.delay_for(1, FailureClass::Transient).unwrap();
         assert!(d1.as_millis() >= 50 && d1.as_millis() <= 100);
         let d5 = p.delay_for(5, FailureClass::Transient).unwrap();
         assert!(d5.as_millis() <= 1000);
         assert!(p.delay_for(6, FailureClass::Transient).is_none());
+        assert!(p.delay_for(6, FailureClass::Throttled).is_some());
+        assert!(p.delay_for(11, FailureClass::Throttled).is_none());
         assert!(p.delay_for(1, FailureClass::Permanent).is_none());
+        assert!(p.delay_for(1, FailureClass::WaitForCondition).is_none());
+        assert_eq!(
+            p.delay_for_with_hint(1, FailureClass::Throttled, Some(Duration::from_secs(7))),
+            Some(Duration::from_secs(7))
+        );
     }
 }

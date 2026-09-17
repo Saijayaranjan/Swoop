@@ -39,7 +39,9 @@ pub enum QueueCompletionAction {
     Nothing,
     Notify,
     /// Run the named automation rule.
-    RunAutomation { automation_id: String },
+    RunAutomation {
+        automation_id: crate::AutomationId,
+    },
     /// Sleep the machine (macOS `pmset sleepnow` equivalent, executed by the app layer).
     Sleep,
     QuitApplication,
@@ -125,7 +127,15 @@ impl Queue {
 
     /// Aggregate counts kept in memory by the services layer, sent to the UI with the queue.
     pub fn summary(&self) -> QueueSummary {
-        QueueSummary { queue_id: self.id.clone(), active: 0, waiting: 0, completed: 0, failed: 0, download_speed: 0, upload_speed: 0 }
+        QueueSummary {
+            queue_id: self.id.clone(),
+            active: 0,
+            waiting: 0,
+            completed: 0,
+            failed: 0,
+            download_speed: 0,
+            upload_speed: 0,
+        }
     }
 }
 

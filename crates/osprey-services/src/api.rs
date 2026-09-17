@@ -440,7 +440,12 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn remove_tasks(&self, ids: Vec<TaskId>, delete_file: bool) -> DomainResult<u32>;
     async fn update_task(&self, id: TaskId, patch: TaskPatch) -> DomainResult<Task>;
     async fn duplicate_task(&self, id: TaskId) -> DomainResult<Task>;
-    async fn set_task_limit(&self, id: TaskId, download: Option<u64>, upload: Option<u64>) -> DomainResult<Task>;
+    async fn set_task_limit(
+        &self,
+        id: TaskId,
+        download: Option<u64>,
+        upload: Option<u64>,
+    ) -> DomainResult<Task>;
     async fn set_task_connections(&self, id: TaskId, connections: u8) -> DomainResult<Task>;
     async fn set_task_priority(&self, id: TaskId, priority: Priority) -> DomainResult<Task>;
     /// Move tasks to `after` (None = top) within their queue; persists manual order.
@@ -456,19 +461,36 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn clear_completed(&self) -> DomainResult<u32>;
 
     // ----- torrents -----
-    async fn set_torrent_files(&self, id: TaskId, selection: Vec<FileSelection>) -> DomainResult<Task>;
+    async fn set_torrent_files(
+        &self,
+        id: TaskId,
+        selection: Vec<FileSelection>,
+    ) -> DomainResult<Task>;
     async fn set_torrent_sequential(&self, id: TaskId, sequential: bool) -> DomainResult<Task>;
-    async fn set_seeding_limits(&self, id: TaskId, limits: osprey_domain::torrent::SeedingLimits) -> DomainResult<Task>;
+    async fn set_seeding_limits(
+        &self,
+        id: TaskId,
+        limits: osprey_domain::torrent::SeedingLimits,
+    ) -> DomainResult<Task>;
     async fn torrent_peers(&self, id: TaskId) -> DomainResult<Vec<PeerInfo>>;
     async fn add_trackers(&self, id: TaskId, trackers: Vec<String>) -> DomainResult<Task>;
     async fn remove_tracker(&self, id: TaskId, tracker: String) -> DomainResult<Task>;
-    async fn set_tracker_enabled(&self, id: TaskId, tracker: String, enabled: bool) -> DomainResult<Task>;
+    async fn set_tracker_enabled(
+        &self,
+        id: TaskId,
+        tracker: String,
+        enabled: bool,
+    ) -> DomainResult<Task>;
     async fn reannounce(&self, id: TaskId) -> DomainResult<()>;
     /// Fetch the curated tracker list from settings and apply it to public torrents.
     async fn refresh_tracker_list(&self) -> DomainResult<u32>;
 
     // ----- media -----
-    async fn detect_media(&self, url: String, page_url: Option<String>) -> DomainResult<DetectedMedia>;
+    async fn detect_media(
+        &self,
+        url: String,
+        page_url: Option<String>,
+    ) -> DomainResult<DetectedMedia>;
 
     // ----- queues -----
     async fn list_queues(&self) -> DomainResult<Vec<Queue>>;
@@ -492,7 +514,10 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn update_rule(&self, r: Rule) -> DomainResult<Rule>;
     async fn delete_rule(&self, id: RuleId) -> DomainResult<()>;
     /// Dry-run: which rules match and what they would do, in order.
-    async fn test_rules(&self, subject: RuleSubject) -> DomainResult<Vec<(Rule, Vec<osprey_domain::rules::RuleAction>)>>;
+    async fn test_rules(
+        &self,
+        subject: RuleSubject,
+    ) -> DomainResult<Vec<(Rule, Vec<osprey_domain::rules::RuleAction>)>>;
 
     // ----- schedules -----
     async fn list_schedules(&self) -> DomainResult<Vec<Schedule>>;
@@ -507,15 +532,27 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn delete_automation(&self, id: AutomationId) -> DomainResult<()>;
     /// Record consent for every code-executing action in the rule (computes consent hashes).
     async fn grant_automation_consent(&self, id: AutomationId) -> DomainResult<AutomationRule>;
-    async fn automation_runs(&self, id: Option<AutomationId>, limit: u32) -> DomainResult<Vec<AutomationRun>>;
+    async fn automation_runs(
+        &self,
+        id: Option<AutomationId>,
+        limit: u32,
+    ) -> DomainResult<Vec<AutomationRun>>;
     /// Run an automation now against a task (for testing rules).
-    async fn run_automation(&self, id: AutomationId, task_id: TaskId) -> DomainResult<AutomationRun>;
+    async fn run_automation(
+        &self,
+        id: AutomationId,
+        task_id: TaskId,
+    ) -> DomainResult<AutomationRun>;
 
     // ----- recipes -----
     async fn list_recipes(&self) -> DomainResult<Vec<Recipe>>;
     async fn save_recipe(&self, r: Recipe) -> DomainResult<Recipe>;
     async fn delete_recipe(&self, id: RecipeId) -> DomainResult<()>;
-    async fn apply_recipe(&self, id: RecipeId, request: NewTaskRequest) -> DomainResult<AddTaskResult>;
+    async fn apply_recipe(
+        &self,
+        id: RecipeId,
+        request: NewTaskRequest,
+    ) -> DomainResult<AddTaskResult>;
 
     // ----- history -----
     async fn history(&self, query: HistoryQuery) -> DomainResult<Vec<HistoryEntry>>;
@@ -533,7 +570,12 @@ pub trait EngineApi: Send + Sync + 'static {
     fn settings(&self) -> Arc<Settings>;
     async fn update_settings(&self, settings: Settings) -> DomainResult<Settings>;
     /// Store a secret in the OS keychain and return its reference.
-    async fn store_credential(&self, name: String, username: Option<String>, secret: String) -> DomainResult<CredentialId>;
+    async fn store_credential(
+        &self,
+        name: String,
+        username: Option<String>,
+        secret: String,
+    ) -> DomainResult<CredentialId>;
     async fn list_credentials(&self) -> DomainResult<Vec<(CredentialId, String, Option<String>)>>;
     async fn delete_credential(&self, id: CredentialId) -> DomainResult<()>;
 
@@ -547,7 +589,13 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn start_pairing(&self, scopes: Vec<Scope>) -> DomainResult<PairingInfo>;
     async fn cancel_pairing(&self) -> DomainResult<()>;
     /// Called by the server when a client presents a code; returns the device + bearer token.
-    async fn complete_pairing(&self, code: String, device_name: String, device_kind: String, ip: String) -> DomainResult<(Device, String)>;
+    async fn complete_pairing(
+        &self,
+        code: String,
+        device_name: String,
+        device_kind: String,
+        ip: String,
+    ) -> DomainResult<(Device, String)>;
     async fn revoke_device(&self, id: DeviceId) -> DomainResult<()>;
     async fn rename_device(&self, id: DeviceId, name: String) -> DomainResult<Device>;
     /// Validate a bearer token; returns the device (updates last_seen) or NotFound.
@@ -561,16 +609,34 @@ pub trait EngineApi: Send + Sync + 'static {
     async fn grabber_start(&self, options: GrabberOptions) -> DomainResult<GrabberSession>;
     async fn grabber_status(&self, id: String) -> DomainResult<GrabberSession>;
     async fn grabber_cancel(&self, id: String) -> DomainResult<()>;
-    async fn grabber_add(&self, id: String, urls: Vec<String>, request: NewTaskRequest) -> DomainResult<Vec<AddTaskResult>>;
+    async fn grabber_add(
+        &self,
+        id: String,
+        urls: Vec<String>,
+        request: NewTaskRequest,
+    ) -> DomainResult<Vec<AddTaskResult>>;
     async fn grabber_list(&self) -> DomainResult<Vec<GrabberSession>>;
 
     // ----- archives -----
     async fn archive_list(&self, path: PathBuf) -> DomainResult<ArchiveListing>;
-    async fn archive_extract(&self, path: PathBuf, entries: Option<Vec<String>>, destination: PathBuf) -> DomainResult<u32>;
+    async fn archive_extract(
+        &self,
+        path: PathBuf,
+        entries: Option<Vec<String>>,
+        destination: PathBuf,
+    ) -> DomainResult<u32>;
 
     // ----- import / export -----
-    async fn export(&self, include_tasks: bool, include_history: bool) -> DomainResult<ExportBundle>;
-    async fn import(&self, bundle: ExportBundle, options: ImportOptions) -> DomainResult<ImportReport>;
+    async fn export(
+        &self,
+        include_tasks: bool,
+        include_history: bool,
+    ) -> DomainResult<ExportBundle>;
+    async fn import(
+        &self,
+        bundle: ExportBundle,
+        options: ImportOptions,
+    ) -> DomainResult<ImportReport>;
 
     // ----- updates -----
     async fn check_for_updates(&self) -> DomainResult<UpdateInfo>;
@@ -579,7 +645,12 @@ pub trait EngineApi: Send + Sync + 'static {
 
     // ----- plugins -----
     async fn list_plugins(&self) -> DomainResult<Vec<PluginInfo>>;
-    async fn set_plugin_enabled(&self, id: PluginId, enabled: bool, granted_permissions: Vec<String>) -> DomainResult<PluginInfo>;
+    async fn set_plugin_enabled(
+        &self,
+        id: PluginId,
+        enabled: bool,
+        granted_permissions: Vec<String>,
+    ) -> DomainResult<PluginInfo>;
     async fn uninstall_plugin(&self, id: PluginId) -> DomainResult<()>;
 
     // ----- logs -----

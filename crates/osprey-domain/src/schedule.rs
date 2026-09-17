@@ -12,7 +12,11 @@ pub enum Recurrence {
     /// Every day between `start` and `end` (local time, `HH:MM`). Windows may cross midnight.
     Daily { start: String, end: String },
     /// Selected weekdays (0 = Monday … 6 = Sunday).
-    Weekly { days: Vec<u8>, start: String, end: String },
+    Weekly {
+        days: Vec<u8>,
+        start: String,
+        end: String,
+    },
     /// Between two absolute instants.
     Range { from: Millis, to: Millis },
     /// Always active; used for condition-only schedules ("only on AC power").
@@ -20,16 +24,27 @@ pub enum Recurrence {
 }
 
 impl Recurrence {
+    /// Whole selected days (`00:00`–`00:00` is the 24 h window; `23:59` would close for a minute).
     pub fn weekdays() -> Self {
-        Recurrence::Weekly { days: vec![0, 1, 2, 3, 4], start: "00:00".into(), end: "23:59".into() }
+        Recurrence::Weekly {
+            days: vec![0, 1, 2, 3, 4],
+            start: "00:00".into(),
+            end: "00:00".into(),
+        }
     }
     pub fn weekends() -> Self {
-        Recurrence::Weekly { days: vec![5, 6], start: "00:00".into(), end: "23:59".into() }
+        Recurrence::Weekly {
+            days: vec![5, 6],
+            start: "00:00".into(),
+            end: "00:00".into(),
+        }
     }
 }
 
 /// Environmental conditions evaluated by the scheduler. The platform layer supplies the
-/// measurements ([`EnvironmentSnapshot`]); the logic is shared.
+/// measurements ([`EnvironmentSnapshot`]); the logic is shared. The evaluator in the services
+/// layer applies hysteresis (a condition must hold/fail for `CONDITION_DWELL_MS` before the
+/// schedule flips) so `BandwidthBelow`/`BatteryAbove` cannot oscillate.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum Condition {
@@ -37,16 +52,31 @@ pub enum Condition {
     /// Network interface is not marked expensive/metered (cellular hotspot).
     NotMetered,
     OnAcPower,
-    BatteryAbove { percent: u8 },
+    BatteryAbove {
+        percent: u8,
+    },
     /// Current global download speed below this many bytes/s (leave room for other traffic).
-    BandwidthBelow { bytes_per_second: u64 },
-    VpnActive { active: bool },
-    ActiveTransfersBelow { count: u32 },
+    BandwidthBelow {
+        bytes_per_second: u64,
+    },
+    VpnActive {
+        active: bool,
+    },
+    ActiveTransfersBelow {
+        count: u32,
+    },
     /// The Wi-Fi SSID matches.
-    NetworkNamed { ssid: String },
+    NetworkNamed {
+        ssid: String,
+    },
 }
 
 /// Measurements supplied by the platform layer (Swift on macOS; a small probe in headless mode).
+/// Minimum time a condition must be stable before a schedule reacts to it.
+pub const CONDITION_DWELL_MS: i64 = 60_000;
+/// Snapshots older than this are treated as unknown (conditions evaluate to their safe default).
+pub const SNAPSHOT_MAX_AGE_MS: i64 = 5 * 60_000;
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize, Default)]
 #[serde(default)]
 pub struct EnvironmentSnapshot {
@@ -63,7 +93,15 @@ pub struct EnvironmentSnapshot {
 
 impl EnvironmentSnapshot {
     pub fn assume_desktop() -> Self {
-        Self { network_available: true, on_ac_power: true, at: Millis::now(), ..Default::default() }
+        Self {
+            network_available: true,
+            on_ac_power: true,
+            at: Millis::now(),
+            ..Default::default()
+        }
+    }
+    pub fn is_stale(&self, now: Millis) -> bool {
+        now.0 - self.at.0 > SNAPSHOT_MAX_AGE_MS
     }
 }
 
@@ -73,11 +111,19 @@ impl Condition {
             Condition::NetworkAvailable => env.network_available,
             Condition::NotMetered => !env.metered,
             Condition::OnAcPower => env.on_ac_power,
-            Condition::BatteryAbove { percent } => env.battery_percent.map(|b| b > *percent).unwrap_or(true),
-            Condition::BandwidthBelow { bytes_per_second } => env.download_speed < *bytes_per_second,
+            Condition::BatteryAbove { percent } => {
+                env.battery_percent.map(|b| b > *percent).unwrap_or(true)
+            }
+            Condition::BandwidthBelow { bytes_per_second } => {
+                env.download_speed < *bytes_per_second
+            }
             Condition::VpnActive { active } => env.vpn_active == *active,
             Condition::ActiveTransfersBelow { count } => env.active_transfers < *count,
-            Condition::NetworkNamed { ssid } => env.ssid.as_deref().map(|s| s.eq_ignore_ascii_case(ssid)).unwrap_or(false),
+            Condition::NetworkNamed { ssid } => env
+                .ssid
+                .as_deref()
+                .map(|s| s.eq_ignore_ascii_case(ssid))
+                .unwrap_or(false),
         }
     }
 }
@@ -85,16 +131,33 @@ impl Condition {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type")]
 pub enum ScheduleAction {
-    StartQueue { queue_id: QueueId },
-    PauseQueue { queue_id: QueueId },
-    SetSpeedLimit { download: u64, upload: u64 },
-    SetConnectionLimit { per_task: u8 },
-    SetTrafficMode { mode: crate::queue::TrafficMode },
+    StartQueue {
+        queue_id: QueueId,
+    },
+    PauseQueue {
+        queue_id: QueueId,
+    },
+    SetSpeedLimit {
+        download: u64,
+        upload: u64,
+    },
+    SetConnectionLimit {
+        per_task: u8,
+    },
+    SetTrafficMode {
+        mode: crate::queue::TrafficMode,
+    },
     /// Executed by the app layer (never by the core).
-    LaunchApplication { path: String },
-    RunAutomation { automation_id: String },
-    Notify { message: String },
-    /// Executed by the app layer after all transfers are paused.
+    LaunchApplication {
+        path: String,
+    },
+    RunAutomation {
+        automation_id: String,
+    },
+    Notify {
+        message: String,
+    },
+    /// Executed by the app layer after the core emits `Event::ReadyForSleep`.
     SleepComputer,
     QuitApplication,
 }
@@ -146,7 +209,10 @@ impl Schedule {
 
     /// Is the time window open at `now` (local time)?
     pub fn window_open_at(&self, now: Millis) -> bool {
-        let local = Local.timestamp_millis_opt(now.0).single().unwrap_or_else(Local::now);
+        let local = Local
+            .timestamp_millis_opt(now.0)
+            .single()
+            .unwrap_or_else(Local::now);
         match &self.recurrence {
             Recurrence::Always => true,
             Recurrence::Once { at } => now.0 >= at.0 && now.0 < at.0 + 24 * 3600 * 1000,
@@ -154,22 +220,22 @@ impl Schedule {
             Recurrence::Daily { start, end } => time_in_window(local.time(), start, end),
             Recurrence::Weekly { days, start, end } => {
                 let wd = weekday_index(local.weekday());
-                // A window that crosses midnight belongs to the day it started on.
-                let (s, e) = (parse_hhmm(start), parse_hhmm(end));
-                let crosses = matches!((s, e), (Some(s), Some(e)) if e <= s);
-                let today = days.contains(&wd) && time_in_window(local.time(), start, end);
-                if today {
+                let (Some(s), Some(e)) = (parse_hhmm(start), parse_hhmm(end)) else {
+                    return false;
+                };
+                let t = local.time();
+                let crosses = e < s;
+                if !crosses {
+                    // plain window (or 24 h when e == s): the day must be selected
+                    return days.contains(&wd) && time_in_window(t, start, end);
+                }
+                // Crossing window: the evening half belongs to today, the morning half to the
+                // day the window started on (yesterday).
+                if days.contains(&wd) && t >= s {
                     return true;
                 }
-                if crosses {
-                    let yesterday = (wd + 6) % 7;
-                    if days.contains(&yesterday) {
-                        if let Some(e) = e {
-                            return local.time() < e;
-                        }
-                    }
-                }
-                false
+                let yesterday = (wd + 6) % 7;
+                days.contains(&yesterday) && t < e
             }
         }
     }
@@ -187,8 +253,10 @@ impl Schedule {
             Recurrence::Once { at } => {
                 if now.0 < at.0 {
                     Some(*at)
-                } else {
+                } else if now.0 < at.0 + 24 * 3600 * 1000 {
                     Some(Millis(at.0 + 24 * 3600 * 1000))
+                } else {
+                    None
                 }
             }
             Recurrence::Range { from, to } => {
@@ -207,7 +275,8 @@ impl Schedule {
                 for d in 0..=7i64 {
                     let day = today + chrono::Duration::days(d);
                     for t in [s, e] {
-                        if let Some(dt) = Local.from_local_datetime(&day.and_time(t)).single() {
+                        // `earliest()` resolves DST gaps/overlaps instead of skipping the boundary.
+                        if let Some(dt) = Local.from_local_datetime(&day.and_time(t)).earliest() {
                             let ms = dt.timestamp_millis();
                             if ms > now.0 {
                                 candidates.push(ms);
@@ -263,7 +332,12 @@ mod tests {
 
     #[test]
     fn conditions() {
-        let env = EnvironmentSnapshot { network_available: true, on_ac_power: false, battery_percent: Some(40), ..Default::default() };
+        let env = EnvironmentSnapshot {
+            network_available: true,
+            on_ac_power: false,
+            battery_percent: Some(40),
+            ..Default::default()
+        };
         assert!(Condition::NetworkAvailable.holds(&env));
         assert!(!Condition::OnAcPower.holds(&env));
         assert!(Condition::BatteryAbove { percent: 30 }.holds(&env));
@@ -271,13 +345,63 @@ mod tests {
     }
 
     #[test]
+    fn crossing_window_belongs_to_start_day() {
+        // Friday-only 23:00–06:00: Friday 02:00 must be closed (Thursday not selected),
+        // Saturday 02:00 must be open.
+        let s = Schedule::new(
+            "night",
+            Recurrence::Weekly {
+                days: vec![4],
+                start: "23:00".into(),
+                end: "06:00".into(),
+            },
+        );
+        let friday_2am = Local
+            .with_ymd_and_hms(2026, 9, 18, 2, 0, 0)
+            .single()
+            .unwrap();
+        let friday_2330 = Local
+            .with_ymd_and_hms(2026, 9, 18, 23, 30, 0)
+            .single()
+            .unwrap();
+        let saturday_2am = Local
+            .with_ymd_and_hms(2026, 9, 19, 2, 0, 0)
+            .single()
+            .unwrap();
+        assert!(!s.window_open_at(Millis(friday_2am.timestamp_millis())));
+        assert!(s.window_open_at(Millis(friday_2330.timestamp_millis())));
+        assert!(s.window_open_at(Millis(saturday_2am.timestamp_millis())));
+        let wd = Schedule::new("wd", Recurrence::weekdays());
+        let fri_2359 = Local
+            .with_ymd_and_hms(2026, 9, 18, 23, 59, 30)
+            .single()
+            .unwrap();
+        assert!(wd.window_open_at(Millis(fri_2359.timestamp_millis())));
+    }
+
+    #[test]
     fn once_and_range() {
         let now = Millis(1_000_000);
-        let s = Schedule::new("once", Recurrence::Once { at: Millis(2_000_000) });
+        let s = Schedule::new(
+            "once",
+            Recurrence::Once {
+                at: Millis(2_000_000),
+            },
+        );
         assert!(!s.window_open_at(now));
         assert!(s.window_open_at(Millis(2_000_001)));
         assert_eq!(s.next_boundary_after(now), Some(Millis(2_000_000)));
-        let r = Schedule::new("range", Recurrence::Range { from: Millis(10), to: Millis(20) });
+        assert_eq!(
+            s.next_boundary_after(Millis(2_000_000 + 48 * 3600 * 1000)),
+            None
+        );
+        let r = Schedule::new(
+            "range",
+            Recurrence::Range {
+                from: Millis(10),
+                to: Millis(20),
+            },
+        );
         assert!(r.window_open_at(Millis(15)));
         assert!(!r.window_open_at(Millis(25)));
     }

@@ -10,7 +10,9 @@ pub fn from_content_disposition(value: &str) -> Option<String> {
     let mut ext: Option<String> = None;
     for part in split_params(value) {
         let part = part.trim();
-        let Some((k, v)) = part.split_once('=') else { continue };
+        let Some((k, v)) = part.split_once('=') else {
+            continue;
+        };
         let key = k.trim().to_ascii_lowercase();
         let v = v.trim();
         if key == "filename*" {
@@ -32,7 +34,11 @@ pub fn from_content_disposition(value: &str) -> Option<String> {
         } else if key == "filename" {
             let unq = unquote(v);
             // Some servers percent-encode plain filename; decode only if it looks encoded.
-            let decoded = if unq.contains('%') { percent_decode_str(&unq).decode_utf8_lossy().to_string() } else { unq };
+            let decoded = if unq.contains('%') {
+                percent_decode_str(&unq).decode_utf8_lossy().to_string()
+            } else {
+                unq
+            };
             plain = Some(decoded);
         }
     }
@@ -80,7 +86,7 @@ fn unquote(v: &str) -> String {
 /// Filename from the last path segment of a URL (percent-decoded), ignoring query strings.
 pub fn from_url(url: &str) -> Option<String> {
     let parsed = url::Url::parse(url).ok()?;
-    let seg = parsed.path_segments()?.filter(|s| !s.is_empty()).next_back()?;
+    let seg = parsed.path_segments()?.rfind(|s| !s.is_empty())?;
     let decoded = percent_decode_str(seg).decode_utf8_lossy().to_string();
     let name = sanitize_filename(&decoded);
     if name == "download" && decoded.trim() != "download" {
@@ -96,10 +102,16 @@ pub fn resolve(url: &str, content_disposition: Option<&str>, content_type: Optio
         .and_then(from_content_disposition)
         .or_else(|| from_url(url))
         .unwrap_or_else(|| {
-            let host = url::Url::parse(url).ok().and_then(|u| u.host_str().map(|h| h.to_owned())).unwrap_or_else(|| "download".into());
+            let host = url::Url::parse(url)
+                .ok()
+                .and_then(|u| u.host_str().map(|h| h.to_owned()))
+                .unwrap_or_else(|| "download".into());
             format!("{}-download", host.replace('.', "-"))
         });
-    let has_ext = std::path::Path::new(&name).extension().map(|e| !e.is_empty() && e.len() <= 8).unwrap_or(false);
+    let has_ext = std::path::Path::new(&name)
+        .extension()
+        .map(|e| !e.is_empty() && e.len() <= 8)
+        .unwrap_or(false);
     if !has_ext {
         if let Some(ct) = content_type {
             let mime = ct.split(';').next().unwrap_or("").trim();
@@ -156,7 +168,9 @@ pub fn extension_for_mime(mime: &str) -> Option<&'static str> {
 
 /// Guess a MIME type from a filename.
 pub fn mime_for_name(name: &str) -> Option<String> {
-    mime_guess::from_path(name).first().map(|m| m.essence_str().to_owned())
+    mime_guess::from_path(name)
+        .first()
+        .map(|m| m.essence_str().to_owned())
 }
 
 #[cfg(test)]
@@ -165,22 +179,51 @@ mod tests {
 
     #[test]
     fn content_disposition_variants() {
-        assert_eq!(from_content_disposition(r#"attachment; filename="report.pdf""#).as_deref(), Some("report.pdf"));
-        assert_eq!(from_content_disposition("attachment; filename*=UTF-8''r%C3%A9sum%C3%A9.pdf").as_deref(), Some("résumé.pdf"));
         assert_eq!(
-            from_content_disposition(r#"attachment; filename="fallback.txt"; filename*=UTF-8''better.txt"#).as_deref(),
+            from_content_disposition(r#"attachment; filename="report.pdf""#).as_deref(),
+            Some("report.pdf")
+        );
+        assert_eq!(
+            from_content_disposition("attachment; filename*=UTF-8''r%C3%A9sum%C3%A9.pdf")
+                .as_deref(),
+            Some("résumé.pdf")
+        );
+        assert_eq!(
+            from_content_disposition(
+                r#"attachment; filename="fallback.txt"; filename*=UTF-8''better.txt"#
+            )
+            .as_deref(),
             Some("better.txt")
         );
-        assert_eq!(from_content_disposition(r#"attachment; filename="../../evil.sh""#).as_deref(), Some("evil.sh"));
-        assert_eq!(from_content_disposition("inline").is_none(), true);
-        assert_eq!(from_content_disposition(r#"attachment; filename="a; b.txt""#).as_deref(), Some("a; b.txt"));
+        assert_eq!(
+            from_content_disposition(r#"attachment; filename="../../evil.sh""#).as_deref(),
+            Some("evil.sh")
+        );
+        assert!(from_content_disposition("inline").is_none());
+        assert_eq!(
+            from_content_disposition(r#"attachment; filename="a; b.txt""#).as_deref(),
+            Some("a; b.txt")
+        );
     }
 
     #[test]
     fn url_names() {
-        assert_eq!(from_url("https://x.com/a/b/c%20d.zip?token=1").as_deref(), Some("c d.zip"));
-        assert_eq!(from_url("https://x.com/").is_none(), true);
-        assert_eq!(resolve("https://x.com/", None, Some("application/pdf")), "x-com-download.pdf");
-        assert_eq!(resolve("https://x.com/file", None, Some("video/mp4; charset=binary")), "file.mp4");
+        assert_eq!(
+            from_url("https://x.com/a/b/c%20d.zip?token=1").as_deref(),
+            Some("c d.zip")
+        );
+        assert!(from_url("https://x.com/").is_none());
+        assert_eq!(
+            resolve("https://x.com/", None, Some("application/pdf")),
+            "x-com-download.pdf"
+        );
+        assert_eq!(
+            resolve(
+                "https://x.com/file",
+                None,
+                Some("video/mp4; charset=binary")
+            ),
+            "file.mp4"
+        );
     }
 }

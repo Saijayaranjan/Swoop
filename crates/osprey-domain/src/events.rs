@@ -61,62 +61,163 @@ pub struct GlobalStats {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "kind")]
 pub enum Notification {
-    Completed { task_id: TaskId, name: String, path: String },
-    Failed { task_id: TaskId, name: String, reason: String },
-    Queued { task_id: TaskId, name: String },
-    Scheduled { task_id: TaskId, name: String, at: Millis },
-    ChecksumMismatch { task_id: TaskId, name: String },
-    LowDiskSpace { path: String, free: u64, required: u64 },
-    TorrentFinished { task_id: TaskId, name: String },
-    DevicePaired { device_id: DeviceId, name: String },
-    AutomationFailed { automation_id: AutomationId, name: String, error: String },
-    DuplicateDetected { task_id: TaskId, name: String, existing_path: String },
-    UpdateAvailable { version: String, notes_url: Option<String> },
-    QueueFinished { queue_id: QueueId, name: String },
+    Completed {
+        task_id: TaskId,
+        name: String,
+        path: String,
+    },
+    Failed {
+        task_id: TaskId,
+        name: String,
+        reason: String,
+    },
+    Queued {
+        task_id: TaskId,
+        name: String,
+    },
+    Scheduled {
+        task_id: TaskId,
+        name: String,
+        at: Millis,
+    },
+    ChecksumMismatch {
+        task_id: TaskId,
+        name: String,
+    },
+    LowDiskSpace {
+        path: String,
+        free: u64,
+        required: u64,
+    },
+    TorrentFinished {
+        task_id: TaskId,
+        name: String,
+    },
+    DevicePaired {
+        device_id: DeviceId,
+        name: String,
+    },
+    AutomationFailed {
+        automation_id: AutomationId,
+        name: String,
+        error: String,
+    },
+    DuplicateDetected {
+        task_id: TaskId,
+        name: String,
+        existing_path: String,
+    },
+    UpdateAvailable {
+        version: String,
+        notes_url: Option<String>,
+    },
+    QueueFinished {
+        queue_id: QueueId,
+        name: String,
+    },
 }
 
 /// The core event stream.
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case", tag = "type", content = "data")]
 pub enum Event {
-    EngineStarted { version: String, at: Millis },
+    EngineStarted {
+        version: String,
+        at: Millis,
+    },
     EngineStopping,
-    TaskAdded(Task),
-    /// Full snapshot; sent on any non-progress change (state, options, name, path…).
-    TaskUpdated(Task),
-    TaskRemoved { task_id: TaskId, deleted_file: bool },
-    TaskStateChanged { task_id: TaskId, from: TaskState, to: TaskState, at: Millis },
+    TaskAdded(Box<Task>),
+    /// Full snapshot; sent on any non-progress change (state, options, name, path…). The FFI
+    /// and WebSocket layers project this to a row and never forward the whole record unasked.
+    TaskUpdated(Box<Task>),
+    TaskRemoved {
+        task_id: TaskId,
+        deleted_file: bool,
+    },
+    TaskStateChanged {
+        task_id: TaskId,
+        from: TaskState,
+        to: TaskState,
+        at: Millis,
+    },
     /// Coalesced progress for many tasks (≤ 4 batches/second).
     Progress(Vec<ProgressUpdate>),
     TaskLog(TaskLogEntry),
     QueueUpdated(Queue),
-    QueueRemoved { queue_id: QueueId },
+    QueueRemoved {
+        queue_id: QueueId,
+    },
     QueueSummaries(Vec<QueueSummary>),
     CategoryUpdated(Category),
-    CategoryRemoved { category_id: crate::CategoryId },
+    CategoryRemoved {
+        category_id: crate::CategoryId,
+    },
     RuleUpdated(Rule),
-    RuleRemoved { rule_id: crate::RuleId },
+    RuleRemoved {
+        rule_id: crate::RuleId,
+    },
     ScheduleUpdated(Schedule),
-    ScheduleRemoved { schedule_id: crate::ScheduleId },
-    ScheduleFired { schedule_id: crate::ScheduleId, opened: bool },
+    ScheduleRemoved {
+        schedule_id: crate::ScheduleId,
+    },
+    ScheduleFired {
+        schedule_id: crate::ScheduleId,
+        opened: bool,
+    },
     AutomationUpdated(crate::automation::AutomationRule),
-    AutomationRemoved { automation_id: AutomationId },
+    AutomationRemoved {
+        automation_id: AutomationId,
+    },
     AutomationRan(AutomationRun),
     /// The core wants the platform layer to execute a platform-only action.
-    PlatformAction { task_id: Option<TaskId>, action: crate::automation::AutomationAction, context: crate::automation::AutomationContext },
+    PlatformAction {
+        task_id: Option<TaskId>,
+        action: crate::automation::AutomationAction,
+        context: crate::automation::AutomationContext,
+    },
     SettingsChanged(Box<crate::settings::Settings>),
     GlobalStats(GlobalStats),
     Notification(Notification),
     DeviceUpdated(Device),
-    DeviceRemoved { device_id: DeviceId },
-    PairingStarted { code: String, expires_at: Millis, url: String },
-    PairingCompleted { device: Device },
-    DiskSpace { path: String, free: u64 },
-    NetworkChanged { available: bool, metered: bool },
+    DeviceRemoved {
+        device_id: DeviceId,
+    },
+    PairingStarted {
+        code: String,
+        expires_at: Millis,
+        url: String,
+    },
+    PairingCompleted {
+        device: Device,
+    },
+    DiskSpace {
+        path: String,
+        free: u64,
+    },
+    NetworkChanged {
+        available: bool,
+        metered: bool,
+    },
     /// Emitted by automation `EmitEvent` actions for external integrations.
-    Custom { name: String, payload: serde_json::Value },
-    GrabberProgress { session_id: String, pages_crawled: u32, files_found: u32, done: bool },
-    UpdateCheck { available: bool, version: Option<String>, notes: Option<String> },
+    Custom {
+        name: String,
+        payload: serde_json::Value,
+    },
+    GrabberProgress {
+        session_id: String,
+        pages_crawled: u32,
+        files_found: u32,
+        done: bool,
+    },
+    UpdateCheck {
+        available: bool,
+        version: Option<String>,
+        notes: Option<String>,
+    },
+    /// All transfers are paused and checkpoints flushed; the platform layer may sleep/quit now.
+    ReadyForSleep {
+        reason: String,
+    },
 }
 
 impl Event {
@@ -124,8 +225,9 @@ impl Event {
     pub fn task_id(&self) -> Option<&TaskId> {
         match self {
             Event::TaskAdded(t) | Event::TaskUpdated(t) => Some(&t.id),
-            Event::TaskRemoved { task_id, .. }
-            | Event::TaskStateChanged { task_id, .. } => Some(task_id),
+            Event::TaskRemoved { task_id, .. } | Event::TaskStateChanged { task_id, .. } => {
+                Some(task_id)
+            }
             Event::TaskLog(l) => Some(&l.task_id),
             _ => None,
         }
@@ -133,7 +235,13 @@ impl Event {
 
     /// High-volume events that remote clients may opt out of.
     pub fn is_high_volume(&self) -> bool {
-        matches!(self, Event::Progress(_) | Event::TaskLog(_) | Event::GlobalStats(_) | Event::QueueSummaries(_))
+        matches!(
+            self,
+            Event::Progress(_)
+                | Event::TaskLog(_)
+                | Event::GlobalStats(_)
+                | Event::QueueSummaries(_)
+        )
     }
 
     pub fn type_name(&self) -> &'static str {
@@ -172,6 +280,7 @@ impl Event {
             Event::Custom { .. } => "custom",
             Event::GrabberProgress { .. } => "grabber_progress",
             Event::UpdateCheck { .. } => "update_check",
+            Event::ReadyForSleep { .. } => "ready_for_sleep",
         }
     }
 }

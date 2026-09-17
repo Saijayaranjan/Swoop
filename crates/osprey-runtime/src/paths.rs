@@ -18,7 +18,12 @@ impl AppPaths {
     pub fn resolve() -> Self {
         if let Ok(base) = std::env::var("OSPREY_DATA_DIR") {
             let base = PathBuf::from(base);
-            return Self { data_dir: base.clone(), config_dir: base.clone(), cache_dir: base.join("cache"), log_dir: base.join("logs") };
+            return Self {
+                data_dir: base.clone(),
+                config_dir: base.clone(),
+                cache_dir: base.join("cache"),
+                log_dir: base.join("logs"),
+            };
         }
         let dirs = directories::ProjectDirs::from("app", "osprey", APP_NAME);
         match dirs {
@@ -30,13 +35,23 @@ impl AppPaths {
             },
             None => {
                 let base = std::env::temp_dir().join("osprey");
-                Self { data_dir: base.clone(), config_dir: base.clone(), cache_dir: base.join("cache"), log_dir: base.join("logs") }
+                Self {
+                    data_dir: base.clone(),
+                    config_dir: base.clone(),
+                    cache_dir: base.join("cache"),
+                    log_dir: base.join("logs"),
+                }
             }
         }
     }
 
     pub fn ensure(&self) -> std::io::Result<()> {
-        for d in [&self.data_dir, &self.config_dir, &self.cache_dir, &self.log_dir] {
+        for d in [
+            &self.data_dir,
+            &self.config_dir,
+            &self.cache_dir,
+            &self.log_dir,
+        ] {
             std::fs::create_dir_all(d)?;
         }
         Ok(())

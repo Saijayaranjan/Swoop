@@ -3137,13 +3137,11 @@ dependencies = [
 name = "osprey-domain"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "chrono",
  "regex",
  "serde",
  "serde_json",
  "thiserror 2.0.20",
- "tokio",
  "url",
  "uuid",
 ]
@@ -3287,10 +3285,12 @@ dependencies = [
 name = "osprey-runtime"
 version = "0.1.0"
 dependencies = [
+ "async-trait",
  "blake3",
  "bytes",
  "directories",
  "hex",
+ "http",
  "libc",
  "md-5",
  "mime_guess",
@@ -3299,6 +3299,7 @@ dependencies = [
  "percent-encoding",
  "rand 0.8.8",
  "regex",
+ "reqwest",
  "serde",
  "serde_json",
  "sha1",
@@ -3308,6 +3309,7 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+ "unicode-normalization",
  "url",
 ]
 
@@ -5219,6 +5221,15 @@ name = "unicode-ident"
 version = "1.0.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d245f478577f809a851594d02313b640fb437e0bb33866753cff937863096954"
+
+[[package]]
+name = "unicode-normalization"
+version = "0.1.25"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5fd4f6878c9cb28d874b009da9e8d183b5abc80117c40bbd187a1fde336be6e8"
+dependencies = [
+ "tinyvec",
+]
 
 [[package]]
 name = "unicode-width"

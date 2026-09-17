@@ -56,7 +56,7 @@ impl HealthScore {
 
         let throughput_consistency = {
             let cv_penalty = (i.speed_cv.clamp(0.0, 2.0) * 35.0) as u32;
-            let drop_penalty = (i.throughput_drops.min(10) * 6) as u32;
+            let drop_penalty = i.throughput_drops.min(10) * 6;
             100u32.saturating_sub(cv_penalty + drop_penalty).min(100) as u8
         };
         if i.throttled_events > 0 {
@@ -88,7 +88,15 @@ impl HealthScore {
             .round()
             .clamp(0.0, 100.0) as u8;
 
-        Self { score, source_stability, throughput_consistency, connection_quality, retry_pressure, remaining_risk, notes }
+        Self {
+            score,
+            source_stability,
+            throughput_consistency,
+            connection_quality,
+            retry_pressure,
+            remaining_risk,
+            notes,
+        }
     }
 
     pub fn label_key(&self) -> &'static str {
@@ -107,7 +115,12 @@ mod tests {
 
     #[test]
     fn healthy_download_scores_high() {
-        let h = HealthScore::compute(&HealthInputs { successful_connections: 8, samples: 50, fraction_done: 0.5, ..Default::default() });
+        let h = HealthScore::compute(&HealthInputs {
+            successful_connections: 8,
+            samples: 50,
+            fraction_done: 0.5,
+            ..Default::default()
+        });
         assert!(h.score >= 85, "{h:?}");
     }
 

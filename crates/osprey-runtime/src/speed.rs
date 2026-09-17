@@ -23,7 +23,16 @@ impl SpeedMeter {
 
     pub fn with_window(window: Duration) -> Self {
         let now = Instant::now();
-        Self { window, samples: VecDeque::new(), total: 0, smoothed: 0.0, last_tick: now, peak: 0, history: VecDeque::new(), drops: 0 }
+        Self {
+            window,
+            samples: VecDeque::new(),
+            total: 0,
+            smoothed: 0.0,
+            last_tick: now,
+            peak: 0,
+            history: VecDeque::new(),
+            drops: 0,
+        }
     }
 
     /// Record `bytes` transferred now.
@@ -54,7 +63,9 @@ impl SpeedMeter {
     pub fn instant(&mut self) -> u64 {
         let now = Instant::now();
         self.prune(now);
-        let Some(front) = self.samples.front() else { return 0 };
+        let Some(front) = self.samples.front() else {
+            return 0;
+        };
         let span = now.duration_since(front.0).as_secs_f64().max(0.25);
         let sum: u64 = self.samples.iter().map(|s| s.1).sum();
         (sum as f64 / span) as u64
@@ -64,7 +75,10 @@ impl SpeedMeter {
     pub fn tick(&mut self) -> u64 {
         let inst = self.instant() as f64;
         let now = Instant::now();
-        let dt = now.duration_since(self.last_tick).as_secs_f64().clamp(0.05, 5.0);
+        let dt = now
+            .duration_since(self.last_tick)
+            .as_secs_f64()
+            .clamp(0.05, 5.0);
         self.last_tick = now;
         // time-corrected EMA with ~2 s constant
         let alpha = 1.0 - (-dt / 2.0).exp();
@@ -107,7 +121,12 @@ impl SpeedMeter {
         if mean <= 0.0 {
             return 0.0;
         }
-        let var = self.history.iter().map(|&v| (v as f64 - mean).powi(2)).sum::<f64>() / n;
+        let var = self
+            .history
+            .iter()
+            .map(|&v| (v as f64 - mean).powi(2))
+            .sum::<f64>()
+            / n;
         (var.sqrt() / mean) as f32
     }
 

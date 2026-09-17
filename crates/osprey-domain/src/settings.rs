@@ -52,7 +52,9 @@ fn urlencode(s: &str) -> String {
     let mut out = String::with_capacity(s.len());
     for b in s.bytes() {
         match b {
-            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => out.push(b as char),
+            b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'-' | b'_' | b'.' | b'~' => {
+                out.push(b as char)
+            }
             _ => out.push_str(&format!("%{b:02X}")),
         }
     }
@@ -156,8 +158,12 @@ impl BandwidthSettings {
                 }
             }
             TrafficMode::Browsing => {
-                let cap = if self.measured_capacity > 0 { (self.measured_capacity as f64 * 0.3) as u64 } else { 2 * 1024 * 1024 };
-                (cap.min(2 * 1024 * 1024).max(128 * 1024), 256 * 1024)
+                let cap = if self.measured_capacity > 0 {
+                    (self.measured_capacity as f64 * 0.3) as u64
+                } else {
+                    2 * 1024 * 1024
+                };
+                (cap.clamp(128 * 1024, 2 * 1024 * 1024), 256 * 1024)
             }
             TrafficMode::Custom => (self.custom_download_limit, self.custom_upload_limit),
         }
@@ -340,10 +346,13 @@ impl Default for BrowserSettings {
         Self {
             intercept_downloads: true,
             intercept_min_size: 1024 * 1024,
-            intercept_extensions: ["zip", "rar", "7z", "tar", "gz", "iso", "dmg", "pkg", "exe", "msi", "mp4", "mkv", "mp3", "flac", "pdf", "epub", "apk", "deb", "rpm", "torrent"]
-                .iter()
-                .map(|s| s.to_string())
-                .collect(),
+            intercept_extensions: [
+                "zip", "rar", "7z", "tar", "gz", "iso", "dmg", "pkg", "exe", "msi", "mp4", "mkv",
+                "mp3", "flac", "pdf", "epub", "apk", "deb", "rpm", "torrent",
+            ]
+            .iter()
+            .map(|s| s.to_string())
+            .collect(),
             excluded_domains: Vec::new(),
             excluded_url_patterns: Vec::new(),
             detect_media: true,
@@ -364,7 +373,13 @@ pub struct UpdateSettings {
 
 impl Default for UpdateSettings {
     fn default() -> Self {
-        Self { check_automatically: true, install_automatically: false, channel: "stable".into(), last_check_at: None, skipped_version: None }
+        Self {
+            check_automatically: true,
+            install_automatically: false,
+            channel: "stable".into(),
+            last_check_at: None,
+            skipped_version: None,
+        }
     }
 }
 
@@ -381,7 +396,13 @@ pub struct PrivacySettings {
 
 impl Default for PrivacySettings {
     fn default() -> Self {
-        Self { analytics_opt_in: false, keep_history: true, history_retention_days: 0, log_level: "info".into(), log_retention_days: 14 }
+        Self {
+            analytics_opt_in: false,
+            keep_history: true,
+            history_retention_days: 0,
+            log_level: "info".into(),
+            log_retention_days: 14,
+        }
     }
 }
 
@@ -460,22 +481,32 @@ impl Settings {
     pub fn validate(&self) -> Result<(), crate::DomainError> {
         let n = &self.network;
         if n.connections_per_task == 0 || n.connections_per_task > 64 {
-            return Err(crate::DomainError::validation("connections_per_task must be 1..=64"));
+            return Err(crate::DomainError::validation(
+                "connections_per_task must be 1..=64",
+            ));
         }
         if n.max_connections_per_host == 0 {
-            return Err(crate::DomainError::validation("max_connections_per_host must be > 0"));
+            return Err(crate::DomainError::validation(
+                "max_connections_per_host must be > 0",
+            ));
         }
         if n.min_segment_size < 64 * 1024 {
-            return Err(crate::DomainError::validation("min_segment_size must be >= 64 KiB"));
+            return Err(crate::DomainError::validation(
+                "min_segment_size must be >= 64 KiB",
+            ));
         }
         if self.remote.port == 0 || self.remote.local_port == 0 {
             return Err(crate::DomainError::validation("ports must be non-zero"));
         }
         if self.remote.port == self.remote.local_port {
-            return Err(crate::DomainError::validation("remote and local ports must differ"));
+            return Err(crate::DomainError::validation(
+                "remote and local ports must differ",
+            ));
         }
         if self.storage.temp_suffix.is_empty() || self.storage.temp_suffix.contains('/') {
-            return Err(crate::DomainError::validation("temp_suffix must be a non-empty suffix"));
+            return Err(crate::DomainError::validation(
+                "temp_suffix must be a non-empty suffix",
+            ));
         }
         Ok(())
     }
@@ -492,7 +523,10 @@ mod tests {
 
     #[test]
     fn traffic_modes() {
-        let mut b = BandwidthSettings { measured_capacity: 10_000_000, ..Default::default() };
+        let mut b = BandwidthSettings {
+            measured_capacity: 10_000_000,
+            ..Default::default()
+        };
         b.mode = TrafficMode::Balanced;
         assert_eq!(b.effective_limits().0, 7_000_000);
         b.mode = TrafficMode::Browsing;
@@ -504,7 +538,18 @@ mod tests {
 
     #[test]
     fn proxy_url_encodes_credentials() {
-        let p = ProxyProfile { id: ProxyId::new(), name: "x".into(), kind: ProxyKind::Socks5, host: "127.0.0.1".into(), port: 1080, credential: None, bypass: vec![] };
-        assert_eq!(p.url(Some("a b"), Some("p@ss")), "socks5h://a%20b:p%40ss@127.0.0.1:1080");
+        let p = ProxyProfile {
+            id: ProxyId::new(),
+            name: "x".into(),
+            kind: ProxyKind::Socks5,
+            host: "127.0.0.1".into(),
+            port: 1080,
+            credential: None,
+            bypass: vec![],
+        };
+        assert_eq!(
+            p.url(Some("a b"), Some("p@ss")),
+            "socks5h://a%20b:p%40ss@127.0.0.1:1080"
+        );
     }
 }

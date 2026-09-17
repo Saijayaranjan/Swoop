@@ -1,1 +1,3 @@
-fn main() { println!("osprey"); }
+fn main() {
+    println!("osprey");
+}
