@@ -1,0 +1,24 @@
+{
+  "name": "osprey-browser-extension",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Official browser extension for Osprey, a production-grade download manager.",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs chrome firefox edge",
+    "build:chrome": "node build.mjs chrome",
+    "build:firefox": "node build.mjs firefox",
+    "build:edge": "node build.mjs edge",
+    "icons": "node scripts/generate-icons.mjs",
+    "watch": "node build.mjs chrome firefox edge --watch",
+    "lint": "tsc --noEmit -p tsconfig.json",
+    "test": "node --test \"test/**/*.test.ts\""
+  },
+  "devDependencies": {
+    "@types/chrome": "^0.0.280",
+    "@types/webextension-polyfill": "^0.10.7",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.6.3",
+    "webextension-polyfill": "^0.12.0"
+  }
+}

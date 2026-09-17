@@ -16,6 +16,9 @@ tracing = { workspace = true }
 parking_lot = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true }
+# `open_in_memory()` is backed by a private temp directory so the WAL/reader/writer behaviour
+# is identical to production; `tempfile` cleans it up on drop.
+tempfile = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }
