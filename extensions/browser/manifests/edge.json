@@ -1,0 +1,7 @@
+{
+  "background": {
+    "service_worker": "background/index.js",
+    "type": "module"
+  },
+  "minimum_chrome_version": "116"
+}

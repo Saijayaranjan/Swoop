@@ -1,0 +1,12 @@
+{
+  "background": {
+    "scripts": ["background/index.js"],
+    "type": "module"
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "osprey@osprey.app",
+      "strict_min_version": "121.0"
+    }
+  }
+}

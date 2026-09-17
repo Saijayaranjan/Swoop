@@ -3179,6 +3179,7 @@ dependencies = [
  "mime_guess",
  "osprey-domain",
  "osprey-runtime",
+ "osprey-testserver",
  "parking_lot",
  "quick-xml 0.37.5",
  "rand 0.8.8",
