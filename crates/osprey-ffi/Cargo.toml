@@ -3,6 +3,27 @@ name = "osprey-ffi"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "UniFFI bindings exposing the Osprey engine to Swift"
+
+[lib]
+crate-type = ["lib", "staticlib", "cdylib"]
+name = "osprey_ffi"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
 
 [dependencies]
 osprey-domain = { path = "../osprey-domain" }
+osprey-runtime = { path = "../osprey-runtime" }
+osprey-services = { path = "../osprey-services" }
+osprey-server = { path = "../osprey-server" }
+uniffi = { workspace = true, features = ["cli", "tokio"] }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+parking_lot = { workspace = true }
+thiserror = { workspace = true }

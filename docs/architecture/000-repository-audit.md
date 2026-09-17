@@ -34,3 +34,12 @@ concentrates on *what the constraints permit*:
    benefit for the user.
 
 See `001-architecture-decision.md` for the decision itself.
+
+## Feasibility spikes (2026-09-17)
+
+| Spike | Result |
+|---|---|
+| SwiftUI app via SwiftPM + CLT (no Xcode) | ✅ builds and links; `@State` replaced by `@ViewState` wrapper (macro plugin absent in CLT) |
+| UniFFI 0.29 → Swift: async method, callback interface (`with_foreign` trait), records/enums, static lib | ✅ `swiftc -I include -L … -lffispike` compiles; async calls and Rust→Swift callbacks run. Exported async fns must `rt.spawn(...).await` (the future is polled by the foreign executor, not inside Tokio) |
+| librqbit 9.0.1 | ✅ fetched; API: `Session::new_with_opts`, `AddTorrent::{from_bytes,from_url}`, `AddTorrentOptions{only_files,output_folder,paused,ratelimits,trackers,peer_limit}`, `ManagedTorrentHandle::{stats,live,wait_until_completed}`, `Session::{pause,unpause,delete,update_only_files}` |
+| reqwest | aligned workspace to 0.13 (same builder API as 0.12; feature `rustls`) so only one version compiles |

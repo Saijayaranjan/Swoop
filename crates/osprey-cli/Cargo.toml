@@ -3,6 +3,7 @@ name = "osprey-cli"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "The `osprey` command line: CLI client, headless server, native messaging host"
 
 [[bin]]
 name = "osprey"
@@ -10,3 +11,21 @@ path = "src/main.rs"
 
 [dependencies]
 osprey-domain = { path = "../osprey-domain" }
+osprey-runtime = { path = "../osprey-runtime" }
+osprey-services = { path = "../osprey-services" }
+osprey-server = { path = "../osprey-server" }
+clap = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+anyhow = { workspace = true }
+humansize = { workspace = true }
+base64 = { workspace = true }
+url = { workspace = true }
+futures = { workspace = true }
+tokio-tungstenite = "0.26"
+directories = { workspace = true }

@@ -3,6 +3,21 @@ name = "osprey-engine-ftp"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "FTP/FTPS download engine"
 
 [dependencies]
 osprey-domain = { path = "../osprey-domain" }
+osprey-runtime = { path = "../osprey-runtime" }
+suppaftp = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+futures = { workspace = true }
+async-trait = { workspace = true }
+bytes = { workspace = true }
+url = { workspace = true }
+serde = { workspace = true }
+tracing = { workspace = true }
+percent-encoding = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

@@ -13,6 +13,7 @@ members = [
     "crates/osprey-server",
     "crates/osprey-cli",
     "crates/osprey-ffi",
+    "crates/osprey-testserver",
 ]
 
 [workspace.package]
@@ -30,7 +31,7 @@ tokio-util = { version = "0.7", features = ["io", "rt"] }
 futures = "0.3"
 async-trait = "0.1"
 # networking
-reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "http2", "stream", "cookies", "socks", "gzip", "brotli", "json"] }
+reqwest = { version = "0.13", default-features = false, features = ["rustls", "http2", "stream", "cookies", "socks", "gzip", "brotli", "json"] }
 url = { version = "2.5", features = ["serde"] }
 http = "1"
 bytes = "1"

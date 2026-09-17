@@ -3,6 +3,37 @@ name = "osprey-server"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
+description = "Local + remote REST/WebSocket API with pairing, scopes and the embedded web UI"
 
 [dependencies]
 osprey-domain = { path = "../osprey-domain" }
+osprey-runtime = { path = "../osprey-runtime" }
+osprey-services = { path = "../osprey-services" }
+axum = { workspace = true }
+axum-server = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+hyper = { workspace = true }
+hyper-util = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+parking_lot = { workspace = true }
+dashmap = { workspace = true }
+rcgen = { workspace = true }
+rand = { workspace = true }
+base64 = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+rust-embed = { workspace = true }
+mime_guess = { workspace = true }
+http = { workspace = true }
+uuid = { workspace = true }
+
+[dev-dependencies]
+reqwest = { workspace = true }
+tokio-tungstenite = "0.26"
+async-trait = { workspace = true }
