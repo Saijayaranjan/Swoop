@@ -11,7 +11,7 @@ use async_trait::async_trait;
 use osprey_domain::automation::{AutomationRule, AutomationRun};
 use osprey_domain::category::Category;
 use osprey_domain::device::{AuditEntry, Device, Scope};
-use osprey_domain::engine::ResolvedMetadata;
+use osprey_runtime::engine::ResolvedMetadata;
 use osprey_domain::events::{GlobalStats, TaskLogEntry};
 use osprey_domain::history::{HistoryEntry, HistoryQuery};
 use osprey_domain::media::DetectedMedia;

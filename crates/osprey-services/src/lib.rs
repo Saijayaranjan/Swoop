@@ -5,5 +5,6 @@
 //! implementation, wiring the persistence layer, the transfer engines and the services.
 
 pub mod api;
+pub mod bootstrap;
 
 pub use api::*;
