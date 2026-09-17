@@ -27,3 +27,4 @@ cbc = { version = "0.1", features = ["alloc"] }
 [dev-dependencies]
 axum = { workspace = true }
 tempfile = { workspace = true }
+osprey-testserver = { path = "../osprey-testserver" }
