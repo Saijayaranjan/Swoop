@@ -1,0 +1,11 @@
+/target
+**/.build
+**/node_modules
+/dist
+/apps/macos/.build
+/apps/macos/build
+/extensions/browser/dist
+/web/remote/dist
+*.dmg
+.DS_Store
+/crates/osprey-ffi/generated

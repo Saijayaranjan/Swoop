@@ -1,0 +1,8 @@
+[package]
+name = "osprey-engine-ftp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[dependencies]
+osprey-domain = { path = "../osprey-domain" }

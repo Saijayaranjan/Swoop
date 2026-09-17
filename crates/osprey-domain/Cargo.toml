@@ -1,0 +1,17 @@
+[package]
+name = "osprey-domain"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Osprey domain model: tasks, state machine, queues, rules, schedules, events"
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
+async-trait = { workspace = true }
+tokio = { workspace = true }
+chrono = { workspace = true }
+regex = { workspace = true }

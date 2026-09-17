@@ -1,0 +1,12 @@
+[package]
+name = "osprey-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "osprey"
+path = "src/main.rs"
+
+[dependencies]
+osprey-domain = { path = "../osprey-domain" }
