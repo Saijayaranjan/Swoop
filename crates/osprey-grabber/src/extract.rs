@@ -44,7 +44,7 @@ pub fn extract(html: &[u8]) -> Extracted {
                 element!("img[srcset], source[srcset]", move |el| {
                     if let Some(v) = el.get_attribute("srcset") {
                         for cand in v.split(',') {
-                            if let Some(u) = cand.trim().split_whitespace().next() {
+                            if let Some(u) = cand.split_whitespace().next() {
                                 out_srcset.borrow_mut().media.push(u.to_owned());
                             }
                         }

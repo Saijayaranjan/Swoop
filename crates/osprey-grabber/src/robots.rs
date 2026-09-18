@@ -1,6 +1,9 @@
 //! A small robots.txt evaluator: longest-match Allow/Disallow for the matching user-agent
 //! group (ours, else `*`), plus `Crawl-delay`.
 
+/// (agents, rules, crawl-delay) for one `User-agent` group.
+type Group = (Vec<String>, Vec<(bool, String)>, Option<u64>);
+
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Robots {
     rules: Vec<(bool, String)>, // (allow, path prefix)
@@ -15,8 +18,8 @@ impl Robots {
 
     pub fn parse(text: &str, our_agent: &str) -> Self {
         let our = our_agent.to_ascii_lowercase();
-        let mut groups: Vec<(Vec<String>, Vec<(bool, String)>, Option<u64>)> = Vec::new();
-        let mut current: Option<(Vec<String>, Vec<(bool, String)>, Option<u64>)> = None;
+        let mut groups: Vec<Group> = Vec::new();
+        let mut current: Option<Group> = None;
         let mut last_was_agent = false;
         for raw in text.lines() {
             let line = raw.split('#').next().unwrap_or("").trim();
