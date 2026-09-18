@@ -215,7 +215,7 @@ async fn pause_then_resume_from_checkpoint() {
     }
     let rests = server.rest_offsets.get();
     assert!(
-        rests.iter().any(|&o| o == committed),
+        rests.contains(&committed),
         "resumed at committed offset: {rests:?}"
     );
 }
