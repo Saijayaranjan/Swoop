@@ -35,10 +35,11 @@ pub fn apply(conn: &mut Connection) -> StoreResult<u32> {
         }
         tracing::info!(from = current, to = version, "applying store migration");
         let tx = conn.transaction()?;
-        tx.execute_batch(sql).map_err(|source| StoreError::Migration {
-            version: *version,
-            source,
-        })?;
+        tx.execute_batch(sql)
+            .map_err(|source| StoreError::Migration {
+                version: *version,
+                source,
+            })?;
         tx.pragma_update(None, "user_version", *version)
             .map_err(|source| StoreError::Migration {
                 version: *version,
@@ -62,10 +63,7 @@ mod tests {
         for (i, (v, _)) in MIGRATIONS.iter().enumerate() {
             assert_eq!(*v as usize, i + 1);
         }
-        assert_eq!(
-            MIGRATIONS.last().map(|m| m.0),
-            Some(CURRENT_SCHEMA_VERSION)
-        );
+        assert_eq!(MIGRATIONS.last().map(|m| m.0), Some(CURRENT_SCHEMA_VERSION));
     }
 
     #[test]
@@ -112,7 +110,8 @@ mod tests {
     #[test]
     fn newer_schema_is_refused() {
         let mut conn = Connection::open_in_memory().expect("open");
-        conn.pragma_update(None, "user_version", 99).expect("pragma");
+        conn.pragma_update(None, "user_version", 99)
+            .expect("pragma");
         assert!(matches!(
             apply(&mut conn),
             Err(StoreError::SchemaTooNew {

@@ -184,40 +184,48 @@ struct Applied {
     result: StoreResult<()>,
 }
 
-/// Apply one batch in a single `BEGIN IMMEDIATE` transaction. Returns `true` when a
-/// [`OpKind::Shutdown`] was processed.
-fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize) -> bool {
-    let started = Instant::now();
-    let count = batch.len();
-    let mut shutdown_ack: Option<Option<Ack>> = None;
-    let mut refused: Vec<StoreOp> = Vec::new();
-    let mut applied: Vec<Applied> = Vec::with_capacity(count);
-    let mut failures = 0usize;
+/// Everything a committed (or failed) batch produced.
+struct BatchOutcome {
+    applied: Vec<Applied>,
+    /// `Some` when the batch contained a shutdown op (with its ack channel).
+    shutdown: Option<Option<Ack>>,
+    /// Ops queued after the shutdown op; refused with `Closed`.
+    refused: Vec<StoreOp>,
+    /// Error message if `BEGIN` or `COMMIT` failed.
+    error: Option<String>,
+    failures: usize,
+}
 
+/// Run the batch inside one `BEGIN IMMEDIATE`; the transaction borrow ends when this returns.
+fn run_transaction(conn: &mut Connection, batch: Vec<StoreOp>) -> BatchOutcome {
+    let mut out = BatchOutcome {
+        applied: Vec::with_capacity(batch.len()),
+        shutdown: None,
+        refused: Vec::new(),
+        error: None,
+        failures: 0,
+    };
     let tx = match conn.transaction_with_behavior(TransactionBehavior::Immediate) {
         Ok(tx) => tx,
         Err(e) => {
-            tracing::error!(error = %e, ops = count, "could not begin store transaction");
-            let mut saw_shutdown = false;
+            out.error = Some(format!("begin transaction failed: {e}"));
             for op in batch {
-                pending.fetch_sub(1, Ordering::SeqCst);
-                saw_shutdown |= op.kind == OpKind::Shutdown;
-                if let Some(ack) = op.ack {
-                    let _ = ack.send(Err(StoreError::Internal(format!(
-                        "begin transaction failed: {e}"
-                    ))));
+                if op.kind == OpKind::Shutdown {
+                    out.shutdown = Some(op.ack);
+                } else {
+                    out.applied.push(Applied {
+                        name: op.name,
+                        ack: op.ack,
+                        result: Ok(()),
+                    });
                 }
             }
-            if saw_shutdown {
-                checkpoint(conn, "shutdown");
-            }
-            return saw_shutdown;
+            return out;
         }
     };
-
     for op in batch {
-        if shutdown_ack.is_some() {
-            refused.push(op);
+        if out.shutdown.is_some() {
+            out.refused.push(op);
             continue;
         }
         let StoreOp {
@@ -227,8 +235,8 @@ fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize
             ack,
         } = op;
         match kind {
-            OpKind::Shutdown => shutdown_ack = Some(ack),
-            OpKind::Flush => applied.push(Applied {
+            OpKind::Shutdown => out.shutdown = Some(ack),
+            OpKind::Flush => out.applied.push(Applied {
                 name,
                 ack,
                 result: Ok(()),
@@ -236,21 +244,31 @@ fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize
             OpKind::Write => {
                 let result = run_in_savepoint(&tx, run);
                 if result.is_err() {
-                    failures += 1;
+                    out.failures += 1;
                 }
-                applied.push(Applied { name, ack, result });
+                out.applied.push(Applied { name, ack, result });
             }
         }
     }
-
-    let commit_error = tx.commit().err().map(|e| e.to_string());
-    if let Some(err) = &commit_error {
-        tracing::error!(error = %err, ops = count, "store batch commit failed");
+    if let Err(e) = tx.commit() {
+        out.error = Some(format!("commit failed: {e}"));
     }
-    for Applied { name, ack, result } in applied {
+    out
+}
+
+/// Apply one batch in a single transaction, deliver results, and checkpoint on shutdown.
+/// Returns `true` when a [`OpKind::Shutdown`] was processed.
+fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize) -> bool {
+    let started = Instant::now();
+    let count = batch.len();
+    let outcome = run_transaction(conn, batch);
+    if let Some(err) = &outcome.error {
+        tracing::error!(error = %err, ops = count, "store batch failed");
+    }
+    for Applied { name, ack, result } in outcome.applied {
         pending.fetch_sub(1, Ordering::SeqCst);
-        let result = match &commit_error {
-            Some(err) => Err(StoreError::Internal(format!("commit failed: {err}"))),
+        let result = match &outcome.error {
+            Some(err) => Err(StoreError::Internal(err.clone())),
             None => result,
         };
         match (ack, result) {
@@ -263,15 +281,14 @@ fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize
     }
     tracing::trace!(
         ops = count,
-        failures,
+        failures = outcome.failures,
         elapsed_ms = started.elapsed().as_millis() as u64,
         "store batch applied"
     );
-
-    let Some(ack) = shutdown_ack else {
+    let Some(ack) = outcome.shutdown else {
         return false;
     };
-    for op in refused {
+    for op in outcome.refused {
         pending.fetch_sub(1, Ordering::SeqCst);
         if let Some(ack) = op.ack {
             let _ = ack.send(Err(StoreError::Closed));
@@ -280,8 +297,8 @@ fn apply_batch(conn: &mut Connection, batch: Vec<StoreOp>, pending: &AtomicUsize
     checkpoint(conn, "shutdown");
     pending.fetch_sub(1, Ordering::SeqCst);
     if let Some(ack) = ack {
-        let _ = ack.send(match commit_error {
-            Some(err) => Err(StoreError::Internal(format!("commit failed: {err}"))),
+        let _ = ack.send(match outcome.error {
+            Some(err) => Err(StoreError::Internal(err)),
             None => Ok(()),
         });
     }
@@ -308,7 +325,11 @@ fn run_in_savepoint(conn: &Connection, run: WriteFn) -> StoreResult<()> {
 /// `PRAGMA wal_checkpoint(TRUNCATE)`; failures are logged, never fatal.
 fn checkpoint(conn: &Connection, reason: &str) {
     match conn.query_row("PRAGMA wal_checkpoint(TRUNCATE)", [], |r| {
-        Ok((r.get::<_, i64>(0)?, r.get::<_, i64>(1)?, r.get::<_, i64>(2)?))
+        Ok((
+            r.get::<_, i64>(0)?,
+            r.get::<_, i64>(1)?,
+            r.get::<_, i64>(2)?,
+        ))
     }) {
         Ok((busy, log, checkpointed)) => {
             tracing::debug!(reason, busy, log, checkpointed, "wal checkpoint")

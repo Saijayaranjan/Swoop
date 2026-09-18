@@ -182,7 +182,8 @@ impl TaskState {
             Failed => matches!(to, Queued | Scheduled | Cancelled | Pending),
             Cancelled => matches!(to, Queued | Scheduled | Pending),
             // Seeding → Downloading: the user selected additional files.
-            Seeding => matches!(to, Completed | Paused | Cancelled | Failed | Downloading),
+            // Seeding → Resolving: recovery re-adds a seeding torrent to the session.
+            Seeding => matches!(to, Completed | Paused | Cancelled | Failed | Downloading | Resolving),
         }
     }
 
