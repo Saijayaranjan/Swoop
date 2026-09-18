@@ -2,7 +2,9 @@
 //! headers, Basic auth) and the client profile. Built once per run and applied to every
 //! probe and segment request so all connections look identical to the server.
 
-use http::header::{HeaderMap, HeaderName, HeaderValue, ACCEPT, ACCEPT_ENCODING, COOKIE, REFERER, USER_AGENT};
+use http::header::{
+    HeaderMap, HeaderName, HeaderValue, ACCEPT, ACCEPT_ENCODING, COOKIE, REFERER, USER_AGENT,
+};
 use osprey_domain::settings::Settings;
 use osprey_domain::{ErrorKind, Task, TaskError};
 use osprey_runtime::engine::TransferSecrets;
@@ -93,7 +95,11 @@ fn insert(headers: &mut HeaderMap, name: &str, value: &str) -> Result<(), TaskEr
 /// The client profile for a task: HTTP/1.1-only unless HTTP/2 is explicitly allowed (each
 /// segment must own a TCP connection for range parallelism to help), proxy from secrets,
 /// TLS exception only when the host is on the user's exception list.
-pub fn client_profile(task: &Task, settings: &Settings, secrets: &TransferSecrets) -> ClientProfile {
+pub fn client_profile(
+    task: &Task,
+    settings: &Settings,
+    secrets: &TransferSecrets,
+) -> ClientProfile {
     let host = task
         .source
         .primary_url()
@@ -174,7 +180,10 @@ mod tests {
         };
         let tpl = RequestTemplate::build(&t, &secrets).unwrap();
         assert_eq!(tpl.headers().get("x-api-key").unwrap(), "abc");
-        assert_eq!(tpl.headers().get("referer").unwrap(), "https://example.com/page");
+        assert_eq!(
+            tpl.headers().get("referer").unwrap(),
+            "https://example.com/page"
+        );
         assert_eq!(tpl.headers().get("cookie").unwrap(), "a=1; b=2");
         assert_eq!(tpl.headers().get("accept-encoding").unwrap(), "identity");
         t.options.headers.insert("Range".into(), "bytes=0-1".into());
@@ -191,7 +200,10 @@ mod tests {
             parse_http_url("ftp://h/x").unwrap_err().kind,
             ErrorKind::UnsupportedScheme
         );
-        assert_eq!(parse_http_url("nope").unwrap_err().kind, ErrorKind::InvalidUrl);
+        assert_eq!(
+            parse_http_url("nope").unwrap_err().kind,
+            ErrorKind::InvalidUrl
+        );
         assert!(parse_http_url("https://h/x").is_ok());
     }
 
