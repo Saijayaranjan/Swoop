@@ -21,6 +21,8 @@ regex = { workspace = true }
 mime_guess = { workspace = true }
 dashmap = { workspace = true }
 uuid = { workspace = true }
+tokio-util = { workspace = true }
 
 [dev-dependencies]
 axum = { workspace = true }
+osprey-testserver = { path = "../osprey-testserver" }

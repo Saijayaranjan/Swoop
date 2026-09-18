@@ -73,7 +73,8 @@ impl TestServer {
         let inner = Arc::new(Inner::default());
         let app = Router::new()
             .route("/file/{name}", get(serve_file).head(serve_file))
-            .route("/html/{name}", get(serve_html))
+            .route("/html/{*name}", get(serve_html))
+            .route("/robots.txt", get(serve_robots))
             .route("/text/{*name}", get(serve_text))
             .route("/bytes/{*name}", get(serve_bytes).head(serve_bytes))
             .route("/stats", get(stats))
@@ -446,6 +447,14 @@ async fn serve_html(State(inner): State<Arc<Inner>>, Path(name): Path<String>) -
             h.clone(),
         )
             .into_response(),
+        None => StatusCode::NOT_FOUND.into_response(),
+    }
+}
+
+async fn serve_robots(State(inner): State<Arc<Inner>>) -> Response {
+    inner.request_count.fetch_add(1, Ordering::Relaxed);
+    match inner.text.lock().get("robots.txt") {
+        Some((_, body)) => ([(header::CONTENT_TYPE, "text/plain")], body.clone()).into_response(),
         None => StatusCode::NOT_FOUND.into_response(),
     }
 }

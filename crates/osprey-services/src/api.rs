@@ -230,49 +230,7 @@ pub struct FileSelection {
     pub priority: u8,
 }
 
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
-#[serde(default)]
-pub struct GrabberOptions {
-    pub url: String,
-    pub max_depth: u8,
-    /// `same_domain`, `subdomains`, `external`.
-    pub scope: String,
-    pub respect_robots: bool,
-    pub concurrency: u8,
-    pub max_pages: u32,
-    pub include_extensions: Vec<String>,
-    pub exclude_patterns: Vec<String>,
-    pub include_regex: Option<String>,
-    pub min_size: Option<u64>,
-    pub max_size: Option<u64>,
-    /// Probe HEAD for sizes/MIME of discovered files.
-    pub probe_files: bool,
-}
-
-#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
-pub struct GrabberFile {
-    pub url: String,
-    pub name: String,
-    pub extension: String,
-    pub domain: String,
-    pub found_on: String,
-    pub size: Option<u64>,
-    pub mime: Option<String>,
-    pub kind: String,
-    pub depth: u8,
-}
-
-#[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
-pub struct GrabberSession {
-    pub id: String,
-    pub options: GrabberOptions,
-    pub pages_crawled: u32,
-    pub pages_queued: u32,
-    pub files: Vec<GrabberFile>,
-    pub done: bool,
-    pub error: Option<String>,
-    pub started_at: Millis,
-}
+pub use osprey_grabber::{GrabberFile, GrabberOptions, GrabberSession};
 
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct ArchiveEntry {
