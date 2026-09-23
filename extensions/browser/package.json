@@ -10,12 +10,14 @@
     "build:firefox": "node build.mjs firefox",
     "build:edge": "node build.mjs edge",
     "icons": "node scripts/generate-icons.mjs",
+    "locales": "node scripts/build-locales.mjs",
     "watch": "node build.mjs chrome firefox edge --watch",
     "lint": "tsc --noEmit -p tsconfig.json",
     "test": "node --test \"test/**/*.test.ts\""
   },
   "devDependencies": {
     "@types/chrome": "^0.0.280",
+    "@types/node": "^22.10.2",
     "@types/webextension-polyfill": "^0.10.7",
     "esbuild": "^0.24.0",
     "typescript": "^5.6.3",

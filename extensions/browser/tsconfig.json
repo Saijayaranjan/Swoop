@@ -13,7 +13,8 @@
     "isolatedModules": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
-    "types": ["chrome", "webextension-polyfill"],
+    "allowImportingTsExtensions": true,
+    "types": ["chrome", "webextension-polyfill", "node"],
     "noEmit": true
   },
   "include": ["src/**/*.ts", "test/**/*.ts", "build.mjs", "scripts/**/*.mjs"]

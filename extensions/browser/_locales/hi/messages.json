@@ -1,0 +1,266 @@
+{
+  "extensionName": {
+    "message": "Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "extensionDescription": {
+    "message": "Send downloads, media and links straight to the Osprey download manager.",
+    "description": "[fallback: needs translation] "
+  },
+  "commandSendPageUrl": {
+    "message": "Send the current page's URL to Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "tabDetectedMedia": {
+    "message": "Detected media",
+    "description": "[fallback: needs translation] "
+  },
+  "tabLinks": {
+    "message": "Links on page",
+    "description": "[fallback: needs translation] "
+  },
+  "tabDownloads": {
+    "message": "Downloads",
+    "description": "[fallback: needs translation] "
+  },
+  "tabSettings": {
+    "message": "Settings",
+    "description": "[fallback: needs translation] "
+  },
+  "optionsSubtitle": {
+    "message": "Browser integration settings",
+    "description": "[fallback: needs translation] "
+  },
+  "statusConnectedPrefix": {
+    "message": "Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "statusConnected": {
+    "message": "connected",
+    "description": "[fallback: needs translation] "
+  },
+  "statusNotRunning": {
+    "message": "Osprey not running",
+    "description": "[fallback: needs translation] "
+  },
+  "actionDownload": {
+    "message": "Download",
+    "description": "[fallback: needs translation] "
+  },
+  "actionQueue": {
+    "message": "Queue",
+    "description": "[fallback: needs translation] "
+  },
+  "actionCopyUrl": {
+    "message": "Copy URL",
+    "description": "[fallback: needs translation] "
+  },
+  "actionOpenSource": {
+    "message": "Open source",
+    "description": "[fallback: needs translation] "
+  },
+  "actionPause": {
+    "message": "Pause",
+    "description": "[fallback: needs translation] "
+  },
+  "actionResume": {
+    "message": "Resume",
+    "description": "[fallback: needs translation] "
+  },
+  "actionCancel": {
+    "message": "Cancel",
+    "description": "[fallback: needs translation] "
+  },
+  "actionLaunch": {
+    "message": "Launch",
+    "description": "[fallback: needs translation] "
+  },
+  "toastDownloadStarted": {
+    "message": "Download started",
+    "description": "[fallback: needs translation] "
+  },
+  "toastQueued": {
+    "message": "Queued",
+    "description": "[fallback: needs translation] "
+  },
+  "toastCopied": {
+    "message": "Copied",
+    "description": "[fallback: needs translation] "
+  },
+  "toastLaunching": {
+    "message": "Launching Osprey…",
+    "description": "[fallback: needs translation] "
+  },
+  "loading": {
+    "message": "Loading…",
+    "description": "[fallback: needs translation] "
+  },
+  "loadFailed": {
+    "message": "Could not load downloads.",
+    "description": "[fallback: needs translation] "
+  },
+  "scanFailed": {
+    "message": "Could not scan this page.",
+    "description": "[fallback: needs translation] "
+  },
+  "noActiveTab": {
+    "message": "No active tab.",
+    "description": "[fallback: needs translation] "
+  },
+  "noMediaDetected": {
+    "message": "No media detected on this page yet.",
+    "description": "[fallback: needs translation] "
+  },
+  "noLinksFound": {
+    "message": "No links found on this page.",
+    "description": "[fallback: needs translation] "
+  },
+  "noActiveDownloads": {
+    "message": "No active downloads.",
+    "description": "[fallback: needs translation] "
+  },
+  "notDownloadable": {
+    "message": "Not downloadable",
+    "description": "[fallback: needs translation] "
+  },
+  "likelyDownload": {
+    "message": "Likely download",
+    "description": "[fallback: needs translation] "
+  },
+  "quality": {
+    "message": "Quality",
+    "description": "[fallback: needs translation] "
+  },
+  "eta": {
+    "message": "ETA",
+    "description": "[fallback: needs translation] "
+  },
+  "remove": {
+    "message": "Remove",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindVideo": {
+    "message": "Video",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindAudio": {
+    "message": "Audio",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindImage": {
+    "message": "Image",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindHls": {
+    "message": "HLS",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindDash": {
+    "message": "DASH",
+    "description": "[fallback: needs translation] "
+  },
+  "mediaKindUnknown": {
+    "message": "Media",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadLink": {
+    "message": "Download with Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadImage": {
+    "message": "Download image with Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadVideo": {
+    "message": "Download video with Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadAudio": {
+    "message": "Download audio with Osprey",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadAllLinks": {
+    "message": "Download all links on page…",
+    "description": "[fallback: needs translation] "
+  },
+  "menuDownloadSelectionLinks": {
+    "message": "Download links in selection",
+    "description": "[fallback: needs translation] "
+  },
+  "notificationCompletedTitle": {
+    "message": "Download complete",
+    "description": "[fallback: needs translation] "
+  },
+  "notificationFailedTitle": {
+    "message": "Download failed",
+    "description": "[fallback: needs translation] "
+  },
+  "settingInterceptDownloads": {
+    "message": "Intercept browser downloads",
+    "description": "[fallback: needs translation] "
+  },
+  "settingMinSize": {
+    "message": "Minimum size to intercept (MB)",
+    "description": "[fallback: needs translation] "
+  },
+  "settingExtensions": {
+    "message": "File extensions to intercept",
+    "description": "[fallback: needs translation] "
+  },
+  "settingExcludedDomains": {
+    "message": "Never intercept on these domains",
+    "description": "[fallback: needs translation] "
+  },
+  "settingExcludedPatterns": {
+    "message": "Never intercept matching URL patterns",
+    "description": "[fallback: needs translation] "
+  },
+  "settingAlwaysBrowser": {
+    "message": "Always use the browser's own download on these sites",
+    "description": "[fallback: needs translation] "
+  },
+  "settingDetectMedia": {
+    "message": "Detect playable media on pages",
+    "description": "[fallback: needs translation] "
+  },
+  "settingShowConfirmation": {
+    "message": "Show a confirmation toast when a download is sent",
+    "description": "[fallback: needs translation] "
+  },
+  "settingNotifyComplete": {
+    "message": "Notify when a download completes",
+    "description": "[fallback: needs translation] "
+  },
+  "settingNotifyFailure": {
+    "message": "Notify when a download fails",
+    "description": "[fallback: needs translation] "
+  },
+  "addExtensionPlaceholder": {
+    "message": "Add extension, press Enter",
+    "description": "[fallback: needs translation] "
+  },
+  "addDomainPlaceholder": {
+    "message": "example.com, press Enter",
+    "description": "[fallback: needs translation] "
+  },
+  "addPatternPlaceholder": {
+    "message": "https://*/ads/*, press Enter",
+    "description": "[fallback: needs translation] "
+  },
+  "urlPatternHint": {
+    "message": "Wildcards (*) allowed.",
+    "description": "[fallback: needs translation] "
+  },
+  "saving": {
+    "message": "Saving…",
+    "description": "[fallback: needs translation] "
+  },
+  "saved": {
+    "message": "Saved",
+    "description": "[fallback: needs translation] "
+  },
+  "saveFailed": {
+    "message": "Save failed",
+    "description": "[fallback: needs translation] "
+  }
+}

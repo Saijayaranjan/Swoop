@@ -2883,6 +2883,40 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
+name = "osprey-archive"
+version = "0.1.0"
+dependencies = [
+ "flate2",
+ "osprey-domain",
+ "osprey-runtime",
+ "serde",
+ "tar",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "zip",
+]
+
+[[package]]
+name = "osprey-automation"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "hex",
+ "osprey-domain",
+ "osprey-runtime",
+ "osprey-testserver",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
 name = "osprey-cli"
 version = "0.1.0"
 dependencies = [
@@ -3068,6 +3102,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "osprey-plugins"
+version = "0.1.0"
+dependencies = [
+ "osprey-domain",
+ "semver",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
 name = "osprey-runtime"
 version = "0.1.0"
 dependencies = [
@@ -3151,20 +3197,26 @@ dependencies = [
  "futures",
  "hex",
  "keyring",
+ "osprey-archive",
+ "osprey-automation",
  "osprey-domain",
  "osprey-engine-ftp",
  "osprey-engine-http",
  "osprey-engine-torrent",
  "osprey-grabber",
  "osprey-media",
+ "osprey-plugins",
  "osprey-runtime",
  "osprey-store",
+ "osprey-testserver",
+ "osprey-update",
  "parking_lot",
  "rand 0.8.8",
  "reqwest",
  "semver",
  "serde",
  "serde_json",
+ "sha2 0.10.9",
  "sysinfo",
  "tar",
  "tempfile",
@@ -3172,6 +3224,8 @@ dependencies = [
  "tokio",
  "tokio-util",
  "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
  "url",
  "uuid",
  "zip",
@@ -3211,6 +3265,28 @@ dependencies = [
  "sha2 0.10.9",
  "tokio",
  "tokio-util",
+]
+
+[[package]]
+name = "osprey-update"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "ed25519-dalek",
+ "hex",
+ "osprey-domain",
+ "osprey-runtime",
+ "osprey-testserver",
+ "rand 0.8.8",
+ "reqwest",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
 ]
 
 [[package]]

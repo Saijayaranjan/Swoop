@@ -1,0 +1,26 @@
+[package]
+name = "osprey-update"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Signed update feed checking and verified download"
+
+[dependencies]
+osprey-domain = { path = "../osprey-domain" }
+osprey-runtime = { path = "../osprey-runtime" }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+reqwest = { workspace = true }
+ed25519-dalek = { workspace = true }
+semver = { workspace = true }
+base64 = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+tracing = { workspace = true }
+url = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+osprey-testserver = { path = "../osprey-testserver" }
+rand = { workspace = true }

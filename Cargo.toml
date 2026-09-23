@@ -14,6 +14,10 @@ members = [
     "crates/osprey-cli",
     "crates/osprey-ffi",
     "crates/osprey-testserver",
+    "crates/osprey-automation",
+    "crates/osprey-archive",
+    "crates/osprey-update",
+    "crates/osprey-plugins",
 ]
 
 [workspace.package]

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Osprey</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div class="brand">
+        <img src="../icons/icon32.png" alt="" width="20" height="20" />
+        <span data-i18n="extensionName">Osprey</span>
+      </div>
+      <div id="status" class="status" role="status" aria-live="polite"></div>
+    </header>
+
+    <div role="tablist" aria-label="Osprey" class="tabs">
+      <button
+        type="button"
+        role="tab"
+        id="tab-media"
+        aria-controls="panel-media"
+        aria-selected="true"
+        tabindex="0"
+        data-i18n="tabDetectedMedia"
+      >
+        Detected media
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="tab-links"
+        aria-controls="panel-links"
+        aria-selected="false"
+        tabindex="-1"
+        data-i18n="tabLinks"
+      >
+        Links on page
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="tab-downloads"
+        aria-controls="panel-downloads"
+        aria-selected="false"
+        tabindex="-1"
+        data-i18n="tabDownloads"
+      >
+        Downloads
+      </button>
+      <button
+        type="button"
+        role="tab"
+        id="tab-settings"
+        aria-controls="panel-settings"
+        aria-selected="false"
+        tabindex="-1"
+        data-i18n="tabSettings"
+      >
+        Settings
+      </button>
+    </div>
+
+    <main>
+      <section role="tabpanel" id="panel-media" aria-labelledby="tab-media" class="panel"></section>
+      <section role="tabpanel" id="panel-links" aria-labelledby="tab-links" class="panel" hidden></section>
+      <section role="tabpanel" id="panel-downloads" aria-labelledby="tab-downloads" class="panel" hidden></section>
+      <section role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" class="panel" hidden></section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
