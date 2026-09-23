@@ -1,4 +1,4 @@
-//! Engine construction. `start` wires the store, the transfer engines and the services into a
+//! Engine construction. [`start`] wires the store, the transfer engines and the services into a
 //! running [`crate::EngineApi`] implementation.
 
 use crate::SharedEngine;
@@ -34,12 +34,7 @@ impl Default for EngineConfig {
 
 /// Start the engine. Must be called from within a Tokio runtime; the engine spawns its background
 /// tasks on the current runtime handle.
-///
-/// CONSTRUCTION SEAM: the services implementation (`crate::engine::Engine`) is being built
-/// against the store and engine crates; until it lands this returns `Unavailable` so the
-/// server, CLI and FFI crates can be developed against the final signature. It is replaced by
-/// `Engine::start(config)` when the services crate is complete.
 pub async fn start(config: EngineConfig) -> DomainResult<SharedEngine> {
-    let _ = config;
-    Err(osprey_domain::DomainError::Unavailable("engine services are not built yet".into()))
+    let engine = crate::engine::Engine::start(config).await?;
+    Ok(engine)
 }

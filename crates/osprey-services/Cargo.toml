@@ -14,12 +14,18 @@ osprey-engine-ftp = { path = "../osprey-engine-ftp" }
 osprey-engine-torrent = { path = "../osprey-engine-torrent" }
 osprey-media = { path = "../osprey-media" }
 osprey-grabber = { path = "../osprey-grabber" }
+osprey-automation = { path = "../osprey-automation" }
+osprey-archive = { path = "../osprey-archive" }
+osprey-update = { path = "../osprey-update" }
+osprey-plugins = { path = "../osprey-plugins" }
 tokio = { workspace = true }
 tokio-util = { workspace = true }
 async-trait = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
 parking_lot = { workspace = true }
 dashmap = { workspace = true }
 thiserror = { workspace = true }
@@ -30,6 +36,7 @@ chrono = { workspace = true }
 reqwest = { workspace = true }
 base64 = { workspace = true }
 blake3 = { workspace = true }
+sha2 = { workspace = true }
 hex = { workspace = true }
 rand = { workspace = true }
 argon2 = { workspace = true }
@@ -45,3 +52,4 @@ futures = { workspace = true }
 [dev-dependencies]
 tempfile = { workspace = true }
 axum = { workspace = true }
+osprey-testserver = { path = "../osprey-testserver" }
