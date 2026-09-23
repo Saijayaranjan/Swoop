@@ -945,7 +945,7 @@ impl Engine {
     }
 
     /// Absolute path helper for the API layer.
-    pub(crate) fn expand(p: &PathBuf) -> PathBuf {
+    pub(crate) fn expand(p: &std::path::Path) -> PathBuf {
         AppPaths::expand_home(&p.to_string_lossy())
     }
 }

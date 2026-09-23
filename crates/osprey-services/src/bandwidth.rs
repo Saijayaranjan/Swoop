@@ -11,10 +11,13 @@ use std::collections::HashMap;
 use std::sync::Arc;
 
 /// Owns the global and per-queue limiters; task limiters are created per run as children.
+/// (download, upload) limiters for one queue.
+type QueueLimiters = (Arc<RateLimiter>, Arc<RateLimiter>);
+
 pub struct BandwidthManager {
     global_down: Arc<RateLimiter>,
     global_up: Arc<RateLimiter>,
-    queues: Mutex<HashMap<QueueId, (Arc<RateLimiter>, Arc<RateLimiter>)>>,
+    queues: Mutex<HashMap<QueueId, QueueLimiters>>,
 }
 
 impl Default for BandwidthManager {

@@ -65,11 +65,11 @@ impl Engine {
             .started_at
             .map(|s| (finished_at.0 - s.0).max(0) as u64 / 1000)
             .unwrap_or(0);
-        let average = if duration > 0 {
-            task.progress.downloaded / duration
-        } else {
-            task.stats.average_speed
-        };
+        let average = task
+            .progress
+            .downloaded
+            .checked_div(duration)
+            .unwrap_or(task.stats.average_speed);
         HistoryEntry {
             task_id: task.id.clone(),
             kind: task.kind,

@@ -691,7 +691,7 @@ impl Engine {
 
     async fn dashboard_inner(&self) -> DomainResult<Dashboard> {
         let mut recent: Vec<Task> = self.tasks.all();
-        recent.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+        recent.sort_by_key(|r| std::cmp::Reverse(r.created_at));
         let recent: Vec<TaskRow> = recent.iter().take(20).map(TaskRow::from).collect();
         let since = Millis::now().saturating_add_ms(-3_600_000);
         let speed_history = self

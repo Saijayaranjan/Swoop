@@ -904,8 +904,8 @@ impl Engine {
                 let secs = run.started.elapsed().as_secs();
                 t.stats.active_seconds += secs;
                 let downloaded = t.progress.downloaded;
-                if t.stats.active_seconds > 0 {
-                    t.stats.average_speed = downloaded / t.stats.active_seconds;
+                if let Some(avg) = downloaded.checked_div(t.stats.active_seconds) {
+                    t.stats.average_speed = avg;
                 }
                 t.progress.speed = 0;
                 t.progress.instant_speed = 0;
