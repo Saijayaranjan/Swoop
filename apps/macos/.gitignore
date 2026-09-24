@@ -1,0 +1,4 @@
+# Produced by scripts/build-macos.sh
+/Sources/OspreyFFI/include/
+/Sources/OspreyKit/Generated/
+/.build/
