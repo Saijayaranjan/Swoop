@@ -75,3 +75,36 @@ async fn http_download_end_to_end() {
     assert_eq!(h.len(), 1);
     engine.shutdown().await;
 }
+
+/// Removing an unfinished task "with files" must never delete a same-named file that the user
+/// already had: Osprey only created the part file, not `<directory>/<name>`.
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn remove_with_files_keeps_unrelated_user_file() {
+    std::env::set_var("OSPREY_CREDENTIALS_FILE_STORE", "1");
+    let data_dir = tempfile::tempdir().unwrap();
+    let dl_dir = tempfile::tempdir().unwrap();
+    let mine = dl_dir.path().join("report.pdf");
+    std::fs::write(&mine, b"the user's own file").unwrap();
+    let engine = start(EngineConfig {
+        data_dir: Some(data_dir.path().into()),
+        download_dir: Some(dl_dir.path().into()),
+        headless: true,
+        skip_instance_lock: true,
+        ..Default::default()
+    })
+    .await
+    .unwrap();
+    let r = engine
+        .add_task(NewTaskRequest {
+            url: Some("https://example.invalid/report.pdf".into()),
+            name: Some("report.pdf".into()),
+            start: false,
+            origin: "test".into(),
+            ..Default::default()
+        })
+        .await
+        .unwrap();
+    engine.remove_task(r.task.id.clone(), true).await.unwrap();
+    assert_eq!(std::fs::read(&mine).unwrap(), b"the user's own file");
+    engine.shutdown().await;
+}

@@ -128,6 +128,15 @@ pub fn ensure_within(root: &Path, candidate: &Path) -> Result<PathBuf, TaskError
     }
 }
 
+/// Like [`ensure_within`] but `candidate` must be strictly below `root` (never `root` itself).
+/// Use it before deleting anything: removing "the task's file" must never remove the whole
+/// download folder because a path degenerated to the directory.
+pub fn is_strictly_within(root: &Path, candidate: &Path) -> bool {
+    let root_c = canonical_prefix(root);
+    let cand_c = canonical_prefix(candidate);
+    cand_c != root_c && cand_c.starts_with(&root_c)
+}
+
 /// Canonicalise the longest existing prefix of `p` and append the rest lexically normalised.
 pub fn canonical_prefix(p: &Path) -> PathBuf {
     let mut existing = p.to_path_buf();

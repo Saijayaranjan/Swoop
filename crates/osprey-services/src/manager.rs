@@ -501,7 +501,7 @@ impl Engine {
     /// Delete a task's partial data, never leaving its directory.
     pub(crate) async fn delete_part(&self, task: &Task) {
         let part = self.part_path(task);
-        if ensure_within(&task.directory, &part).is_err() {
+        if !osprey_runtime::safety::is_strictly_within(&task.directory, &part) {
             return;
         }
         let meta = tokio::fs::symlink_metadata(&part).await;
@@ -1055,7 +1055,13 @@ impl Engine {
         }) else {
             return;
         };
-        self.persist.send(PersistOp::State(Box::new(snap.clone())));
+        // Persist the whole row, not just the state: the engine may have promoted the file to a
+        // uniquified name, and if Osprey stops while hashing, recovery must find *that* file
+        // rather than guess `<directory>/<name>` (which can be an unrelated file of the user's).
+        let _ = self
+            .persist
+            .commit(PersistOp::Update(Box::new(snap.clone())))
+            .await;
         if from != snap.state {
             self.publish_state(&snap, from);
         }

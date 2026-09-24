@@ -11,7 +11,7 @@ use osprey_domain::{
 };
 use osprey_runtime::engine::Transfer;
 use osprey_runtime::paths::AppPaths;
-use osprey_runtime::safety::{ensure_within, sanitize_filename, validate_destination_dir};
+use osprey_runtime::safety::{is_strictly_within, sanitize_filename, validate_destination_dir};
 use std::path::PathBuf;
 use std::sync::atomic::Ordering;
 use std::time::Duration;
@@ -349,12 +349,17 @@ impl Engine {
         self.delete_part(&snap).await;
         let mut deleted = false;
         if delete_file && !snap.kind.is_torrent() {
-            if let Some(p) = snap
-                .file_path
-                .clone()
-                .or_else(|| Some(snap.directory.join(&snap.name)))
-            {
-                if ensure_within(&snap.directory, &p).is_ok() {
+            // Only a file Osprey itself promoted is deleted: engines write to a part file and
+            // rename it into place when the run completes, recording `file_path`. Until then
+            // `<directory>/<name>` may be an unrelated file the user already had (the engine
+            // would have picked a unique name), so it is never guessed.
+            if let Some(p) = snap.file_path.clone().filter(|_| {
+                matches!(
+                    snap.state,
+                    TaskState::Completed | TaskState::Processing | TaskState::Verifying
+                )
+            }) {
+                if is_strictly_within(&snap.directory, &p) {
                     match tokio::fs::symlink_metadata(&p).await {
                         Ok(m) if m.is_dir() => {
                             deleted = tokio::fs::remove_dir_all(&p).await.is_ok()
