@@ -4,6 +4,9 @@
 set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
+# Replace a file atomically with a NEW inode. Never `cp` over an executable that may be running:
+# macOS kills a process whose mapped code pages change underneath it (CODESIGNING "Invalid Page").
+replace_file() { local src="$1" dst="$2"; local tmp="$dst.tmp.$$"; cp "$src" "$tmp" && mv -f "$tmp" "$dst"; }
 export PATH="/opt/homebrew/opt/rustup/bin:$HOME/.cargo/bin:$PATH"
 
 PROFILE=release
@@ -36,7 +39,7 @@ if [[ $UNIVERSAL == 1 ]]; then
 fi
 LIBS=()
 for t in "${TARGETS[@]}"; do
-  cargo build -p osprey-ffi -p osprey-cli --target "$t" "${CARGO_FLAGS[@]}"
+  cargo build -p osprey-ffi -p osprey-cli --target "$t" ${CARGO_FLAGS[@]+"${CARGO_FLAGS[@]}"}
   LIBS+=("target/$t/$PROFILE/libosprey_ffi.a")
 done
 mkdir -p "$BUILD_DIR/lib"
@@ -50,11 +53,17 @@ fi
 
 echo "▸ UniFFI Swift bindings"
 BINDINGS="$ROOT/apps/macos/Sources/OspreyFFI"
-mkdir -p "$BINDINGS/include"
-cargo run -q -p osprey-ffi --bin uniffi-bindgen -- generate \
-  --library "$BUILD_DIR/lib/libosprey_ffi.a" --language swift --out-dir "$BUILD_DIR/bindings"
-cp "$BUILD_DIR/bindings/osprey_ffi.swift" "$ROOT/apps/macos/Sources/OspreyKit/Generated/OspreyFFI.swift" 2>/dev/null || {
-  mkdir -p "$ROOT/apps/macos/Sources/OspreyKit/Generated"; cp "$BUILD_DIR/bindings/osprey_ffi.swift" "$ROOT/apps/macos/Sources/OspreyKit/Generated/OspreyFFI.swift"; }
+GENERATED="$ROOT/apps/macos/Sources/OspreyKit/Generated"
+mkdir -p "$BINDINGS/include" "$GENERATED"
+rm -rf "$BUILD_DIR/bindings"
+# The bindgen binary is built alongside the library by `cargo build -p osprey-ffi`; reuse it
+# instead of compiling the whole workspace again for the host profile.
+BINDGEN="target/${TARGETS[0]}/$PROFILE/uniffi-bindgen"
+if [[ ! -x "$BINDGEN" ]]; then
+  cargo build -p osprey-ffi --bin uniffi-bindgen --target "${TARGETS[0]}" ${CARGO_FLAGS[@]+"${CARGO_FLAGS[@]}"}
+fi
+"$BINDGEN" generate --library "target/${TARGETS[0]}/$PROFILE/libosprey_ffi.a" --language swift --out-dir "$BUILD_DIR/bindings"
+cp "$BUILD_DIR/bindings/osprey_ffi.swift" "$GENERATED/OspreyFFI.swift"
 cp "$BUILD_DIR/bindings/osprey_ffiFFI.h" "$BINDINGS/include/osprey_ffiFFI.h"
 cp "$BUILD_DIR/bindings/osprey_ffiFFI.modulemap" "$BINDINGS/include/module.modulemap"
 
@@ -62,15 +71,22 @@ echo "▸ Swift package ($PROFILE)"
 SWIFT_CONF=$([[ "$PROFILE" == release ]] && echo release || echo debug)
 SWIFT_ARCHS=()
 if [[ ${#TARGETS[@]} -gt 1 ]]; then SWIFT_ARCHS=(--arch arm64 --arch x86_64); fi
-( cd apps/macos && swift build -c "$SWIFT_CONF" "${SWIFT_ARCHS[@]}" -Xlinker -L"$BUILD_DIR/lib" -Xlinker -losprey_ffi )
-SWIFT_BIN="$(cd apps/macos && swift build -c "$SWIFT_CONF" "${SWIFT_ARCHS[@]}" --show-bin-path)"
+# Link flags for libosprey_ffi.a (and the system frameworks it needs) live in Package.swift, which
+# only enables the engine once the artefacts above exist.
+( cd apps/macos && swift build -c "$SWIFT_CONF" ${SWIFT_ARCHS[@]+"${SWIFT_ARCHS[@]}"} --product OspreyApp )
+SWIFT_BIN="$(cd apps/macos && swift build -c "$SWIFT_CONF" ${SWIFT_ARCHS[@]+"${SWIFT_ARCHS[@]}"} --show-bin-path)"
 
 echo "▸ Bundle"
 rm -rf "$APP"
-mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
-cp "$SWIFT_BIN/OspreyApp" "$APP/Contents/MacOS/Osprey"
-cp "$BUILD_DIR/osprey" "$APP/Contents/MacOS/osprey"
+mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Helpers" "$APP/Contents/Resources"
+replace_file "$SWIFT_BIN/OspreyApp" "$APP/Contents/MacOS/Osprey"
+# The CLI / native-messaging host lives in Contents/Helpers: on the default case-insensitive APFS
+# volume `MacOS/osprey` and `MacOS/Osprey` would be the same file.
+replace_file "$BUILD_DIR/osprey" "$APP/Contents/Helpers/osprey"
 cp apps/macos/Resources/Osprey.icns "$APP/Contents/Resources/"
+for lproj in apps/macos/Resources/Localization/*.lproj; do
+  cp -R "$lproj" "$APP/Contents/Resources/"
+done
 if [[ -d "$SWIFT_BIN/OspreyApp_OspreyApp.bundle" ]]; then cp -R "$SWIFT_BIN/OspreyApp_OspreyApp.bundle" "$APP/Contents/Resources/"; fi
 if [[ -d "$SWIFT_BIN/OspreyKit_OspreyKit.bundle" ]]; then cp -R "$SWIFT_BIN/OspreyKit_OspreyKit.bundle" "$APP/Contents/Resources/"; fi
 sed -e "s/__VERSION__/$VERSION/g" -e "s/__BUILD__/$(date +%Y%m%d%H%M)/g" apps/macos/Resources/Info.plist > "$APP/Contents/Info.plist"
@@ -78,7 +94,8 @@ echo -n "APPL????" > "$APP/Contents/PkgInfo"
 
 echo "▸ Codesign (ad-hoc unless OSPREY_SIGN_IDENTITY is set)"
 IDENTITY="${OSPREY_SIGN_IDENTITY:--}"
-codesign --force --deep --options runtime --entitlements apps/macos/Resources/Osprey.entitlements --sign "$IDENTITY" "$APP"
+codesign --force --options runtime --sign "$IDENTITY" "$APP/Contents/Helpers/osprey"
+codesign --force --options runtime --entitlements apps/macos/Resources/Osprey.entitlements --sign "$IDENTITY" "$APP"
 codesign --verify --deep --strict "$APP" && echo "  signed: $APP"
 
 if [[ $MAKE_DMG == 1 ]]; then
