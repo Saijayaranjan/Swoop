@@ -184,14 +184,14 @@ listener on 41780 and stores data and downloads in named volumes.
 
 ## Creating a release
 
-`scripts/build-macos.sh --release [--universal] [--dmg]` does the following (another agent was editing these scripts during this review, so check the current version):
+`scripts/build-macos.sh --release [--universal] [--dmg]` does the following:
 
 1. It builds `osprey-ffi` and `osprey-cli` in release mode for `aarch64-apple-darwin`. With `--universal` it also builds `x86_64-apple-darwin` when that target is installed, and the outputs are `lipo`'d.
 2. It generates the UniFFI Swift bindings, header and modulemap with the bundled `uniffi-bindgen`.
 3. It runs `swift build -c release --product OspreyApp`.
 4. It assembles `build/Osprey.app`: the binary, `Contents/Helpers/osprey`, resources and localisations. `Info.plist` gets the version from `Cargo.toml` and a timestamp build number.
 5. It code-signs the helper and then the app with the hardened runtime and `Osprey.entitlements`, using `OSPREY_SIGN_IDENTITY` if it's set. Without it the signature is ad hoc (`-`). It then runs `codesign --verify --deep --strict`.
-6. With `--dmg`, `scripts/make-dmg.sh` stages the app plus an `/Applications` symlink and creates a UDZO DMG at `build/Osprey-<version>.dmg`.
+6. With `--dmg`, `scripts/make-dmg.sh` stages the app plus an `/Applications` symlink and creates a UDZO DMG at `build/Osprey-<version>.dmg`. When `dmgbuild` is installed (`pip install dmgbuild`) the DMG gets the styled background from `scripts/render-dmg-background.swift` and fixed icon positions; without it an unstyled DMG is produced. `MACOSX_DEPLOYMENT_TARGET` is pinned to 14.0.
 
 Signing and notarisation caveats (there's no Developer ID):
 
