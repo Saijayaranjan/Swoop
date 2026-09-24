@@ -2922,17 +2922,25 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
+ "bytes",
  "clap",
  "directories",
  "futures",
+ "http",
+ "http-body-util",
  "humansize",
+ "hyper",
+ "hyper-util",
  "osprey-domain",
  "osprey-runtime",
  "osprey-server",
  "osprey-services",
+ "percent-encoding",
+ "qrcode",
  "reqwest",
  "serde",
  "serde_json",
+ "tempfile",
  "tokio",
  "tokio-tungstenite 0.26.2",
  "tracing",
@@ -3043,6 +3051,7 @@ dependencies = [
  "parking_lot",
  "serde",
  "serde_json",
+ "tempfile",
  "thiserror 2.0.20",
  "tokio",
  "tracing",
@@ -3149,35 +3158,32 @@ dependencies = [
 name = "osprey-server"
 version = "0.1.0"
 dependencies = [
- "async-trait",
  "axum",
  "axum-server",
- "base64 0.22.1",
+ "bytes",
  "dashmap",
  "futures",
  "hex",
  "http",
- "hyper",
- "hyper-util",
  "mime_guess",
  "osprey-domain",
  "osprey-runtime",
  "osprey-services",
- "parking_lot",
- "rand 0.8.8",
+ "percent-encoding",
  "rcgen",
- "reqwest",
  "rust-embed",
+ "rustls",
  "serde",
  "serde_json",
  "sha2 0.10.9",
+ "tempfile",
  "tokio",
  "tokio-tungstenite 0.26.2",
  "tokio-util",
  "tower",
  "tower-http",
  "tracing",
- "uuid",
+ "url",
 ]
 
 [[package]]
@@ -3489,6 +3495,12 @@ dependencies = [
  "idna",
  "psl-types",
 ]
+
+[[package]]
+name = "qrcode"
+version = "0.14.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d68782463e408eb1e668cf6152704bd856c78c5b6417adaee3203d8f4c1fc9ec"
 
 [[package]]
 name = "quanta"
@@ -3974,6 +3986,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0d41d731c7d2f962d1ccc364cec258de3c0e93b38c2fb3ba97ac74513048d634"
 dependencies = [
  "aws-lc-rs",
+ "log",
  "once_cell",
  "ring",
  "rustls-pki-types",
