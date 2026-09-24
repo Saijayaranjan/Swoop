@@ -55,7 +55,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             let urls = pendingURLs
             pendingURLs.removeAll()
             if !urls.isEmpty { self.application(NSApp, open: urls) }
-            SnapshotSupport.runIfRequested(ui: ui)
+            SnapshotSupport.runIfRequested(ui: ui, model: model, delegate: self)
         }
 
         NotificationCenter.default.addObserver(forName: NSApplication.didBecomeActiveNotification, object: nil, queue: .main) { [weak self] _ in
@@ -127,6 +127,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
     /// Set by the main scene so AppKit entry points can reopen the SwiftUI window.
     var openMainWindowAction: (() -> Void)?
+    var openSettingsAction: (() -> Void)?
 
     // MARK: periodic work (power assertion, dashboard refresh)
 

@@ -73,7 +73,7 @@ public enum TrafficMode: String, CaseIterable, Codable, Sendable {
         case .unlimited: return "Unlimited"
         case .fullSpeed: return "Full speed"
         case .balanced: return "Balanced"
-        case .browsing: return "Browsing"
+        case .browsing: return "Quiet"
         case .custom: return "Custom"
         }
     }
@@ -82,7 +82,7 @@ public enum TrafficMode: String, CaseIterable, Codable, Sendable {
         case .unlimited: return "infinity"
         case .fullSpeed: return "hare"
         case .balanced: return "gauge.with.dots.needle.50percent"
-        case .browsing: return "safari"
+        case .browsing: return "leaf"
         case .custom: return "slider.horizontal.3"
         }
     }

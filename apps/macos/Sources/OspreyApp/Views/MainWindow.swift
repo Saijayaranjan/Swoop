@@ -8,23 +8,22 @@ struct MainWindow: View {
     @Environment(UIState.self) private var ui
     @Environment(\.appDelegate) private var delegate
     @Environment(\.openWindow) private var openWindow
+    @Environment(\.openSettings) private var openSettings
     @ViewState private var dropTargeted = false
-    @ViewState private var columns: NavigationSplitViewVisibility = .all
 
     var body: some View {
         @Bindable var ui = ui
-        NavigationSplitView(columnVisibility: $columns) {
-            SidebarView()
-                .navigationSplitViewColumnWidth(min: 190, ideal: 220, max: 300)
-        } detail: {
-            DetailRouter()
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .inspector(isPresented: $ui.showInspector) {
-                    InspectorView()
-                        .inspectorColumnWidth(min: 300, ideal: 340, max: 480)
-                }
+        ZStack {
+            WindowWash()
+            HStack(spacing: 0) {
+                SidebarView()
+                    .frame(width: 252)
+                ContentPanel()
+                    .padding(.vertical, 10)
+                    .padding(.trailing, 10)
+            }
         }
-        .toolbar { MainToolbar() }
+        .ignoresSafeArea()
         .sheet(item: $ui.addRequest) { prefill in
             AddDownloadSheet(prefill: prefill)
                 .environment(model)
@@ -56,6 +55,7 @@ struct MainWindow: View {
         }
         .onAppear {
             delegate?.openMainWindowAction = { openWindow(id: "main") }
+            delegate?.openSettingsAction = { openSettings() }
         }
     }
 
@@ -112,15 +112,13 @@ struct DetailRouter: View {
     var body: some View {
         Group {
             if case .unavailable(let reason) = model.status {
-                ContentUnavailableView {
-                    Label("Osprey Can't Start", systemImage: "exclamationmark.triangle")
-                } description: {
-                    Text(reason)
-                } actions: {
+                EmptyStateView("exclamationmark.triangle", title: "Osprey Can't Start", message: reason) {
                     Button("Try Again") { Task { await model.reloadSnapshot() } }
+                        .buttonStyle(ProminentCapsuleStyle())
                 }
             } else {
                 switch ui.sidebar {
+                case .dashboard: DashboardView()
                 case .downloads: DownloadsView(scope: .active)
                 case .completed: DownloadsView(scope: .completed)
                 case .torrents: DownloadsView(scope: .torrents)
@@ -135,94 +133,38 @@ struct DetailRouter: View {
     }
 }
 
-// MARK: - Toolbar
+// MARK: - Content panel
 
-struct MainToolbar: ToolbarContent {
-    @Environment(AppModel.self) private var model
+/// The large floating panel: the current page, the inspector beside it and the status bar.
+struct ContentPanel: View {
     @Environment(UIState.self) private var ui
-
-    var body: some ToolbarContent {
-        ToolbarItem(placement: .principal) {
-            ActivityStatusButton()
-        }
-        ToolbarItemGroup(placement: .primaryAction) {
-            AddToolbarButton()
-            Button {
-                if model.stats.active > 0 || model.stats.queued > 0 { model.pauseAll() } else { model.resumeAll() }
-            } label: {
-                if model.stats.active > 0 || model.stats.queued > 0 {
-                    Label("Pause All", systemImage: "pause.fill")
-                } else {
-                    Label("Resume All", systemImage: "play.fill")
-                }
-            }
-            .help(model.stats.active > 0 ? "Pause all downloads" : "Resume all downloads")
-            Menu {
-                Picker("Speed", selection: Binding(get: { model.stats.trafficMode == .fullSpeed ? .unlimited : model.stats.trafficMode },
-                                                   set: { model.setTrafficMode($0) })) {
-                    ForEach(TrafficMode.pickerModes, id: \.self) { Text(LocalizedStringKey($0.label)).tag($0) }
-                }
-                .pickerStyle(.inline)
-                Divider()
-                SettingsLink { Text("Speed Settings…") }
-            } label: {
-                Label("Speed", systemImage: "gauge.with.dots.needle.33percent")
-            }
-            .help("Speed mode: \(model.stats.trafficMode.label)")
-            Button { ui.showInspector.toggle() } label: { Label("Inspector", systemImage: "sidebar.trailing") }
-                .help("Show or hide the inspector (⌥⌘I)")
-        }
-    }
-}
-
-struct AddToolbarButton: View {
-    @Environment(UIState.self) private var ui
-    var body: some View {
-        Button { ui.openAdd() } label: { Label("Add Download", systemImage: "plus") }
-            .help("Add a download (⌘N)")
-            .modifier(ProminentToolbarButton())
-    }
-}
-
-private struct ProminentToolbarButton: ViewModifier {
-    func body(content: Content) -> some View {
-        if #available(macOS 26, *) {
-            content.buttonStyle(.glassProminent)
-        } else {
-            content
-        }
-    }
-}
-
-/// "↓ 4.2 MB/s · 3 active" — the window's single live speed readout; opens the Activity popover.
-struct ActivityStatusButton: View {
-    @Environment(AppModel.self) private var model
-    @Environment(UIState.self) private var ui
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
-        @Bindable var ui = ui
-        Button { ui.showActivity.toggle() } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "arrow.down")
-                    .imageScale(.small)
-                Text(Fmt.speed(model.stats.downloadSpeed, zero: "0 B/s"))
-                    .contentTransition(.numericText(value: Double(model.stats.downloadSpeed)))
-                if model.stats.active > 0 {
-                    Text("·")
-                    Text("\(model.stats.active) active")
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        VStack(spacing: 0) {
+            HStack(spacing: 0) {
+                DetailRouter()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                if ui.showInspector {
+                    InspectorView()
+                        .frame(width: 340)
+                        .frame(maxHeight: .infinity)
+                        .background(Theme.card.opacity(scheme == .dark ? 0.7 : 0.9), in: RoundedRectangle(cornerRadius: 18, style: .continuous))
+                        .overlay(RoundedRectangle(cornerRadius: 18, style: .continuous).strokeBorder(Theme.hairline, lineWidth: 1))
+                        .padding(.top, 12)
+                        .padding(.trailing, 12)
+                        .transition(.move(edge: .trailing).combined(with: .opacity))
                 }
             }
-            .font(.callout.monospacedDigit())
-            .foregroundStyle(.secondary)
-            .animation(.smooth, value: model.stats.downloadSpeed)
-            .padding(.horizontal, 6)
+            .animation(.spring(response: 0.4, dampingFraction: 0.88), value: ui.showInspector)
+            StatusBar()
         }
-        .buttonStyle(.borderless)
-        .help("Show activity")
-        .accessibilityLabel(Text("Download speed \(Fmt.speed(model.stats.downloadSpeed, zero: "0 B/s")), \(model.stats.active) active"))
-        .popover(isPresented: $ui.showActivity, arrowEdge: .bottom) {
-            ActivityPopover().environment(model)
-        }
+        .background(Theme.panel, in: shape)
+        .clipShape(shape)
+        .overlay(shape.strokeBorder(Theme.hairline, lineWidth: 1))
+        .shadow(color: Color(red: 0.05, green: 0.1, blue: 0.3).opacity(scheme == .dark ? 0.45 : 0.10), radius: 24, y: 10)
+        .transaction { if SnapshotSample.active { $0.disablesAnimations = true } }
     }
 }
 

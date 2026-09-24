@@ -59,11 +59,20 @@ struct AddDownloadSheet: View {
                     if let probe, !probe.mediaVariants.isEmpty { variantSection(probe) }
                     advancedSection
                 }
-                .padding(24)
+                .padding(26)
             }
+            .scrollIndicators(.never)
             footer
         }
-        .frame(width: 640, height: 700)
+        .background {
+            ZStack(alignment: .top) {
+                Theme.panel
+                LinearGradient(colors: [Theme.washEnd.opacity(0.9), Theme.washStart.opacity(0)], startPoint: .top, endPoint: .bottom)
+                    .frame(height: 180)
+            }
+            .ignoresSafeArea()
+        }
+        .frame(width: 660, height: 720)
         .onAppear(perform: setup)
         .onChange(of: text) { _, _ in scheduleProbe() }
     }
@@ -73,15 +82,17 @@ struct AddDownloadSheet: View {
     private var header: some View {
         HStack(spacing: 14) {
             Image(systemName: kindSymbol)
-                .font(.system(size: 26, weight: .medium))
-                .symbolRenderingMode(.hierarchical)
-                .foregroundStyle(Theme.accent)
-                .frame(width: 54, height: 54)
-                .ospreyGlass(.clear, cornerRadius: 16)
+                .font(.system(size: 24, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 56, height: 56)
+                .background(LinearGradient(colors: [Color(red: 0.25, green: 0.62, blue: 1.0), Color(red: 0.16, green: 0.36, blue: 0.93)],
+                                           startPoint: .topLeading, endPoint: .bottomTrailing),
+                            in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                .shadow(color: Theme.blue.opacity(0.35), radius: 10, y: 4)
                 .contentTransition(.symbolEffect(.replace))
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Add Download").font(.title2.weight(.semibold))
-                Text(detectedKindLabel).font(.callout).foregroundStyle(.secondary)
+            VStack(alignment: .leading, spacing: 3) {
+                Text("Add Download").font(.system(size: 26, weight: .bold))
+                Text(detectedKindLabel).font(.system(size: 13)).foregroundStyle(.secondary)
             }
             Spacer()
         }
@@ -93,20 +104,24 @@ struct AddDownloadSheet: View {
                 TextEditor(text: $text)
                     .font(.system(size: 13, design: .monospaced))
                     .scrollContentBackground(.hidden)
-                    .frame(minHeight: 60, maxHeight: 110)
-                    .padding(8)
+                    .frame(minHeight: 70, maxHeight: 120)
+                    .padding(10)
                 if text.isEmpty {
                     Text("Paste links, a magnet link, or choose a .torrent / .metalink file")
                         .foregroundStyle(.tertiary)
-                        .padding(.horizontal, 13)
-                        .padding(.vertical, 8)
+                        .padding(.horizontal, 15)
+                        .padding(.vertical, 10)
                         .allowsHitTesting(false)
                 }
             }
-            .ospreyGlass(.regular, cornerRadius: 14)
+            .background(Theme.card, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
+            .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(Theme.hairline, lineWidth: 1))
+            .shadow(color: .black.opacity(0.04), radius: 8, y: 3)
             HStack {
                 Button { paste() } label: { Label("Paste", systemImage: "doc.on.clipboard") }
+                    .ospreyGlassButton()
                 Button { chooseFile() } label: { Label("Choose File…", systemImage: "folder") }
+                    .ospreyGlassButton()
                 if let f = torrentFile ?? metalinkFile {
                     Label(f.lastPathComponent, systemImage: "doc.fill").font(.caption).foregroundStyle(.secondary)
                     Button { clearFile() } label: { Image(systemName: "xmark.circle.fill") }.buttonStyle(.plain).foregroundStyle(.secondary)
@@ -138,12 +153,11 @@ struct AddDownloadSheet: View {
         if let p = probe {
             GlassCard {
                 VStack(alignment: .leading, spacing: 10) {
-                    HStack(alignment: .firstTextBaseline) {
-                        Image(systemName: Theme.fileSymbol(name: p.suggestedName, kind: p.kind))
-                            .foregroundStyle(Theme.fileTint(name: p.suggestedName, kind: p.kind))
-                        TextField("Name", text: $name).textFieldStyle(.plain).font(.headline)
+                    HStack(spacing: 12) {
+                        FileBadge(name: p.suggestedName, kind: p.kind, size: 40)
+                        TextField("Name", text: $name).textFieldStyle(.plain).font(.system(size: 16, weight: .semibold))
                     }
-                    HStack(spacing: 14) {
+                    HStack(spacing: 8) {
                         chip("externaldrive", Fmt.bytes(p.size))
                         chip("tag", p.mime ?? p.kind.label)
                         if let r = p.resumable {
@@ -199,6 +213,7 @@ struct AddDownloadSheet: View {
     }
 
     private var destinationSection: some View {
+        GlassCard("Destination", symbol: "folder") {
         Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 10) {
             GridRow {
                 Text("Save to").foregroundStyle(.secondary)
@@ -246,6 +261,7 @@ struct AddDownloadSheet: View {
             }
         }
         .font(.callout)
+        }
     }
 
     private var torrentFilesSection: some View {
@@ -291,6 +307,7 @@ struct AddDownloadSheet: View {
     }
 
     private var advancedSection: some View {
+        GlassCard {
         DisclosureGroup(isExpanded: $showAdvanced) {
             Grid(alignment: .leadingFirstTextBaseline, horizontalSpacing: 12, verticalSpacing: 10) {
                 GridRow {
@@ -403,7 +420,8 @@ struct AddDownloadSheet: View {
             .font(.callout)
             .padding(.top, 8)
         } label: {
-            Text("Advanced").font(.callout.weight(.semibold))
+            CardLabel("Advanced", symbol: "slider.horizontal.3")
+        }
         }
     }
 
@@ -415,21 +433,33 @@ struct AddDownloadSheet: View {
             Spacer()
             Button("Cancel") { dismiss() }
                 .keyboardShortcut(.cancelAction)
+                .buttonStyle(SecondaryCapsuleStyle())
             Button {
                 Task { await add() }
             } label: {
-                if adding { ProgressView().controlSize(.small) } else { Text(isBatch ? "Add All" : "Download") }
+                if adding {
+                    ProgressView().controlSize(.small).tint(.white)
+                } else {
+                    Label(isBatch ? "Add All" : "Download", systemImage: "arrow.down")
+                }
             }
             .keyboardShortcut(.defaultAction)
-            .ospreyGlassButton(prominent: true)
+            .buttonStyle(ProminentCapsuleStyle())
             .disabled(!canAdd || (probe?.duplicate != nil && duplicateChoice == .skip))
         }
-        .padding(16)
-        .background(.bar)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 14)
+        .background(Theme.card.opacity(0.6))
+        .overlay(alignment: .top) { Rectangle().fill(Theme.hairline).frame(height: 1) }
     }
 
     private func chip(_ symbol: String, _ text: String) -> some View {
-        Label(text, systemImage: symbol).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+        Label(text, systemImage: symbol)
+            .font(.system(size: 12, weight: .medium).monospacedDigit())
+            .foregroundStyle(.secondary)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Theme.well, in: Capsule())
     }
 
     // MARK: detection

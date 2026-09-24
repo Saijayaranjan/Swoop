@@ -12,10 +12,10 @@ struct OspreyApp: App {
                 .environment(delegate.model)
                 .environment(delegate.ui)
                 .environment(\.appDelegate, delegate)
-                .frame(minWidth: 900, minHeight: 560)
+                .frame(minWidth: 960, minHeight: 600)
         }
         .defaultSize(width: 1280, height: 800)
-        .windowToolbarStyle(.unified(showsTitle: false))
+        .windowStyle(.hiddenTitleBar)
         .commands { OspreyCommands(model: delegate.model, ui: delegate.ui, delegate: delegate) }
 
         Settings {
@@ -23,6 +23,7 @@ struct OspreyApp: App {
                 .environment(delegate.model)
                 .environment(delegate.ui)
         }
+        .windowToolbarStyle(.unified(showsTitle: false))
 
         MenuBarExtra(isInserted: Binding(
             get: { delegate.model.settings.bool("appearance.show_menu_bar_extra", default: true) },

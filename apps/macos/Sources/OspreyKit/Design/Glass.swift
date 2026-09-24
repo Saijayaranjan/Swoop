@@ -69,9 +69,17 @@ public extension View {
     func ospreyGlassButton(prominent: Bool = false) -> some View {
         if #available(macOS 26, *) {
             // Secondary glass buttons stay neutral; only prominent ones take the accent tint.
-            if prominent { self.buttonStyle(.glassProminent) } else { self.buttonStyle(.glass).tint(nil) }
+            if prominent {
+                self.buttonStyle(.glassProminent).buttonBorderShape(.capsule)
+            } else {
+                self.buttonStyle(.glass).buttonBorderShape(.capsule).tint(nil)
+            }
         } else {
-            if prominent { self.buttonStyle(.borderedProminent) } else { self.buttonStyle(.bordered) }
+            if prominent {
+                self.buttonStyle(.borderedProminent).buttonBorderShape(.capsule)
+            } else {
+                self.buttonStyle(.bordered).buttonBorderShape(.capsule)
+            }
         }
     }
 

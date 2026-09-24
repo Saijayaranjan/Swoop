@@ -78,25 +78,28 @@ struct InspectorView: View {
     var body: some View {
         Group {
             if ui.selection.count == 1, let id = ui.selection.first, let item = model.tasks[id] {
-                VStack(spacing: 0) {
-                    Picker("Section", selection: $tabRaw) {
-                        ForEach(InspectorTab.allCases) { t in
-                            Image(systemName: t.symbol)
-                                .help(Text(LocalizedStringKey(t.title)))
-                                .accessibilityLabel(Text(LocalizedStringKey(t.title)))
-                                .tag(t.rawValue)
+                Form {
+                    Section {
+                        InspectorHero(item: item, detail: loader.detail)
+                    }
+                    Section {
+                        Picker("Section", selection: $tabRaw) {
+                            ForEach(InspectorTab.allCases) { t in
+                                Image(systemName: t.symbol)
+                                    .help(Text(LocalizedStringKey(t.title)))
+                                    .accessibilityLabel(Text(LocalizedStringKey(t.title)))
+                                    .tag(t.rawValue)
+                            }
                         }
+                        .pickerStyle(.segmented)
+                        .labelsHidden()
+                    } footer: {
+                        Text(LocalizedStringKey(tab.title)).font(.system(size: 11, weight: .semibold)).foregroundStyle(.secondary)
                     }
-                    .pickerStyle(.segmented)
-                    .labelsHidden()
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    Form {
-                        InspectorHeader(item: item)
-                        tabContent(item)
-                    }
-                    .formStyle(.grouped)
+                    tabContent(item)
                 }
+                .formStyle(.grouped)
+                .scrollContentBackground(.hidden)
                 .task(id: "\(id)#\(model.detailVersion[id] ?? 0)") {
                     await loader.load(id, engine: model.engine)
                 }
@@ -109,9 +112,22 @@ struct InspectorView: View {
             } else if ui.selection.count > 1 {
                 MultiSelectionSummary(ids: Array(ui.selection))
             } else {
-                ContentUnavailableView("No Selection", systemImage: "sidebar.trailing",
-                                       description: Text("Select a download to see its details."))
+                EmptyStateView("sidebar.trailing", title: "Nothing selected",
+                               message: "Select a download to see its progress, source and options.")
             }
+        }
+        .overlay(alignment: .topTrailing) {
+            Button { ui.showInspector = false } label: {
+                Image(systemName: "xmark")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(.secondary)
+                    .frame(width: 24, height: 24)
+                    .background(Theme.well, in: Circle())
+            }
+            .buttonStyle(.plain)
+            .padding(12)
+            .help("Hide Inspector")
+            .accessibilityLabel(Text("Hide Inspector"))
         }
         .frame(maxHeight: .infinity, alignment: .top)
     }
@@ -119,7 +135,7 @@ struct InspectorView: View {
     @ViewBuilder
     private func tabContent(_ item: TaskItem) -> some View {
         if let error = loader.error, loader.detail == nil {
-            Section { Label(error, systemImage: "exclamationmark.triangle").foregroundStyle(Theme.warning) }
+            Section { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.secondary) }
         }
         switch tab {
         case .overview: OverviewTab(item: item, detail: loader.detail)
@@ -133,51 +149,162 @@ struct InspectorView: View {
     }
 }
 
-struct InspectorHeader: View {
+/// The top of the inspector: a progress ring around the file icon, the name, metric tiles and the
+/// main actions.
+struct InspectorHero: View {
     let item: TaskItem
+    let detail: TaskDetailData?
     @Environment(AppModel.self) private var model
 
     var body: some View {
         let d = item.data
-        Section {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top, spacing: 10) {
-                    Image(nsImage: FileIcons.icon(for: d.name, kind: d.kind))
-                        .resizable()
-                        .frame(width: 44, height: 44)
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text(d.name).font(.headline).lineLimit(3).textSelection(.enabled)
-                        Text(TaskStatusText.detail(d))
-                            .font(.caption.monospacedDigit())
-                            .foregroundStyle(d.state == .failed ? AnyShapeStyle(Theme.danger) : AnyShapeStyle(.secondary))
-                    }
-                }
-                if d.state != .completed {
-                    ThinProgress(fraction: d.progress.effectiveFraction, tint: Theme.progressTint(d.state), height: 4)
-                }
+        let p = d.progress
+        let fraction = d.state == .completed ? 1 : p.effectiveFraction
+        VStack(spacing: 16) {
+            ProgressRing(fraction: fraction, tint: Theme.progressTint(d.state), lineWidth: 9) {
+                FileBadge(name: d.name, kind: d.kind, size: 62)
+            }
+            .frame(width: 118, height: 118)
+            .padding(.top, 8)
+
+            VStack(spacing: 6) {
+                Text(d.name)
+                    .font(.system(size: 16, weight: .semibold))
+                    .multilineTextAlignment(.center)
+                    .lineLimit(3)
+                    .textSelection(.enabled)
                 HStack(spacing: 8) {
-                    if d.state.canPause {
-                        Button("Pause") { model.act(.pause, on: [d.id]) }
-                    } else if d.state == .failed || d.state == .cancelled {
-                        Button("Retry") { model.act(.retry, on: [d.id]) }
-                    } else if d.state.canResume {
-                        Button("Resume") { model.act(.resume, on: [d.id]) }
+                    StatusCapsule(d.state, compact: true)
+                    if let domain = d.domain, !domain.isEmpty {
+                        Text(domain).font(.system(size: 12)).foregroundStyle(.secondary).lineLimit(1)
                     }
-                    if d.state == .completed || d.state == .seeding {
-                        Button("Open") { Finder.open(d.targetPath) }
+                }
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 6) {
+                Text(Fmt.percent(fraction))
+                    .font(Theme.numeral(34))
+                    .contentTransition(.numericText(value: fraction))
+                    .animation(.smooth, value: fraction)
+                Text(d.state == .completed ? Fmt.bytes(p.total ?? p.downloaded) : "\(Fmt.bytes(p.downloaded)) of \(Fmt.bytes(p.total))")
+                    .font(.system(size: 12, weight: .medium).monospacedDigit())
+                    .foregroundStyle(.secondary)
+            }
+            if d.state == .failed {
+                Text(TaskStatusText.detail(d)).font(.system(size: 12)).foregroundStyle(Theme.danger).multilineTextAlignment(.center)
+            }
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                MetricTile(label: "Speed", value: speedValue(d), symbol: "speedometer")
+                MetricTile(label: "ETA", value: d.state == .downloading ? Fmt.eta(p.etaSeconds) : "—", symbol: "timer")
+                MetricTile(label: "Size", value: Fmt.bytes(p.total ?? (d.state == .completed ? p.downloaded : nil)), symbol: "externaldrive")
+                MetricTile(label: d.kind.isTorrent ? "Peers" : "Connections", value: connectionsValue(d), symbol: "point.3.connected.trianglepath.dotted")
+                MetricTile(label: "Source", value: sourceValue(d), symbol: "globe")
+                MetricTile(label: "Saved to", value: savedTo(d), symbol: "folder")
+            }
+
+            VStack(spacing: 8) {
+                primaryButton(d)
+                HStack(spacing: 8) {
+                    Button { Finder.reveal([d.targetPath]) } label: {
+                        Label("Reveal", systemImage: "magnifyingglass").frame(maxWidth: .infinity)
                     }
-                    Button("Show in Finder") { Finder.reveal([d.targetPath]) }
-                    Spacer()
-                    Menu { TaskActionsMenu(ids: [d.id]) } label: { Image(systemName: "ellipsis.circle") }
-                        .menuStyle(.borderlessButton)
+                    .ospreyGlassButton()
+                    Button { copyLink(d) } label: {
+                        Label("Copy Link", systemImage: "link").frame(maxWidth: .infinity)
+                    }
+                    .ospreyGlassButton()
+                    .disabled(link(d) == nil)
+                    Menu { TaskActionsMenu(ids: [d.id]) } label: { Image(systemName: "ellipsis") }
+                        .menuStyle(.button)
                         .menuIndicator(.hidden)
                         .fixedSize()
+                        .ospreyGlassButton()
                         .accessibilityLabel(Text("More actions"))
                 }
-                .controlSize(.small)
+                .controlSize(.large)
             }
-            .padding(.vertical, 4)
         }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 6)
+    }
+
+    @ViewBuilder
+    private func primaryButton(_ d: TaskRowData) -> some View {
+        let primary: (title: String, symbol: String, action: () -> Void)? = {
+            if d.state.canPause { return ("Pause", "pause.fill", { model.act(.pause, on: [d.id]) }) }
+            if d.state == .failed || d.state == .cancelled { return ("Retry", "arrow.clockwise", { model.act(.retry, on: [d.id]) }) }
+            if d.state.canResume { return ("Resume", "play.fill", { model.act(.resume, on: [d.id]) }) }
+            if d.state == .completed || d.state == .seeding { return ("Open", "arrow.up.forward.app", { Finder.open(d.targetPath) }) }
+            return nil
+        }()
+        if let primary {
+            Button(action: primary.action) {
+                Label(LocalizedStringKey(primary.title), systemImage: primary.symbol)
+                    .font(.system(size: 14, weight: .semibold))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 5)
+            }
+            .controlSize(.extraLarge)
+            .ospreyGlassButton(prominent: true)
+        }
+    }
+
+    private func speedValue(_ d: TaskRowData) -> String {
+        if d.state == .seeding { return "↑ " + Fmt.speed(d.progress.uploadSpeed, zero: "0 B/s") }
+        return d.state == .downloading ? Fmt.speed(d.progress.speed, zero: "—") : "—"
+    }
+
+    private func connectionsValue(_ d: TaskRowData) -> String {
+        if d.kind.isTorrent { return "\(d.progress.peers)" }
+        let segments = detail?.segments.count ?? 0
+        if segments > 0 { return "\(d.progress.activeConnections) / \(segments)" }
+        return d.progress.activeConnections > 0 ? "\(d.progress.activeConnections)" : "—"
+    }
+
+    private func sourceValue(_ d: TaskRowData) -> String {
+        if let domain = d.domain, !domain.isEmpty { return domain }
+        if let u = link(d), let host = URL(string: u)?.host { return host }
+        return d.kind.label
+    }
+
+    private func savedTo(_ d: TaskRowData) -> String {
+        let dir = (d.targetPath as NSString).deletingLastPathComponent
+        return dir.isEmpty ? "—" : (dir as NSString).lastPathComponent
+    }
+
+    private func link(_ d: TaskRowData) -> String? { d.url ?? detail?.urls.first }
+
+    private func copyLink(_ d: TaskRowData) {
+        guard let u = link(d) else { return }
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(u, forType: .string)
+        model.toast(.success, "Link copied")
+    }
+}
+
+struct MetricTile: View {
+    var label: String
+    var value: String
+    var symbol: String
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            HStack(spacing: 5) {
+                Image(systemName: symbol).font(.system(size: 9, weight: .bold))
+                Text(L10n.tr(label).uppercased()).font(.system(size: 9.5, weight: .semibold)).tracking(0.9)
+            }
+            .foregroundStyle(.secondary)
+            .lineLimit(1)
+            Text(value)
+                .font(.system(size: 15, weight: .semibold, design: .rounded).monospacedDigit())
+                .lineLimit(1)
+                .truncationMode(.middle)
+                .contentTransition(.numericText())
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 12)
+        .padding(.vertical, 10)
+        .background(Theme.well, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 }
 
@@ -190,23 +317,43 @@ struct MultiSelectionSummary: View {
         let total = items.reduce(UInt64(0)) { $0 + ($1.progress.total ?? 0) }
         let done = items.reduce(UInt64(0)) { $0 + $1.progress.downloaded }
         let speed = items.reduce(UInt64(0)) { $0 + $1.progress.speed }
-        Form {
-            Section {
-                LabeledContent("Selected", value: "\(items.count)")
-                LabeledContent("Downloaded", value: "\(Fmt.bytes(done)) of \(Fmt.bytes(total))")
-                LabeledContent("Combined speed", value: Fmt.speed(speed, zero: "—"))
-                LabeledContent("Active", value: "\(items.filter { $0.state.isActive }.count)")
-                LabeledContent("Failed", value: "\(items.filter { $0.state == .failed }.count)")
-            }
-            Section {
-                HStack {
-                    Button("Pause") { model.act(.pause, on: items.filter { $0.state.canPause }.map(\.id)) }
-                    Button("Resume") { model.act(.resume, on: items.filter { $0.state.canResume }.map(\.id)) }
-                    Spacer()
-                    Button("Remove…", role: .destructive) { ui.removeConfirmation = ids }
+        VStack(spacing: 18) {
+            ZStack {
+                ForEach(Array(items.prefix(3).enumerated()), id: \.offset) { i, item in
+                    FileBadge(name: item.name, kind: item.kind, size: 58)
+                        .background(Theme.card, in: RoundedRectangle(cornerRadius: 17, style: .continuous))
+                        .rotationEffect(.degrees(Double(i - 1) * 12))
+                        .offset(x: CGFloat(i - 1) * 22)
                 }
             }
+            .frame(height: 80)
+            .padding(.top, 36)
+            VStack(spacing: 2) {
+                Text("\(items.count)").font(Theme.numeral(40))
+                Text("downloads selected").font(.system(size: 13)).foregroundStyle(.secondary)
+            }
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 8), count: 2), spacing: 8) {
+                MetricTile(label: "Downloaded", value: "\(Fmt.bytes(done)) of \(Fmt.bytes(total))", symbol: "arrow.down.circle")
+                MetricTile(label: "Combined speed", value: Fmt.speed(speed, zero: "—"), symbol: "speedometer")
+                MetricTile(label: "Active", value: "\(items.filter { $0.state.isActive }.count)", symbol: "bolt.horizontal")
+                MetricTile(label: "Failed", value: "\(items.filter { $0.state == .failed }.count)", symbol: "exclamationmark.triangle")
+            }
+            HStack(spacing: 8) {
+                Button { model.act(.pause, on: items.filter { $0.state.canPause }.map(\.id)) } label: {
+                    Label("Pause", systemImage: "pause.fill").frame(maxWidth: .infinity)
+                }
+                .ospreyGlassButton(prominent: true)
+                Button { model.act(.resume, on: items.filter { $0.state.canResume }.map(\.id)) } label: {
+                    Label("Resume", systemImage: "play.fill").frame(maxWidth: .infinity)
+                }
+                .ospreyGlassButton()
+            }
+            .controlSize(.large)
+            Button("Remove…", role: .destructive) { ui.removeConfirmation = ids }
+                .buttonStyle(.borderless)
+                .foregroundStyle(Theme.danger)
+            Spacer()
         }
-        .formStyle(.grouped)
+        .padding(18)
     }
 }

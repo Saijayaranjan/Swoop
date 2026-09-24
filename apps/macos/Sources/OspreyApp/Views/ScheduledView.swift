@@ -7,23 +7,18 @@ struct ScheduledView: View {
     @ViewState private var editing: ScheduleDoc?
 
     var body: some View {
+        VStack(spacing: 0) {
+        PageHeader("Scheduled", count: "\(model.schedules.count)",
+                   subtitle: L10n.tr("Download windows for nights, weekends and quiet hours — optionally only on power or unmetered Wi-Fi.")) {
+            Button { editing = ScheduleDoc(name: L10n.tr("New Schedule")) } label: { Label("New Schedule", systemImage: "plus") }
+                .buttonStyle(ProminentCapsuleStyle())
+        }
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                HStack {
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("Scheduled").font(.largeTitle.weight(.semibold))
-                        Text("Schedules open download windows (nights, weekends) and can wait for conditions like AC power or an unmetered network.")
-                            .font(.callout).foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                    Button { editing = ScheduleDoc(name: L10n.tr("New Schedule")) } label: { Label("New Schedule", systemImage: "plus") }
-                        .ospreyGlassButton(prominent: true)
-                }
-
                 if model.schedules.isEmpty {
                     GlassCard {
-                        EmptyStateView("calendar.badge.clock", title: "No schedules", message: "Create a schedule, then attach it to a queue or to individual downloads.")
-                            .frame(height: 260)
+                        EmptyStateView("calendar.badge.clock", title: "No schedules yet", message: "Create a schedule, then attach it to a queue or to individual downloads.")
+                            .frame(height: 280)
                     }
                 } else {
                     LazyVGrid(columns: [GridItem(.adaptive(minimum: 300), spacing: 14)], spacing: 14) {
@@ -51,10 +46,12 @@ struct ScheduledView: View {
                     }
                 }
             }
-            .padding(20)
+            .padding(.horizontal, 28)
+            .padding(.bottom, 24)
         }
+        .scrollIndicators(.never)
         .ospreySoftScrollEdge()
-        .navigationTitle("Scheduled")
+        }
         .task {
             await model.load("schedules")
             await model.refreshDashboard()
@@ -73,13 +70,15 @@ struct ScheduleCard: View {
     var body: some View {
         let next = model.scheduledNext.first { $0.scheduleId == schedule.id }
         let queues = model.queues.filter { $0.scheduleId == schedule.id }
-        VStack(alignment: .leading, spacing: 10) {
-            HStack {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 12) {
                 Image(systemName: schedule.enabled ? "calendar.badge.clock" : "calendar")
-                    .font(.title2).symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(schedule.enabled ? Theme.violet : .secondary)
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(schedule.name).font(.headline)
+                    .font(.system(size: 18, weight: .semibold)).symbolRenderingMode(.hierarchical)
+                    .foregroundStyle(schedule.enabled ? Theme.blue : .secondary)
+                    .frame(width: 40, height: 40)
+                    .background((schedule.enabled ? Theme.blue : Theme.neutral).opacity(0.12), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(schedule.name).font(.system(size: 16, weight: .semibold))
                     Text(schedule.recurrenceSummary).font(.caption).foregroundStyle(.secondary)
                 }
                 Spacer()
@@ -106,8 +105,7 @@ struct ScheduleCard: View {
                 Button("Edit", action: onEdit).controlSize(.small).ospreyGlassButton()
             }
         }
-        .padding(16)
-        .ospreyGlass(.regular, cornerRadius: 22)
+        .cardSurface(padding: 18)
     }
 }
 

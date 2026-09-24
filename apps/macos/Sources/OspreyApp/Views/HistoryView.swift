@@ -14,26 +14,29 @@ struct HistoryView: View {
     @ViewState private var confirmClear = false
 
     var body: some View {
-        VStack(spacing: 12) {
-            HStack {
-                Picker("", selection: $stateFilter) {
-                    Text("All").tag("all")
-                    Text("Completed").tag("completed")
-                    Text("Failed").tag("failed")
-                    Text("Cancelled").tag("cancelled")
+        VStack(spacing: 0) {
+            PageHeader("History", count: "\(total)", subtitle: L10n.tr("Everything Osprey has finished, failed or cancelled — searchable and ready to fetch again.")) {
+                HStack(spacing: 10) {
+                    GlassControlGroup {
+                        GroupIconMenu(symbol: "square.and.arrow.up", help: "Export") {
+                            Button("Export as CSV…") { export(csv: true) }
+                            Button("Export as JSON…") { export(csv: false) }
+                        }
+                        GroupIconButton(symbol: "trash", help: "Clear History") { confirmClear = true }
+                    }
+                    SearchCapsule(text: $search, prompt: "Search history")
                 }
-                .pickerStyle(.segmented)
-                .labelsHidden()
-                .frame(width: 340)
-                Spacer()
-                Text("\(entries.count) of \(total)").font(.caption.monospacedDigit()).foregroundStyle(.secondary)
-                Menu {
-                    Button("Export as CSV…") { export(csv: true) }
-                    Button("Export as JSON…") { export(csv: false) }
-                } label: { Label("Export", systemImage: "square.and.arrow.up") }
-                .fixedSize()
-                Button(role: .destructive) { confirmClear = true } label: { Label("Clear History", systemImage: "trash") }
-                    .ospreyGlassButton()
+            } below: {
+                HStack(spacing: 8) {
+                    ForEach([("all", "All"), ("completed", "Completed"), ("failed", "Failed"), ("cancelled", "Cancelled")], id: \.0) { key, title in
+                        Button { withAnimation(.smooth(duration: 0.25)) { stateFilter = key } } label: {
+                            Chip(selected: stateFilter == key) { Text(LocalizedStringKey(title)) }
+                        }
+                        .buttonStyle(.plain)
+                    }
+                    Spacer()
+                    Text("Showing \(entries.count) of \(total)").font(.system(size: 12).monospacedDigit()).foregroundStyle(.secondary)
+                }
             }
             Group {
                 if entries.isEmpty && !loading {
@@ -44,11 +47,10 @@ struct HistoryView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ospreyGlass(.regular, cornerRadius: 22)
+            .cardSurface(cornerRadius: 20, padding: 0)
+            .padding(.horizontal, 28)
+            .padding(.bottom, 20)
         }
-        .padding(16)
-        .searchable(text: $search, placement: .toolbar, prompt: Text("Search history"))
-        .navigationTitle("History")
         .task(id: "\(search)|\(stateFilter)|\(sortKey)|\(model.historyVersion)") {
             try? await Task.sleep(nanoseconds: 200_000_000)
             await load()
@@ -81,16 +83,14 @@ struct HistoryView: View {
     private var table: some View {
         Table(entries, selection: $selection, sortOrder: $sortOrder) {
             TableColumn("Name", value: \.name) { e in
-                HStack(spacing: 8) {
-                    Image(systemName: Theme.fileSymbol(name: e.name, kind: e.kind))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(Theme.fileTint(name: e.name, kind: e.kind))
-                        .frame(width: 20)
+                HStack(spacing: 10) {
+                    FileBadge(name: e.name, kind: e.kind, size: 28)
                     VStack(alignment: .leading, spacing: 1) {
                         Text(e.name).lineLimit(1).truncationMode(.middle)
                         if let err = e.error { Text(err).font(.caption).foregroundStyle(Theme.danger).lineLimit(1) }
                     }
                 }
+                .padding(.vertical, 5)
             }
             .width(min: 220, ideal: 320)
             TableColumn("Site", value: \.domain) { e in Text(e.domain).foregroundStyle(.secondary) }.width(min: 90, ideal: 140)
@@ -121,10 +121,15 @@ struct HistoryView: View {
             let items = entries.filter { ids.contains($0.taskId) }
             if let first = items.first, FileManager.default.fileExists(atPath: first.destination) { Finder.open(first.destination) }
         }
-        .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
     }
 
     private func load() async {
+        if let sample = SnapshotSample.history {
+            entries = sample
+            total = UInt32(sample.count)
+            return
+        }
         loading = true
         defer { loading = false }
         var q = HistoryQueryData()

@@ -6,12 +6,13 @@ import SwiftUI
 /// Places in the main window. Configuration (rules, automation, categories, recipes, queues,
 /// devices) lives in the Settings window.
 enum SidebarItem: Hashable, Codable {
-    case downloads, completed, torrents, scheduled
+    case dashboard, downloads, completed, torrents, scheduled
     case history, grabber
     case queue(String)
 
     var title: String {
         switch self {
+        case .dashboard: return "Dashboard"
         case .downloads: return "Downloads"
         case .completed: return "Completed"
         case .torrents: return "Torrents"
@@ -24,22 +25,23 @@ enum SidebarItem: Hashable, Codable {
 
     var symbol: String {
         switch self {
+        case .dashboard: return "square.grid.2x2"
         case .downloads: return "arrow.down.circle"
         case .completed: return "checkmark.circle"
         case .torrents: return "point.3.connected.trianglepath.dotted"
-        case .scheduled: return "calendar"
-        case .history: return "clock"
-        case .grabber: return "globe"
+        case .scheduled: return "calendar.badge.clock"
+        case .history: return "clock.arrow.circlepath"
+        case .grabber: return "globe.desk"
         case .queue: return "tray"
         }
     }
 
     /// ⌘1…⌘6 order.
-    static let shortcutOrder: [SidebarItem] = [.downloads, .completed, .torrents, .scheduled, .history, .grabber]
+    static let shortcutOrder: [SidebarItem] = [.dashboard, .downloads, .torrents, .scheduled, .history, .grabber]
 }
 
 enum SmartFilter: String, CaseIterable, Identifiable {
-    case all, active, queued, paused, failed, media
+    case all, active, queued, paused, completed, failed, media
     var id: String { rawValue }
     var title: String {
         switch self {
@@ -47,6 +49,7 @@ enum SmartFilter: String, CaseIterable, Identifiable {
         case .active: return "Active"
         case .queued: return "Waiting"
         case .paused: return "Paused"
+        case .completed: return "Completed"
         case .failed: return "Failed"
         case .media: return "Media"
         }
@@ -58,6 +61,7 @@ enum SmartFilter: String, CaseIterable, Identifiable {
         case .active: return t.state.isActive
         case .queued: return t.state == .queued || t.state == .pending || t.state == .scheduled
         case .paused: return t.state == .paused
+        case .completed: return t.state == .completed || t.state == .seeding
         case .failed: return t.state == .failed || t.state == .cancelled
         case .media: return t.kind == .hls || Self.mediaExtensions.contains((t.name as NSString).pathExtension.lowercased())
         }
@@ -108,6 +112,7 @@ final class UIState {
     var editingQueue: QueueData?
     var windowActive = true
     var showActivity = false
+    var showNotifications = false
 
     func openAdd(_ prefill: AddPrefill = AddPrefill()) {
         addRequest = prefill

@@ -12,44 +12,64 @@ struct MenuBarView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            HStack(alignment: .firstTextBaseline) {
-                VStack(alignment: .leading, spacing: 0) {
-                    LiveNumber(Fmt.speed(model.stats.downloadSpeed, zero: "0 B/s"), value: Double(model.stats.downloadSpeed), size: 26)
-                        .foregroundStyle(Theme.accent)
-                    Text("↑ \(Fmt.speed(model.stats.uploadSpeed, zero: "0 B/s")) · \(model.stats.active) active")
-                        .font(.caption.monospacedDigit())
-                        .foregroundStyle(.secondary)
-                }
+            HStack(spacing: 10) {
+                OspreyMark(size: 26)
+                Text("Osprey").font(.system(size: 16, weight: .bold, design: .rounded))
                 Spacer()
-                Circle().fill(model.networkAvailable ? Theme.success : Theme.danger).frame(width: 8, height: 8)
-                    .accessibilityLabel(Text(model.networkAvailable ? "Online" : "Offline"))
-            }
-            Sparkline(model.speedHistory.suffix(90).map { Double($0.download) })
-                .frame(height: 38)
-
-            GlassGroup(spacing: 4) {
                 HStack(spacing: 4) {
-                    ForEach(TrafficMode.pickerModes, id: \.self) { mode in
-                        let selected = model.stats.trafficMode == mode
-                        Button { model.setTrafficMode(mode) } label: {
-                            VStack(spacing: 2) {
-                                Image(systemName: mode.symbol).font(.system(size: 13))
-                                Text(mode.label).font(.system(size: 9, weight: .medium))
-                            }
-                            .frame(maxWidth: .infinity, minHeight: 38)
-                            .background { if selected { RoundedRectangle(cornerRadius: 10).fill(Theme.accent.opacity(0.25)) } }
-                            .contentShape(RoundedRectangle(cornerRadius: 10))
-                        }
-                        .buttonStyle(.plain)
-                        .foregroundStyle(selected ? Theme.accent : .primary)
-                        .accessibilityAddTraits(selected ? .isSelected : [])
-                    }
+                    StatusDot(color: model.networkAvailable ? Theme.success : Theme.warning)
+                    Text(model.networkAvailable ? "Online" : "Offline").font(.system(size: 11, weight: .medium)).foregroundStyle(.secondary)
                 }
-                .padding(4)
-                .ospreyGlass(.regular, cornerRadius: 14)
             }
 
-            HStack(spacing: 6) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline) {
+                    LiveNumber(Fmt.speed(model.stats.downloadSpeed, zero: "0 B/s"), value: Double(model.stats.downloadSpeed), size: 30)
+                    Spacer()
+                    Label(Fmt.speed(model.stats.uploadSpeed, zero: "0 B/s"), systemImage: "arrow.up")
+                        .font(.system(size: 12, weight: .semibold).monospacedDigit())
+                        .foregroundStyle(Theme.upload)
+                }
+                let samples = model.speedHistory.suffix(90)
+                let ceiling = max(Double(samples.map { max($0.download, $0.upload) }.max() ?? 0) * 1.15, 250_000)
+                ZStack {
+                    Sparkline(samples.map { Double($0.download) }, color: Theme.blue, fill: true, lineWidth: 1.8, ceiling: ceiling)
+                    Sparkline(samples.map { Double($0.upload) }, color: Theme.upload, fill: false, lineWidth: 1.2, ceiling: ceiling)
+                }
+                .frame(height: 44)
+            }
+            .cardSurface(cornerRadius: 16, padding: 14)
+
+            HStack(spacing: 8) {
+                miniStat("Active", "\(model.stats.active)")
+                miniStat("Queued", "\(model.stats.queued + model.stats.scheduled)")
+                miniStat("Today", Fmt.bytes(model.stats.bytesToday))
+            }
+
+            HStack(spacing: 4) {
+                ForEach(TrafficMode.quickModes, id: \.self) { mode in
+                    let current = model.stats.trafficMode == .fullSpeed ? TrafficMode.unlimited : model.stats.trafficMode
+                    let selected = current == mode
+                    Button { model.setTrafficMode(mode) } label: {
+                        HStack(spacing: 5) {
+                            Image(systemName: mode.symbol).font(.system(size: 11, weight: .semibold))
+                            Text(LocalizedStringKey(mode.label)).font(.system(size: 12, weight: .medium))
+                        }
+                        .frame(maxWidth: .infinity, minHeight: 30)
+                        .foregroundStyle(selected ? AnyShapeStyle(.white) : AnyShapeStyle(.primary))
+                        .background {
+                            if selected { Capsule().fill(Theme.blue.gradient) }
+                        }
+                        .contentShape(Capsule())
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityAddTraits(selected ? .isSelected : [])
+                }
+            }
+            .padding(3)
+            .background(Theme.well, in: Capsule())
+
+            HStack(spacing: 8) {
                 Image(systemName: "link").foregroundStyle(.secondary)
                 TextField("Paste a link and press Return", text: $quickURL)
                     .textFieldStyle(.plain)
@@ -60,39 +80,39 @@ struct MenuBarView: View {
                 .buttonStyle(.borderless)
                 .help("Download the link on the clipboard")
             }
-            .padding(.horizontal, 10)
-            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .frame(height: 36)
             .ospreyGlass(.regular, in: Capsule())
 
             if !model.recentCompletions.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Recently finished").font(.caption.weight(.semibold)).foregroundStyle(.secondary)
-                    ForEach(model.recentCompletions.prefix(5)) { row in
+                    CardLabel("Recently finished")
+                    ForEach(model.recentCompletions.prefix(4)) { row in
                         Button { Finder.reveal([row.filePath ?? (row.directory as NSString).appendingPathComponent(row.name)]) } label: {
                             HStack(spacing: 8) {
-                                Image(systemName: Theme.fileSymbol(name: row.name, kind: row.kind))
-                                    .foregroundStyle(Theme.fileTint(name: row.name, kind: row.kind)).frame(width: 16)
-                                Text(row.name).lineLimit(1).truncationMode(.middle)
+                                FileBadge(name: row.name, kind: row.kind, size: 24)
+                                Text(row.name).font(.system(size: 12, weight: .medium)).lineLimit(1).truncationMode(.middle)
                                 Spacer()
-                                Text(Fmt.bytes(row.progress.total)).font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                                Text(Fmt.bytes(row.progress.total)).font(.system(size: 11).monospacedDigit()).foregroundStyle(.secondary)
                             }
+                            .padding(.vertical, 2)
                             .contentShape(Rectangle())
                         }
                         .buttonStyle(.plain)
-                        .font(.callout)
                     }
                 }
             }
 
-            Divider()
             HStack(spacing: 6) {
-                Button { model.pauseAll() } label: { Label("Pause All", systemImage: "pause.fill") }
-                Button { model.resumeAll() } label: { Label("Resume All", systemImage: "play.fill") }
-                Button { model.retryFailed() } label: { Label("Retry Failed", systemImage: "arrow.clockwise") }
+                Button { model.pauseAll() } label: { Label("Pause All", systemImage: "pause.fill").frame(maxWidth: .infinity) }
+                Button { model.resumeAll() } label: { Label("Resume All", systemImage: "play.fill").frame(maxWidth: .infinity) }
+                Button { model.retryFailed() } label: { Image(systemName: "arrow.clockwise") }
+                    .help("Retry Failed")
             }
-            .controlSize(.small)
+            .controlSize(.regular)
             .ospreyGlassButton()
-            HStack {
+            Rectangle().fill(Theme.hairline).frame(height: 1)
+            HStack(spacing: 14) {
                 Button("Open Osprey") { delegate?.showMainWindow() }
                 Button("Add…") { delegate?.showMainWindow(); ui.openAdd() }
                 Button("Downloads Folder") { NSWorkspace.shared.open(URL(fileURLWithPath: model.settings.downloadDirectory)) }
@@ -102,10 +122,21 @@ struct MenuBarView: View {
                     .accessibilityLabel(Text("Quit Osprey"))
             }
             .buttonStyle(.borderless)
-            .font(.callout)
+            .font(.system(size: 12, weight: .medium))
         }
-        .padding(14)
-        .frame(width: 340)
+        .padding(16)
+        .frame(width: 350)
+    }
+
+    private func miniStat(_ label: String, _ value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(L10n.tr(label).uppercased()).font(.system(size: 9, weight: .semibold)).tracking(0.9).foregroundStyle(.secondary)
+            Text(value).font(.system(size: 17, weight: .semibold, design: .rounded).monospacedDigit()).lineLimit(1).minimumScaleFactor(0.7)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
+        .background(Theme.well, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
     }
 
     private func addQuick() {

@@ -74,19 +74,53 @@ struct SettingsView: View {
     @AppStorage("settingsPane") private var paneRaw = SettingsPane.general.rawValue
 
     var body: some View {
+        let pane = SettingsPane(rawValue: paneRaw) ?? .general
         NavigationSplitView {
             List(selection: Binding(get: { paneRaw }, set: { if let v = $0 { paneRaw = v } })) {
-                ForEach(SettingsPane.allCases) { pane in
-                    Label(LocalizedStringKey(pane.title), systemImage: pane.symbol).tag(pane.rawValue)
+                ForEach(SettingsPane.allCases) { p in
+                    Label {
+                        Text(LocalizedStringKey(p.title)).font(.system(size: 14))
+                    } icon: {
+                        Image(systemName: p.symbol)
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundStyle(paneRaw == p.rawValue ? .white : Theme.blue)
+                            .frame(width: 26, height: 26)
+                            .background(paneRaw == p.rawValue ? AnyShapeStyle(Theme.blue.gradient) : AnyShapeStyle(Theme.blue.opacity(0.13)),
+                                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    }
+                    .padding(.vertical, 3)
+                    .tag(p.rawValue)
                 }
             }
             .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(190)
+            .navigationSplitViewColumnWidth(210)
+            .toolbar(removing: .sidebarToggle)
         } detail: {
-            paneView(SettingsPane(rawValue: paneRaw) ?? .general)
-                .navigationTitle(LocalizedStringKey((SettingsPane(rawValue: paneRaw) ?? .general).title))
+            ZStack {
+                WindowWash()
+                VStack(alignment: .leading, spacing: 0) {
+                    HStack(spacing: 14) {
+                        Image(systemName: pane.symbol)
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .frame(width: 44, height: 44)
+                            .background(Theme.blue.gradient, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                            .shadow(color: Theme.blue.opacity(0.3), radius: 8, y: 3)
+                        Text(LocalizedStringKey(pane.title))
+                            .font(.system(size: 28, weight: .bold))
+                    }
+                    .padding(.horizontal, 28)
+                    .padding(.top, 18)
+                    .padding(.bottom, 4)
+                    paneView(pane)
+                        .scrollContentBackground(.hidden)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
+            }
+            .navigationTitle(LocalizedStringKey(pane.title))
+            .toolbarBackground(.hidden, for: .windowToolbar)
         }
-        .frame(width: 820, height: 600)
+        .frame(width: 880, height: 640)
     }
 
     @ViewBuilder

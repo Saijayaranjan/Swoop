@@ -12,30 +12,38 @@ struct GrabberView: View {
     @ViewState private var starting = false
 
     var body: some View {
-        HStack(alignment: .top, spacing: 14) {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 14) {
-                    optionsForm
-                    if !past.isEmpty { pastSessions }
+        VStack(spacing: 0) {
+            PageHeader("Site Grabber", count: past.isEmpty ? nil : "\(past.count)",
+                       subtitle: L10n.tr("Sweep a page and the pages it links to for every file worth keeping."))
+            HStack(alignment: .top, spacing: 16) {
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 18) {
+                        optionsForm
+                        if !past.isEmpty {
+                            Rectangle().fill(Theme.hairline).frame(height: 1)
+                            pastSessions
+                        }
+                    }
+                    .padding(18)
                 }
-                .padding(16)
-            }
-            .frame(width: 330)
-            .ospreyGlass(.regular, cornerRadius: 22)
+                .scrollIndicators(.never)
+                .frame(width: 340)
+                .cardSurface(cornerRadius: 20, padding: 0)
 
-            Group {
-                if let session {
-                    GrabberResults(session: session) { self.session = $0 }
-                } else {
-                    EmptyStateView("square.stack.3d.down.right", title: "Site Grabber",
-                                   message: "Crawl a page (and pages it links to) to collect every downloadable file, then pick what to download.")
+                Group {
+                    if let session {
+                        GrabberResults(session: session) { self.session = $0 }
+                    } else {
+                        EmptyStateView("globe.desk", title: "Point it at a page",
+                                       message: "Osprey follows links as deep as you like, gathers every downloadable file, and lets you pick what to keep.")
+                    }
                 }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .cardSurface(cornerRadius: 20, padding: 0)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .ospreyGlass(.regular, cornerRadius: 22)
+            .padding(.horizontal, 28)
+            .padding(.bottom, 20)
         }
-        .padding(16)
-        .navigationTitle("Site Grabber")
         .task { past = (try? await model.engine.grabberList()) ?? [] }
         .task(id: session?.id) {
             // Poll the live session until it finishes (progress events trigger faster refreshes).
@@ -53,9 +61,17 @@ struct GrabberView: View {
 
     private var optionsForm: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Crawl").font(.headline)
-            TextField("https://example.com/downloads/", text: $options.url)
-                .textFieldStyle(.roundedBorder)
+            CardLabel("Crawl", symbol: "globe")
+            HStack(spacing: 8) {
+                Image(systemName: "link").foregroundStyle(.secondary)
+                TextField("https://example.com/downloads/", text: $options.url)
+                    .textFieldStyle(.plain)
+                    .font(.system(size: 14))
+            }
+            .padding(.horizontal, 14)
+            .frame(height: 40)
+            .background(Theme.well, in: Capsule())
+            .overlay(Capsule().strokeBorder(Theme.hairline, lineWidth: 1))
             Stepper(value: Binding(get: { Int(options.maxDepth) }, set: { options.maxDepth = UInt8($0) }), in: 0...5) {
                 LabeledContent("Link depth", value: options.maxDepth == 0 ? L10n.tr("This page only") : "\(options.maxDepth)")
             }
@@ -76,7 +92,7 @@ struct GrabberView: View {
             TextField("Exclude URLs matching (e.g. *thumb*)", text: $excludeText)
                 .textFieldStyle(.roundedBorder)
             HStack {
-                Text("Size").foregroundStyle(.secondary)
+                Text("Size").foregroundStyle(.secondary).fixedSize()
                 BytesField(bytes: Binding(get: { options.minSize ?? 0 }, set: { options.minSize = $0 == 0 ? nil : $0 }))
                 Text("–")
                 BytesField(bytes: Binding(get: { options.maxSize ?? 0 }, set: { options.maxSize = $0 == 0 ? nil : $0 }))
@@ -95,7 +111,7 @@ struct GrabberView: View {
                 } label: {
                     if starting { ProgressView().controlSize(.small) } else { Label("Start Crawl", systemImage: "play.fill") }
                 }
-                .ospreyGlassButton(prominent: true)
+                .buttonStyle(ProminentCapsuleStyle())
                 .disabled(!LinkDetector.looksLikeLink(options.url) || starting)
             }
         }
@@ -104,7 +120,7 @@ struct GrabberView: View {
 
     private var pastSessions: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text("Recent crawls").font(.headline)
+            CardLabel("Recent crawls", symbol: "clock.arrow.circlepath")
             ForEach(past.sorted { $0.startedAt > $1.startedAt }.prefix(8)) { s in
                 Button { session = s } label: {
                     HStack {

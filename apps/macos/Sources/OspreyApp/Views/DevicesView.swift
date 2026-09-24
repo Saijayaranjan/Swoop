@@ -14,11 +14,8 @@ struct DevicesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("Devices").font(.largeTitle.weight(.semibold))
-                    Text("Control Osprey from your phone or another computer. Remote access is encrypted and every device can be revoked.")
-                        .font(.callout).foregroundStyle(.secondary)
-                }
+                Text("Control Osprey from your phone or another computer. Remote access is encrypted and every device can be revoked.")
+                    .font(.system(size: 13)).foregroundStyle(.secondary)
                 if !model.settings.bool("remote.enabled") {
                     HStack {
                         Label("Remote access is off", systemImage: "wifi.slash").font(.callout.weight(.semibold))
@@ -26,8 +23,7 @@ struct DevicesView: View {
                         Button("Turn On Remote Access") { model.setSetting("remote.enabled", .bool(true)) }
                             .ospreyGlassButton(prominent: true)
                     }
-                    .padding(14)
-                    .ospreyGlass(.regular, cornerRadius: 18)
+                    .cardSurface(cornerRadius: 18, padding: 14)
                 }
                 HStack(alignment: .top, spacing: 14) {
                     pairingCard.frame(maxWidth: 420)
@@ -35,10 +31,11 @@ struct DevicesView: View {
                 }
                 auditCard
             }
-            .padding(20)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 16)
         }
+        .scrollIndicators(.never)
         .ospreySoftScrollEdge()
-        .navigationTitle("Devices")
         .task {
             await model.load("devices")
             await loadAudit()
