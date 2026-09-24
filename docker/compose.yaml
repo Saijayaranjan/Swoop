@@ -1,0 +1,34 @@
+# Runs the Osprey engine headless with the remote (TLS) API + web UI exposed.
+#
+#   docker compose -f docker/compose.yaml up -d --build
+#   docker compose -f docker/compose.yaml logs -f
+#
+# The remote listener uses a self-signed certificate on first run (see /data/tls inside the
+# volume); trust it once, or put a reverse proxy with a real certificate in front of it and set
+# `OSPREY_NO_TLS=1` below only if that proxy terminates TLS itself.
+services:
+  osprey:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+    image: osprey:latest
+    container_name: osprey
+    restart: unless-stopped
+    ports:
+      - "41780:41780"
+    volumes:
+      - osprey-data:/data
+      - osprey-downloads:/downloads
+    environment:
+      OSPREY_DATA_DIR: /data
+      RUST_LOG: info
+    healthcheck:
+      test: ["CMD", "osprey", "status", "--socket", "/data/osprey.sock"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  osprey-data:
+  osprey-downloads:

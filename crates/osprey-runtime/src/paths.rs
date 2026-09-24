@@ -60,8 +60,21 @@ impl AppPaths {
     pub fn database(&self) -> PathBuf {
         self.data_dir.join("osprey.db")
     }
+    /// Unix socket path. `sockaddr_un` limits paths to ~104 bytes; when the data directory is
+    /// too deep, fall back to a short per-user location derived from the data dir (the per-user
+    /// temp dir on macOS is private to the user), so the CLI and server always agree.
     pub fn socket(&self) -> PathBuf {
-        self.data_dir.join("osprey.sock")
+        let preferred = self.data_dir.join("osprey.sock");
+        if preferred.as_os_str().len() < 100 {
+            return preferred;
+        }
+        let digest = blake3::hash(self.data_dir.to_string_lossy().as_bytes()).to_hex();
+        let short = std::env::temp_dir().join(format!("osprey-{}.sock", &digest[..12]));
+        if short.as_os_str().len() < 100 {
+            short
+        } else {
+            PathBuf::from(format!("/tmp/osprey-{}.sock", &digest[..12]))
+        }
     }
     pub fn local_token_file(&self) -> PathBuf {
         self.data_dir.join("local-api.token")

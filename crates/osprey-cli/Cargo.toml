@@ -29,3 +29,13 @@ url = { workspace = true }
 futures = { workspace = true }
 tokio-tungstenite = "0.26"
 directories = { workspace = true }
+hyper = { workspace = true, features = ["client", "http1"] }
+hyper-util = { workspace = true }
+http = { workspace = true }
+http-body-util = "0.1"
+percent-encoding = { workspace = true }
+qrcode = { version = "0.14", default-features = false }
+bytes = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
