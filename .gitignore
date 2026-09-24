@@ -9,3 +9,4 @@
 *.dmg
 .DS_Store
 /crates/osprey-ffi/generated
+/build
