@@ -342,3 +342,51 @@ async fn reqwest_like_get(addr: std::net::SocketAddr, path: &str) -> String {
     s.read_to_string(&mut out).await.unwrap();
     out
 }
+
+/// A paired device may only save inside the folders chosen on this computer; before the fix it
+/// could name any non-system directory (and, with the replace policy, overwrite user files).
+#[tokio::test(flavor = "multi_thread")]
+async fn remote_save_directory_is_confined() {
+    let env = engine().await;
+    let local = router(env.engine.clone(), ListenerKind::Local);
+    let remote = router(env.engine.clone(), ListenerKind::Remote);
+    let admin = env.engine.local_token();
+    let (_, info) = call(
+        &local,
+        "POST",
+        "/api/v1/devices/pairing",
+        Some(&admin),
+        Some(json!({ "scopes": ["read", "add"] })),
+    )
+    .await;
+    let (_, v) = call(
+        &remote,
+        "POST",
+        "/api/v1/pair",
+        None,
+        Some(json!({ "code": info["code"], "device_name": "Phone", "device_kind": "phone" })),
+    )
+    .await;
+    let token = v["token"].as_str().unwrap().to_owned();
+    let elsewhere = tempfile::tempdir().unwrap();
+    let (s, _) = call(
+        &remote,
+        "POST",
+        "/api/v1/tasks",
+        Some(&token),
+        Some(json!({ "url": "https://example.invalid/a.bin", "directory": elsewhere.path() })),
+    )
+    .await;
+    assert_eq!(s, StatusCode::FORBIDDEN);
+    let inside = env._downloads.path().join("sub");
+    let (s, v) = call(
+        &remote,
+        "POST",
+        "/api/v1/tasks",
+        Some(&token),
+        Some(json!({ "url": "https://example.invalid/a.bin", "directory": inside })),
+    )
+    .await;
+    assert_eq!(s, StatusCode::CREATED, "{v}");
+    env.engine.shutdown().await;
+}

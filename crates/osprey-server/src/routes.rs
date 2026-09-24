@@ -26,6 +26,8 @@ use osprey_domain::{
     AutomationId, CategoryId, Checksum, ConflictPolicy, DeviceId, NewTaskRequest, PluginId,
     Priority, QueueId, RecipeId, RuleId, ScheduleId, TaskId, TaskState,
 };
+use osprey_runtime::paths::AppPaths;
+use osprey_runtime::safety::ensure_within;
 use osprey_services::{
     ExportBundle, FileSelection, GrabberOptions, ImportOptions, Recipe, TaskFilter, TaskPatch,
 };
@@ -254,8 +256,13 @@ fn count(n: u32) -> Json<Value> {
 // ---------------------------------------------------------------------------------------------
 
 /// Normalise a task request from an API caller. Remote devices cannot make Osprey open a
-/// downloaded file automatically, and their tasks are tagged with a `remote` origin.
-fn sanitize_request(c: &Caller, mut r: NewTaskRequest) -> NewTaskRequest {
+/// downloaded file automatically, their tasks are tagged with a `remote` origin, and any save
+/// directory they name must lie inside a folder the local user configured.
+async fn sanitize_request(
+    st: &AppState,
+    c: &Caller,
+    mut r: NewTaskRequest,
+) -> ApiResult<NewTaskRequest> {
     if c.trusted {
         if r.origin.is_empty() {
             r.origin = "api".into();
@@ -263,8 +270,46 @@ fn sanitize_request(c: &Caller, mut r: NewTaskRequest) -> NewTaskRequest {
     } else {
         r.options.open_when_done = false;
         r.origin = "remote".into();
+        if let Some(d) = r.directory.as_ref().filter(|d| !d.as_os_str().is_empty()) {
+            check_remote_directory(st, d).await?;
+        }
     }
-    r
+    Ok(r)
+}
+
+/// Folders a remote device may save into: the default download directory and the directories
+/// the local user assigned to queues (and anything below them).
+async fn remote_save_roots(st: &AppState) -> ApiResult<Vec<PathBuf>> {
+    let expand = |p: &std::path::Path| AppPaths::expand_home(&p.to_string_lossy());
+    let base = expand(&st.engine.settings().storage.download_directory);
+    let mut roots = vec![base.clone()];
+    for q in st.engine.list_queues().await? {
+        if let Some(d) = q.directory {
+            let d = expand(&d);
+            roots.push(if d.is_absolute() { d } else { base.join(d) });
+        }
+    }
+    Ok(roots)
+}
+
+async fn check_remote_directory(st: &AppState, dir: &std::path::Path) -> ApiResult<()> {
+    let dir = AppPaths::expand_home(&dir.to_string_lossy());
+    if !dir.is_absolute() {
+        return Err(ApiError::validation(
+            "the save directory must be an absolute path",
+        ));
+    }
+    let inside = remote_save_roots(st)
+        .await?
+        .iter()
+        .any(|root| ensure_within(root, &dir).is_ok());
+    if inside {
+        Ok(())
+    } else {
+        Err(ApiError::forbidden(
+            "remote devices can only save inside the download folder chosen on this computer",
+        ))
+    }
 }
 
 fn refuse_exec_automation(c: &Caller, a: &AutomationRule) -> ApiResult<()> {
@@ -475,7 +520,7 @@ async fn probe(
     Extension(c): Who,
     ApiJson(r): ApiJson<NewTaskRequest>,
 ) -> ApiResult<Response> {
-    Ok(Json(st.engine.probe(sanitize_request(&c, r)).await?).into_response())
+    Ok(Json(st.engine.probe(sanitize_request(&st, &c, r).await?).await?).into_response())
 }
 
 async fn add_task(
@@ -483,7 +528,11 @@ async fn add_task(
     Extension(c): Who,
     ApiJson(r): ApiJson<NewTaskRequest>,
 ) -> ApiResult<Response> {
-    Ok(created(st.engine.add_task(sanitize_request(&c, r)).await?))
+    Ok(created(
+        st.engine
+            .add_task(sanitize_request(&st, &c, r).await?)
+            .await?,
+    ))
 }
 
 async fn add_batch(
@@ -494,7 +543,11 @@ async fn add_batch(
     if rs.len() > 1000 {
         return Err(ApiError::validation("at most 1000 tasks per batch"));
     }
-    let rs = rs.into_iter().map(|r| sanitize_request(&c, r)).collect();
+    let mut checked = Vec::with_capacity(rs.len());
+    for r in rs {
+        checked.push(sanitize_request(&st, &c, r).await?);
+    }
+    let rs = checked;
     Ok(Json(st.engine.add_tasks(rs).await?).into_response())
 }
 
@@ -518,6 +571,9 @@ async fn patch_task(
 ) -> ApiResult<Response> {
     let id = TaskId(id);
     if !c.trusted {
+        if let Some(d) = p.directory.as_ref() {
+            check_remote_directory(&st, d).await?;
+        }
         if let Some(opts) = p.options.as_mut() {
             // A remote device may not switch on "open when done".
             let current = st.engine.get_task(id.clone()).await?;
@@ -741,6 +797,11 @@ async fn task_file(State(st): St, Id(id): Id) -> ApiResult<Response> {
         .file_path
         .clone()
         .ok_or_else(|| ApiError::conflict("the download has no file"))?;
+    // Only serve the file the task produced inside its own folder (an imported or edited row
+    // must not turn this route into a reader for arbitrary paths).
+    if ensure_within(&task.directory, &path).is_err() {
+        return Err(ApiError::forbidden("the file is outside the task's folder"));
+    }
     let file = tokio::fs::File::open(&path)
         .await
         .map_err(|_| ApiError::not_found("the downloaded file no longer exists"))?;
@@ -1090,7 +1151,7 @@ async fn apply_recipe(
 ) -> ApiResult<Response> {
     Ok(created(
         st.engine
-            .apply_recipe(RecipeId(id), sanitize_request(&c, r))
+            .apply_recipe(RecipeId(id), sanitize_request(&st, &c, r).await?)
             .await?,
     ))
 }
@@ -1225,7 +1286,7 @@ async fn grabber_add(
     Id(id): Id,
     ApiJson(b): ApiJson<GrabberAddBody>,
 ) -> ApiResult<Response> {
-    let req = sanitize_request(&c, b.request);
+    let req = sanitize_request(&st, &c, b.request).await?;
     Ok(Json(st.engine.grabber_add(id, b.urls, req).await?).into_response())
 }
 
