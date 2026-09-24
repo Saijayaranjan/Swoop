@@ -210,7 +210,28 @@ impl UpdateChecker {
         if !(200..300).contains(&status) {
             return Err(TaskError::from_http_status(status, url));
         }
-        let mut file = tokio::fs::File::create(&path)
+        // Write to a temporary name and only rename to the final name once the hash and size
+        // match, so an interrupted or tampered download never sits where an installer looks.
+        let tmp = path.with_extension("osprey-verify");
+        let result = self.fetch_to(&mut resp, &tmp, sha_hex, info.size).await;
+        if let Err(e) = result {
+            let _ = tokio::fs::remove_file(&tmp).await;
+            return Err(e);
+        }
+        tokio::fs::rename(&tmp, &path)
+            .await
+            .map_err(|e| TaskError::from_io(&e, "rename verified update"))?;
+        Ok(path)
+    }
+
+    async fn fetch_to(
+        &self,
+        resp: &mut reqwest::Response,
+        path: &Path,
+        sha_hex: &str,
+        size: Option<u64>,
+    ) -> Result<(), TaskError> {
+        let mut file = tokio::fs::File::create(path)
             .await
             .map_err(|e| TaskError::from_io(&e, "create"))?;
         let mut hasher = sha2::Sha256::new();
@@ -238,23 +259,21 @@ impl UpdateChecker {
             .map_err(|e| TaskError::from_io(&e, "sync"))?;
         let actual = hex::encode(hasher.finalize());
         if actual != sha_hex.to_ascii_lowercase() {
-            let _ = tokio::fs::remove_file(&path).await;
             return Err(TaskError::new(
                 ErrorKind::ChecksumMismatch,
                 "update archive hash mismatch",
             )
             .with_detail(format!("expected {sha_hex} got {actual}")));
         }
-        if let Some(sz) = info.size {
+        if let Some(sz) = size {
             if sz != total {
-                let _ = tokio::fs::remove_file(&path).await;
                 return Err(TaskError::new(
                     ErrorKind::ChecksumMismatch,
                     "update size mismatch",
                 ));
             }
         }
-        Ok(path)
+        Ok(())
     }
 
     fn verify_signature(&self, sha_hex: &str, sig_b64: &str) -> Result<(), TaskError> {
