@@ -28,5 +28,8 @@ If the app is not running the host answers `{"ok":false,"error":{"type":"unavail
 "message":"Osprey is not running"}}` and the extension offers to launch it (`open -b app.osprey.desktop`
 is done by the host on `{"type":"launch"}` — macOS only).
 
-Only paths under `/api/v1/` are relayed; `settings`, `devices`, `automations`, `plugins`, `import`,
-`export`, `archives` are refused by the host (the extension has no business there).
+Only `/api/v1/tasks…` and `/api/v1/media…` are relayed, with the methods GET, POST, PUT, PATCH and
+DELETE. Every other group (settings, devices, automations, rules, queues, updates, plugins,
+import/export, archives, …) is refused by the host, as are paths containing `..`, `//`, `%`, `#`,
+backslashes or whitespace. The relay authenticates with the local token, so the allowlist is what
+keeps a compromised extension away from administrative routes.

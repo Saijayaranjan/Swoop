@@ -20,10 +20,11 @@ pub const MAX_MESSAGE_BYTES: u32 = 1024 * 1024;
 const HOST_NAME: &str = "app.osprey.bridge";
 const BUNDLE_ID: &str = "app.osprey.desktop";
 
-/// Paths under `/api/v1/` the extension has no business reaching directly.
-const FORBIDDEN_GROUPS: &[&str] = &[
-    "settings", "devices", "automations", "import", "export", "archives", "plugins",
-];
+/// The only `/api/v1/` groups the extension uses (adding/controlling downloads and media
+/// detection). Everything else — settings, devices, automations, rules, queues, updates,
+/// import/export, archives, plugins — is refused: the relay authenticates with the local
+/// admin token, so an allowlist keeps a compromised extension from reaching the rest.
+const ALLOWED_GROUPS: &[&str] = &["tasks", "media"];
 
 // ---------------------------------------------------------------------------------------------
 // Framing (sync; run from a blocking thread since stdin/stdout are blocking).
@@ -86,11 +87,26 @@ pub fn write_message(w: &mut impl Write, value: &Value) -> std::io::Result<()> {
 }
 
 fn path_allowed(path: &str) -> bool {
+    // Reject anything a server or proxy might normalise into a different route.
+    if path.len() > 2048
+        || path.contains("..")
+        || path.contains("//")
+        || path.contains('\\')
+        || path.contains('%')
+        || path.contains('#')
+        || path.chars().any(|c| c.is_control() || c.is_whitespace())
+    {
+        return false;
+    }
     let Some(rest) = path.split('?').next().unwrap_or("").strip_prefix("/api/v1/") else {
         return false;
     };
     let first = rest.split('/').next().unwrap_or("");
-    !FORBIDDEN_GROUPS.contains(&first)
+    ALLOWED_GROUPS.contains(&first)
+}
+
+fn method_allowed(m: &str) -> bool {
+    matches!(m, "GET" | "POST" | "PUT" | "PATCH" | "DELETE")
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -189,8 +205,8 @@ async fn handle_message(
                 return;
             }
             let method = match Method::from_bytes(method_str.as_bytes()) {
-                Ok(m) => m,
-                Err(_) => {
+                Ok(m) if method_allowed(method_str) => m,
+                _ => {
                     send_frame(
                         &write_lock,
                         &serde_json::json!({ "id": id, "ok": false, "error": { "type": "validation", "message": "bad method" } }),
@@ -463,5 +479,10 @@ mod tests {
         assert!(!path_allowed("/api/v1/automations"));
         assert!(!path_allowed("/healthz"));
         assert!(!path_allowed("/api/v2/tasks"));
+        assert!(!path_allowed("/api/v1/rules"));
+        assert!(!path_allowed("/api/v1/tasks/../settings"));
+        assert!(!path_allowed("/api/v1/tasks/%2e%2e/settings"));
+        assert!(path_allowed("/api/v1/tasks/rows?smart=active"));
+        assert!(path_allowed("/api/v1/media/detect"));
     }
 }
