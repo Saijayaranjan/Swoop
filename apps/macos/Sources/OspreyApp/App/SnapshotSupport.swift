@@ -6,7 +6,7 @@ import SwiftUI
 /// `OSPREY_SNAPSHOT` is set to a path prefix, Osprey renders its main window into PNGs for each
 /// screen listed in `OSPREY_SNAPSHOT_SCREENS` (comma-separated: `downloads`, `downloads-empty`,
 /// `dashboard`, `inspector`, `add`, `torrents`, `scheduled`, `history`, `grabber`, `queue`,
-/// `settings`, `menubar`; default `downloads,dashboard`) and `OSPREY_SNAPSHOT_APPEARANCE` (`light`, `dark` or
+/// `settings`, `settings-<pane>` (e.g. `settings-general`), `about`, `menubar`; default `downloads,dashboard`) and `OSPREY_SNAPSHOT_APPEARANCE` (`light`, `dark` or
 /// both); `OSPREY_SNAPSHOT_SIZE=WxH` sets the main window size first. With `OSPREY_SNAPSHOT_SAMPLE=1` the in-memory model is filled with sample downloads,
 /// live stats and activity so busy states can be checked; the engine's stored data is untouched.
 /// Inert otherwise.
@@ -41,6 +41,7 @@ enum SnapshotSupport {
                 NSApp.appearance = NSAppearance(named: appearance == "dark" ? .darkAqua : .aqua)
                 for screen in screens {
                     if sample {
+                        SnapshotSample.idle = screen == "downloads-empty"
                         if screen == "downloads-empty" { model.tasks.load([], rev: model.tasks.snapshotRev) } else { SnapshotSample.loadTasks(into: model) }
                     }
                     ui.sidebar = item(screen, model: model)
@@ -48,12 +49,34 @@ enum SnapshotSupport {
                     ui.selection = screen == "inspector" ? [SnapshotSample.inspectedId] : []
                     if screen == "add" { ui.openAdd() }
                     if screen == "settings" { delegate.openSettingsAction?() }
+                    if screen.hasPrefix("settings-") {
+                        let key = "settingsPane"
+                        let original = UserDefaults.standard.string(forKey: key)
+                        UserDefaults.standard.set(String(screen.dropFirst("settings-".count)), forKey: key)
+                        delegate.openSettingsAction?()
+                        try? await Task.sleep(nanoseconds: 1_800_000_000)
+                        if let w = NSApp.windows.first(where: { $0.isVisible && $0.frame.height > 300 && $0 !== main }) {
+                            save(w, to: "\(prefix)-\(screen)-\(appearance).png")
+                            w.close()
+                        }
+                        if let original { UserDefaults.standard.set(original, forKey: key) } else { UserDefaults.standard.removeObject(forKey: key) }
+                        continue
+                    }
+                    if screen == "about" {
+                        delegate.openAboutAction?()
+                        try? await Task.sleep(nanoseconds: 1_500_000_000)
+                        if let w = NSApp.windows.first(where: { $0.isVisible && $0.frame.height > 300 && $0 !== main && $0.frame.width < 500 }) {
+                            save(w, to: "\(prefix)-about-\(appearance).png")
+                            w.close()
+                        }
+                        continue
+                    }
                     if screen == "menubar" {
                         await captureMenuBar(ui: ui, model: model, path: "\(prefix)-menubar-\(appearance).png", dark: appearance == "dark")
                         continue
                     }
                     try? await Task.sleep(nanoseconds: 1_600_000_000)
-                    if sample { SnapshotSample.refreshHistory(into: model) }
+                    if sample && !SnapshotSample.idle { SnapshotSample.refreshHistory(into: model) }
                     try? await Task.sleep(nanoseconds: 350_000_000)
                     for (i, window) in NSApp.windows.enumerated() where window.isVisible && window.frame.height > 300 {
                         save(window, to: "\(prefix)-\(screen)-\(appearance)\(i == 0 ? "" : "-\(i)").png")
@@ -137,6 +160,8 @@ enum SnapshotSupport {
 @MainActor
 enum SnapshotSample {
     static var active = false
+    /// Report an idle engine (no transfers) instead of the busy sample figures.
+    static var idle = false
     static var activity: [Date: DayActivity]?
     static var history: [HistoryEntryData]?
     static var allTimeBytes: UInt64 = 0
@@ -276,8 +301,12 @@ enum SnapshotSample {
 
     static func refreshStats(into model: AppModel) {
         var s = baseStats
-        s.downloadSpeed = 42_300_000
-        s.uploadSpeed = 1_150_000
+        if idle {
+            s = GlobalStatsData()
+        } else {
+            s.downloadSpeed = 42_300_000
+            s.uploadSpeed = 1_150_000
+        }
         s.at = Date().millis
         model.apply([.globalStats(s)])
     }

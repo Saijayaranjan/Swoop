@@ -194,7 +194,9 @@ struct BytesField: View {
     @ViewState private var text = ""
     @FocusState private var focused: Bool
     var body: some View {
-        TextField("e.g. 100 MB", text: $text)
+        TextField("", text: $text, prompt: Text("e.g. 100 MB"))
+            .labelsHidden()
+            .multilineTextAlignment(.trailing)
             .textFieldStyle(.roundedBorder)
             .frame(width: 140)
             .focused($focused)
@@ -208,7 +210,8 @@ struct BytesField: View {
     }
 }
 
-/// Shared list + detail layout for configuration panes (Mail-rules style: list with +/− below).
+/// Shared list + detail layout for configuration panes: a card list with add/remove on the left
+/// and the editor for the selected item on the right. The first item is selected automatically.
 struct MasterDetail<Item: Identifiable, Row: View, Detail: View>: View where Item.ID == String {
     let items: [Item]
     @Binding var selection: String?
@@ -218,29 +221,196 @@ struct MasterDetail<Item: Identifiable, Row: View, Detail: View>: View where Ite
     @ViewBuilder let detail: () -> Detail
 
     var body: some View {
-        HStack(spacing: 0) {
-            VStack(spacing: 0) {
-                List(selection: $selection) {
-                    ForEach(items) { item in row(item).tag(item.id) }
-                }
-                .listStyle(.inset)
-                Divider()
-                HStack(spacing: 0) {
-                    Button(action: onAdd) { Image(systemName: "plus").frame(width: 24, height: 20) }
-                        .accessibilityLabel(Text("Add"))
-                    Divider().frame(height: 16)
-                    Button { if let s = selection { onRemove?(s) } } label: { Image(systemName: "minus").frame(width: 24, height: 20) }
-                        .disabled(selection == nil || onRemove == nil)
-                        .accessibilityLabel(Text("Remove"))
-                    Spacer()
-                }
-                .buttonStyle(.borderless)
-                .padding(4)
-            }
-            .frame(width: 220)
-            Divider()
+        HStack(alignment: .top, spacing: 14) {
+            if !items.isEmpty { list }
             detail()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .padding(.leading, 20)
+        .padding(.top, 10)
+        .padding(.bottom, 16)
+        .onAppear { if selection == nil { selection = items.first?.id } }
+        .onChange(of: items.map(\.id)) { _, ids in
+            if let s = selection, ids.contains(s) { return }
+            if selection != nil || !ids.isEmpty { selection = ids.first }
+        }
+    }
+
+    private var list: some View {
+            VStack(spacing: 0) {
+                HStack(spacing: 8) {
+                    Text("\(items.count) \(L10n.tr(items.count == 1 ? "item" : "items"))")
+                        .font(.system(size: 11, weight: .semibold))
+                        .tracking(0.8)
+                        .foregroundStyle(.secondary)
+                        .textCase(.uppercase)
+                    Spacer()
+                    HStack(spacing: 0) {
+                        Button(action: onAdd) {
+                            Image(systemName: "plus").font(.system(size: 12, weight: .bold)).frame(width: 30, height: 26).contentShape(Rectangle())
+                        }
+                        .help("Add")
+                        .accessibilityLabel(Text("Add"))
+                        Rectangle().fill(Theme.hairline).frame(width: 1, height: 14)
+                        Button { if let s = selection { onRemove?(s) } } label: {
+                            Image(systemName: "minus").font(.system(size: 12, weight: .bold)).frame(width: 30, height: 26).contentShape(Rectangle())
+                        }
+                        .disabled(selection == nil || onRemove == nil)
+                        .help("Remove")
+                        .accessibilityLabel(Text("Remove"))
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(Theme.blue)
+                    .background(Theme.well, in: Capsule())
+                    .overlay(Capsule().strokeBorder(Theme.hairline, lineWidth: 1))
+                }
+                .padding(.horizontal, 14)
+                .padding(.vertical, 10)
+                Rectangle().fill(Theme.hairline).frame(height: 1)
+                ScrollView {
+                    LazyVStack(spacing: 2) {
+                        ForEach(items) { item in
+                            MasterListRow(selected: selection == item.id) { row(item) }
+                                .onTapGesture { withAnimation(.easeOut(duration: 0.15)) { selection = item.id } }
+                        }
+                    }
+                    .padding(8)
+                }
+                .scrollIndicators(.never)
+            }
+            .frame(width: 260)
+            .frame(maxHeight: .infinity)
+            .cardSurface(cornerRadius: 18, padding: 0)
+    }
+}
+
+private struct MasterListRow<Content: View>: View {
+    let selected: Bool
+    @ViewBuilder let content: Content
+    @ViewState private var hovering = false
+    var body: some View {
+        let shape = RoundedRectangle(cornerRadius: 12, style: .continuous)
+        content
+            .padding(.horizontal, 8)
+            .frame(maxWidth: .infinity, minHeight: 48, alignment: .leading)
+            .background {
+                if selected {
+                    shape.fill(Theme.rowSelected).overlay(shape.strokeBorder(Theme.blue.opacity(0.3), lineWidth: 1))
+                } else if hovering {
+                    shape.fill(Theme.rowHover)
+                }
+            }
+            .contentShape(shape)
+            .onHover { hovering = $0 }
+            .accessibilityAddTraits(selected ? .isSelected : [])
+    }
+}
+
+/// A list row with a tinted symbol tile, a title and a secondary line.
+struct MasterRow: View {
+    var symbol: String
+    var tint: Color
+    var title: String
+    var subtitle: String?
+    var subtitleTint: Color? = nil
+    var dimmed = false
+    var body: some View {
+        HStack(spacing: 10) {
+            Image(systemName: symbol)
+                .font(.system(size: 13, weight: .semibold))
+                .symbolRenderingMode(.hierarchical)
+                .foregroundStyle(tint)
+                .frame(width: 32, height: 32)
+                .background(LinearGradient(colors: [tint.opacity(0.22), tint.opacity(0.10)], startPoint: .topLeading, endPoint: .bottomTrailing),
+                            in: RoundedRectangle(cornerRadius: 9, style: .continuous))
+            VStack(alignment: .leading, spacing: 1) {
+                Text(title).font(.system(size: 13.5, weight: .semibold)).lineLimit(1)
+                    .foregroundStyle(dimmed ? .secondary : .primary)
+                if let subtitle {
+                    Text(subtitle).font(.system(size: 11.5)).lineLimit(1)
+                        .foregroundStyle(subtitleTint.map { AnyShapeStyle($0) } ?? AnyShapeStyle(.secondary))
+                }
+            }
+            Spacer(minLength: 0)
+        }
+        .opacity(dimmed ? 0.75 : 1)
+    }
+}
+
+/// A palette of symbol tiles to pick an icon from.
+struct IconGrid: View {
+    let icons: [String]
+    @Binding var selection: String
+    var tint: Color = Theme.blue
+    var body: some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.fixed(38), spacing: 8), count: 8), alignment: .leading, spacing: 8) {
+            ForEach(icons, id: \.self) { icon in
+                let on = selection == icon
+                Button { selection = icon } label: {
+                    Image(systemName: icon)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(on ? .white : tint)
+                        .frame(width: 38, height: 38)
+                        .background(on ? AnyShapeStyle(tint.gradient) : AnyShapeStyle(tint.opacity(0.12)),
+                                    in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(Text(icon))
+                .accessibilityAddTraits(on ? .isSelected : [])
+            }
+        }
+    }
+}
+
+/// A colour for a category, from its stored hex colour or its symbol.
+enum CategoryTint {
+    static func of(_ c: CategoryData) -> Color {
+        if let hex = c.color?.trimmingCharacters(in: CharacterSet(charactersIn: "#")), hex.count == 6, let v = UInt32(hex, radix: 16) {
+            return Color(light: v, dark: v)
+        }
+        return of(symbol: c.icon)
+    }
+    static func of(symbol: String) -> Color {
+        switch symbol {
+        case let s where s.contains("film") || s.contains("video"): return Theme.fileTint(name: "x.mp4")
+        case let s where s.contains("music") || s.contains("waveform"): return Theme.fileTint(name: "x.mp3")
+        case let s where s.contains("photo") || s.contains("paintpalette"): return Theme.fileTint(name: "x.png")
+        case let s where s.contains("archivebox"): return Theme.fileTint(name: "x.zip")
+        case let s where s.contains("app") || s.contains("shippingbox") || s.contains("gamecontroller"): return Theme.fileTint(name: "x.dmg")
+        case let s where s.contains("network") || s.contains("point.3"): return Theme.fileTint(name: "x", kind: .torrent)
+        case let s where s.contains("book") || s.contains("richtext"): return Theme.fileTint(name: "x.pdf")
+        default: return Theme.blue
+        }
+    }
+}
+
+/// A form row: title on the left, the current value and a stepper on the right.
+struct StepperRow<V: Strideable>: View where V.Stride: ExpressibleByIntegerLiteral {
+    let title: LocalizedStringKey
+    @Binding var value: V
+    let range: ClosedRange<V>
+    let step: V.Stride
+    let display: String
+
+    init(_ title: LocalizedStringKey, value: Binding<V>, in range: ClosedRange<V>, step: V.Stride = 1, display: String) {
+        self.title = title
+        _value = value
+        self.range = range
+        self.step = step
+        self.display = display
+    }
+
+    var body: some View {
+        LabeledContent {
+            HStack(spacing: 8) {
+                Text(display)
+                    .font(.system(.body, design: .rounded).monospacedDigit())
+                    .foregroundStyle(.secondary)
+                    .contentTransition(.numericText())
+                Stepper("", value: $value, in: range, step: step).labelsHidden()
+            }
+        } label: {
+            Text(title)
         }
     }
 }

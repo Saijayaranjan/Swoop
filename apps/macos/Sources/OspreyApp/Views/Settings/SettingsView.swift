@@ -69,58 +69,139 @@ enum SettingsPane: String, CaseIterable, Identifiable {
     }
 }
 
+/// Sidebar groups for the Settings window.
+enum SettingsGroup: String, CaseIterable, Identifiable {
+    case general, organise, network, integrations, privacy
+    var id: String { rawValue }
+    var title: String {
+        switch self {
+        case .general: return "General"
+        case .organise: return "Downloads & Organisation"
+        case .network: return "Network"
+        case .integrations: return "Integrations"
+        case .privacy: return "Privacy & Advanced"
+        }
+    }
+    var panes: [SettingsPane] {
+        switch self {
+        case .general: return [.general, .notifications, .updates]
+        case .organise: return [.downloads, .queues, .categories, .rules, .automations, .recipes]
+        case .network: return [.network, .bandwidth, .torrents]
+        case .integrations: return [.browser, .remote, .devices, .automation]
+        case .privacy: return [.privacy, .advanced]
+        }
+    }
+}
+
+extension SettingsPane {
+    var subtitle: String {
+        switch self {
+        case .general: return "Startup, appearance and language."
+        case .downloads: return "Where files go and how they're checked."
+        case .queues: return "Lanes that decide how many downloads run at once."
+        case .categories: return "Sort files by type into their own folders."
+        case .rules: return "Route new downloads by site, type, size or name."
+        case .automations: return "React to download events with actions."
+        case .recipes: return "One-click bundles of folder, queue, tags and actions."
+        case .network: return "Connections, retries, timeouts and proxies."
+        case .bandwidth: return "Speed modes, limits and how much runs in parallel."
+        case .torrents: return "Peers, seeding and trackers."
+        case .browser: return "Catch downloads straight from your browser."
+        case .notifications: return "Choose what Osprey tells you about."
+        case .remote: return "Control Osprey from other devices."
+        case .devices: return "Pair and manage phones and computers."
+        case .automation: return "Extensions that add abilities to Osprey."
+        case .privacy: return "History, logs and saved sign-ins."
+        case .updates: return "Stay on the latest version."
+        case .advanced: return "Engine details and diagnostics."
+        }
+    }
+}
+
 struct SettingsView: View {
     @Environment(AppModel.self) private var model
     @AppStorage("settingsPane") private var paneRaw = SettingsPane.general.rawValue
+    @Namespace private var selectionNS
+    @Environment(\.colorScheme) private var scheme
 
     var body: some View {
         let pane = SettingsPane(rawValue: paneRaw) ?? .general
-        NavigationSplitView {
-            List(selection: Binding(get: { paneRaw }, set: { if let v = $0 { paneRaw = v } })) {
-                ForEach(SettingsPane.allCases) { p in
-                    Label {
-                        Text(LocalizedStringKey(p.title)).font(.system(size: 14))
-                    } icon: {
-                        Image(systemName: p.symbol)
-                            .font(.system(size: 12, weight: .semibold))
-                            .foregroundStyle(paneRaw == p.rawValue ? .white : Theme.blue)
-                            .frame(width: 26, height: 26)
-                            .background(paneRaw == p.rawValue ? AnyShapeStyle(Theme.blue.gradient) : AnyShapeStyle(Theme.blue.opacity(0.13)),
-                                        in: RoundedRectangle(cornerRadius: 8, style: .continuous))
-                    }
-                    .padding(.vertical, 3)
-                    .tag(p.rawValue)
-                }
-            }
-            .listStyle(.sidebar)
-            .navigationSplitViewColumnWidth(210)
-            .toolbar(removing: .sidebarToggle)
-        } detail: {
-            ZStack {
-                WindowWash()
+        let shape = RoundedRectangle(cornerRadius: 22, style: .continuous)
+        ZStack {
+            WindowWash()
+            HStack(spacing: 0) {
+                sidebar(pane)
+                    .frame(width: 236)
                 VStack(alignment: .leading, spacing: 0) {
                     HStack(spacing: 14) {
                         Image(systemName: pane.symbol)
-                            .font(.system(size: 20, weight: .semibold))
+                            .font(.system(size: 21, weight: .semibold))
                             .foregroundStyle(.white)
-                            .frame(width: 44, height: 44)
-                            .background(Theme.blue.gradient, in: RoundedRectangle(cornerRadius: 13, style: .continuous))
+                            .frame(width: 46, height: 46)
+                            .background(LinearGradient(colors: [Color(red: 0.25, green: 0.62, blue: 1.0), Color(red: 0.16, green: 0.36, blue: 0.93)],
+                                                       startPoint: .topLeading, endPoint: .bottomTrailing),
+                                        in: RoundedRectangle(cornerRadius: 14, style: .continuous))
                             .shadow(color: Theme.blue.opacity(0.3), radius: 8, y: 3)
-                        Text(LocalizedStringKey(pane.title))
-                            .font(.system(size: 28, weight: .bold))
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(LocalizedStringKey(pane.title)).font(.system(size: 26, weight: .bold))
+                            Text(LocalizedStringKey(pane.subtitle)).font(.system(size: 13)).foregroundStyle(.secondary)
+                        }
                     }
                     .padding(.horizontal, 28)
-                    .padding(.top, 18)
-                    .padding(.bottom, 4)
+                    .padding(.top, 24)
+                    .padding(.bottom, 6)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background { Color.clear.contentShape(Rectangle()).windowDraggable() }
                     paneView(pane)
                         .scrollContentBackground(.hidden)
+                        .scrollIndicators(.never)
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .id(pane)
                 }
+                .background(Theme.panel, in: shape)
+                .clipShape(shape)
+                .overlay(shape.strokeBorder(Theme.hairline, lineWidth: 1))
+                .shadow(color: Color(red: 0.05, green: 0.1, blue: 0.3).opacity(scheme == .dark ? 0.45 : 0.10), radius: 24, y: 10)
+                .padding(.vertical, 10)
+                .padding(.trailing, 10)
             }
-            .navigationTitle(LocalizedStringKey(pane.title))
-            .toolbarBackground(.hidden, for: .windowToolbar)
         }
-        .frame(width: 880, height: 640)
+        .ignoresSafeArea()
+        .frame(width: 1000, height: 700)
+        .transparentTitleBar()
+    }
+
+    private func sidebar(_ current: SettingsPane) -> some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Settings")
+                .font(.system(size: 22, weight: .bold, design: .rounded))
+                .padding(.leading, 22)
+                .padding(.top, 46)
+                .padding(.bottom, 8)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .background { Color.clear.contentShape(Rectangle()).windowDraggable() }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 1) {
+                    ForEach(SettingsGroup.allCases) { group in
+                        Text(L10n.tr(group.title).uppercased())
+                            .font(.system(size: 10, weight: .semibold))
+                            .tracking(1.1)
+                            .foregroundStyle(.secondary)
+                            .padding(.horizontal, 12)
+                            .padding(.top, group == .general ? 8 : 16)
+                            .padding(.bottom, 4)
+                        ForEach(group.panes) { p in
+                            SettingsSidebarRow(pane: p, selected: current == p, namespace: selectionNS) {
+                                withAnimation(.spring(response: 0.34, dampingFraction: 0.85)) { paneRaw = p.rawValue }
+                            }
+                        }
+                    }
+                }
+                .padding(.horizontal, 12)
+                .padding(.bottom, 16)
+            }
+            .scrollIndicators(.never)
+        }
     }
 
     @ViewBuilder
@@ -149,6 +230,46 @@ struct SettingsView: View {
             }
         }
         .formStyle(.grouped)
+    }
+}
+
+struct SettingsSidebarRow: View {
+    let pane: SettingsPane
+    let selected: Bool
+    let namespace: Namespace.ID
+    let action: () -> Void
+    @ViewState private var hovering = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 10) {
+                Image(systemName: pane.symbol)
+                    .font(.system(size: 11.5, weight: .semibold))
+                    .foregroundStyle(selected ? .white : Theme.blue)
+                    .frame(width: 26, height: 26)
+                    .background(selected ? AnyShapeStyle(Theme.blue.gradient) : AnyShapeStyle(Theme.blue.opacity(0.12)),
+                                in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                Text(LocalizedStringKey(pane.title))
+                    .font(.system(size: 14, weight: selected ? .semibold : .regular))
+                    .foregroundStyle(.primary)
+                Spacer(minLength: 0)
+            }
+            .padding(.horizontal, 8)
+            .frame(height: 36)
+            .background {
+                if selected {
+                    Color.clear
+                        .ospreyGlass(.regular, in: RoundedRectangle(cornerRadius: 11, style: .continuous))
+                        .matchedGeometryEffect(id: "settings-selection", in: namespace)
+                } else if hovering {
+                    RoundedRectangle(cornerRadius: 11, style: .continuous).fill(Color.primary.opacity(0.05))
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { hovering = $0 }
+        .accessibilityAddTraits(selected ? .isSelected : [])
     }
 }
 
@@ -266,15 +387,9 @@ struct NetworkPane: View {
     var body: some View {
         Form {
             Section("Connections") {
-                Stepper(value: b.int("network.connections_per_task", 8), in: 1...64) {
-                    LabeledContent("Connections per download", value: "\(model.settings.int("network.connections_per_task", default: 8))")
-                }
-                Stepper(value: b.int("network.max_connections_per_host", 16), in: 1...128) {
-                    LabeledContent("Per server", value: "\(model.settings.int("network.max_connections_per_host", default: 16))")
-                }
-                Stepper(value: b.int("network.max_total_connections", 64), in: 1...512) {
-                    LabeledContent("In total", value: "\(model.settings.int("network.max_total_connections", default: 64))")
-                }
+                StepperRow("Connections per download", value: b.int("network.connections_per_task", 8), in: 1...64, display: "\(model.settings.int("network.connections_per_task", default: 8))")
+                StepperRow("Per server", value: b.int("network.max_connections_per_host", 16), in: 1...128, display: "\(model.settings.int("network.max_connections_per_host", default: 16))")
+                StepperRow("In total", value: b.int("network.max_total_connections", 64), in: 1...512, display: "\(model.settings.int("network.max_total_connections", default: 64))")
                 Toggle("Adapt connections to the server", isOn: b.bool("network.adaptive_segmentation", true))
                 LabeledContent("Smallest segment") { BytesField(bytes: b.bytes("network.min_segment_size")) }
                 Toggle("Allow HTTP/2 multiplexing for segments", isOn: b.bool("network.allow_http2_for_segments"))
@@ -293,15 +408,9 @@ struct NetworkPane: View {
                 }
             }
             Section("Reliability") {
-                Stepper(value: b.int("network.max_retries", 8), in: 0...50) {
-                    LabeledContent("Retries", value: "\(model.settings.int("network.max_retries", default: 8))")
-                }
-                Stepper(value: b.int("network.connect_timeout_seconds", 20), in: 5...120, step: 5) {
-                    LabeledContent("Connect timeout", value: "\(model.settings.int("network.connect_timeout_seconds", default: 20)) s")
-                }
-                Stepper(value: b.int("network.read_timeout_seconds", 45), in: 5...300, step: 5) {
-                    LabeledContent("Read timeout", value: "\(model.settings.int("network.read_timeout_seconds", default: 45)) s")
-                }
+                StepperRow("Retries", value: b.int("network.max_retries", 8), in: 0...50, display: "\(model.settings.int("network.max_retries", default: 8))")
+                StepperRow("Connect timeout", value: b.int("network.connect_timeout_seconds", 20), in: 5...120, step: 5, display: "\(model.settings.int("network.connect_timeout_seconds", default: 20)) s")
+                StepperRow("Read timeout", value: b.int("network.read_timeout_seconds", 45), in: 5...300, step: 5, display: "\(model.settings.int("network.read_timeout_seconds", default: 45)) s")
                 Toggle("Verify TLS certificates", isOn: b.bool("network.verify_tls", true))
                 Toggle("IPv4 only", isOn: b.bool("network.ipv4_only"))
                 Toggle("Prefer IPv6", isOn: b.bool("network.prefer_ipv6"))
@@ -366,9 +475,9 @@ struct BandwidthPane: View {
         Form {
             Section("Speed mode") {
                 Picker("Mode", selection: Binding(get: { model.stats.trafficMode }, set: { model.setTrafficMode($0) })) {
-                    ForEach(TrafficMode.pickerModes, id: \.self) { Label($0.label, systemImage: $0.symbol).tag($0) }
+                    ForEach(TrafficMode.pickerModes, id: \.self) { Text(LocalizedStringKey($0.label)).tag($0) }
                 }
-                .pickerStyle(.inline)
+                .pickerStyle(.segmented)
                 Text(modeHelp).font(.caption).foregroundStyle(.secondary)
                 LabeledContent("Custom download limit") { BytesField(bytes: b.bytes("bandwidth.custom_download_limit")) }
                 LabeledContent("Custom upload limit") { BytesField(bytes: b.bytes("bandwidth.custom_upload_limit")) }
@@ -376,12 +485,8 @@ struct BandwidthPane: View {
                 LabeledContent("Measured connection", value: cap > 0 ? Fmt.speed(cap) : L10n.tr("Not measured yet"))
             }
             Section("Concurrency") {
-                Stepper(value: b.int("bandwidth.max_active_downloads", 5), in: 1...50) {
-                    LabeledContent("Active downloads", value: "\(model.settings.int("bandwidth.max_active_downloads", default: 5))")
-                }
-                Stepper(value: b.int("bandwidth.max_active_torrents", 5), in: 1...50) {
-                    LabeledContent("Active torrents", value: "\(model.settings.int("bandwidth.max_active_torrents", default: 5))")
-                }
+                StepperRow("Active downloads", value: b.int("bandwidth.max_active_downloads", 5), in: 1...50, display: "\(model.settings.int("bandwidth.max_active_downloads", default: 5))")
+                StepperRow("Active torrents", value: b.int("bandwidth.max_active_torrents", 5), in: 1...50, display: "\(model.settings.int("bandwidth.max_active_torrents", default: 5))")
             }
         }
     }
@@ -407,9 +512,7 @@ struct TorrentsPane: View {
                 Toggle("Distributed hash table (DHT)", isOn: b.bool("torrent.dht", true))
                 Toggle("Peer exchange (PEX)", isOn: b.bool("torrent.pex", true))
                 Toggle("Require encrypted connections", isOn: b.bool("torrent.encryption_required"))
-                Stepper(value: b.int("torrent.max_peers_per_torrent", 120), in: 10...1000, step: 10) {
-                    LabeledContent("Peers per torrent", value: "\(model.settings.int("torrent.max_peers_per_torrent", default: 120))")
-                }
+                StepperRow("Peers per torrent", value: b.int("torrent.max_peers_per_torrent", 120), in: 10...1000, step: 10, display: "\(model.settings.int("torrent.max_peers_per_torrent", default: 120))")
                 Toggle("Download pieces in order by default", isOn: b.bool("torrent.sequential_by_default"))
             }
             Section("Seeding") {
@@ -417,9 +520,7 @@ struct TorrentsPane: View {
                 LabeledContent("Stop at ratio") {
                     TextField("", value: b.double("torrent.seed_ratio_limit", 2), format: .number.precision(.fractionLength(1))).frame(width: 70)
                 }
-                Stepper(value: b.int("torrent.seed_time_limit_minutes"), in: 0...10080, step: 30) {
-                    LabeledContent("Stop after", value: model.settings.int("torrent.seed_time_limit_minutes") == 0 ? L10n.tr("No limit") : "\(model.settings.int("torrent.seed_time_limit_minutes")) min")
-                }
+                StepperRow("Stop after", value: b.int("torrent.seed_time_limit_minutes"), in: 0...10080, step: 30, display: model.settings.int("torrent.seed_time_limit_minutes") == 0 ? L10n.tr("No limit") : "\(model.settings.int("torrent.seed_time_limit_minutes")) min")
                 LabeledContent("Upload limit") { BytesField(bytes: b.bytes("torrent.upload_limit")) }
             }
             Section("Trackers") {
@@ -536,15 +637,9 @@ struct RemotePane: View {
                 TextField("Local API port", value: b.int("remote.local_port", 41779), format: .number.grouping(.never))
             }
             Section("Security") {
-                Stepper(value: b.int("remote.session_ttl_hours", 720), in: 1...8760, step: 24) {
-                    LabeledContent("Sessions expire after", value: "\(model.settings.int("remote.session_ttl_hours", default: 720) / 24) days")
-                }
-                Stepper(value: b.int("remote.max_failed_attempts", 5), in: 1...50) {
-                    LabeledContent("Lock out after failed attempts", value: "\(model.settings.int("remote.max_failed_attempts", default: 5))")
-                }
-                Stepper(value: b.int("remote.lockout_minutes", 15), in: 1...1440) {
-                    LabeledContent("Lockout", value: "\(model.settings.int("remote.lockout_minutes", default: 15)) min")
-                }
+                StepperRow("Sessions expire after", value: b.int("remote.session_ttl_hours", 720), in: 1...8760, step: 24, display: "\(model.settings.int("remote.session_ttl_hours", default: 720) / 24) days")
+                StepperRow("Lock out after failed attempts", value: b.int("remote.max_failed_attempts", 5), in: 1...50, display: "\(model.settings.int("remote.max_failed_attempts", default: 5))")
+                StepperRow("Lockout", value: b.int("remote.lockout_minutes", 15), in: 1...1440, display: "\(model.settings.int("remote.lockout_minutes", default: 15)) min")
                 TextField("Allowed web origins", text: b.list("remote.allowed_origins"))
             }
             if model.info.remoteEnabled, let port = model.info.remotePort {
@@ -609,17 +704,13 @@ struct PrivacyPane: View {
         Form {
             Section("History") {
                 Toggle("Keep download history", isOn: b.bool("privacy.keep_history", true))
-                Stepper(value: b.int("privacy.history_retention_days"), in: 0...3650, step: 30) {
-                    LabeledContent("Keep for", value: model.settings.int("privacy.history_retention_days") == 0 ? L10n.tr("Forever") : "\(model.settings.int("privacy.history_retention_days")) days")
-                }
+                StepperRow("Keep for", value: b.int("privacy.history_retention_days"), in: 0...3650, step: 30, display: model.settings.int("privacy.history_retention_days") == 0 ? L10n.tr("Forever") : "\(model.settings.int("privacy.history_retention_days")) days")
             }
             Section("Logs") {
                 Picker("Log detail", selection: b.string("privacy.log_level", "info")) {
                     ForEach(["error", "warn", "info", "debug", "trace"], id: \.self) { Text($0.capitalized).tag($0) }
                 }
-                Stepper(value: b.int("privacy.log_retention_days", 14), in: 1...365) {
-                    LabeledContent("Keep logs for", value: "\(model.settings.int("privacy.log_retention_days", default: 14)) days")
-                }
+                StepperRow("Keep logs for", value: b.int("privacy.log_retention_days", 14), in: 1...365, display: "\(model.settings.int("privacy.log_retention_days", default: 14)) days")
                 Text("Logs never contain passwords, cookies or tokens.").font(.caption).foregroundStyle(.secondary)
             }
             Section("Saved sign-ins (Keychain)") {
@@ -657,6 +748,20 @@ struct UpdatesPane: View {
 
     var body: some View {
         Form {
+            Section {
+                HStack(spacing: 16) {
+                    Image(nsImage: NSApp.applicationIconImage)
+                        .resizable()
+                        .frame(width: 64, height: 64)
+                    VStack(alignment: .leading, spacing: 3) {
+                        Text("Osprey \(Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? model.info.version)")
+                            .font(.system(size: 20, weight: .bold))
+                        Text(info?.available == true ? L10n.tr("A new version is ready.") : L10n.tr("Updates are checked quietly in the background."))
+                            .font(.system(size: 13)).foregroundStyle(.secondary)
+                    }
+                }
+                .padding(.vertical, 6)
+            }
             Section {
                 Toggle("Check for updates automatically", isOn: b.bool("updates.check_automatically", true))
                 Toggle("Download and install automatically", isOn: b.bool("updates.install_automatically"))

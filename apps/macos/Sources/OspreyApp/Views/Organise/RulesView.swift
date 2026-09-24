@@ -16,22 +16,17 @@ struct RulesView: View {
                              selection = nil
                          }
                      }) { rule in
-            VStack(alignment: .leading, spacing: 1) {
-                Text(rule.name).foregroundStyle(rule.enabled ? .primary : .secondary)
-                Text(rule.enabled ? "Used \(rule.hitCount) times" : "Off").font(.caption).foregroundStyle(.secondary)
-            }
+            MasterRow(symbol: "arrow.triangle.branch", tint: rule.enabled ? Theme.blue : Theme.neutral, title: rule.name,
+                      subtitle: rule.enabled ? "Used \(rule.hitCount) times" : L10n.tr("Off"), dimmed: !rule.enabled)
         } detail: {
             if let draft {
                 RuleEditor(rule: draft) { self.draft = nil; selection = $0 }.id(draft.id)
             } else if let id = selection, let rule = model.rules.first(where: { $0.id == id }) {
                 RuleEditor(rule: rule) { selection = $0 }.id(rule.id + String(rule.updatedAt))
             } else {
-                ContentUnavailableView {
-                    Label("No Rule Selected", systemImage: "arrow.triangle.branch")
-                } description: {
-                    Text("Rules sort new downloads by type, site, size or name — where they're saved and how they run.")
-                } actions: {
-                    Button("New Rule") { draft = RuleDoc(name: L10n.tr("New Rule")) }
+                EmptyStateView("arrow.triangle.branch", title: "No rules yet",
+                               message: "Rules sort new downloads by type, site, size or name — where they're saved and how they run.") {
+                    Button("New Rule") { draft = RuleDoc(name: L10n.tr("New Rule")) }.buttonStyle(ProminentCapsuleStyle())
                 }
             }
         }
@@ -57,9 +52,7 @@ struct RuleEditor: View {
             Section {
                 TextField("Name", text: $rule.name)
                 Toggle("Enabled", isOn: $rule.enabled)
-                Stepper(value: $rule.priority, in: 0...1000, step: 10) {
-                    LabeledContent("Order", value: "\(rule.priority)")
-                }
+                StepperRow("Order", value: $rule.priority, in: 0...1000, step: 10, display: "\(rule.priority)")
                 .help("Lower numbers run first")
             }
             Section {
@@ -102,11 +95,13 @@ struct RuleEditor: View {
                     Spacer()
                     Button("Save") { Task { if await model.saveRule(rule) { onSaved(rule.id) } } }
                         .keyboardShortcut("s", modifiers: .command)
+                        .buttonStyle(ProminentCapsuleStyle())
                         .disabled(rule.name.isEmpty)
                 }
             }
         }
         .formStyle(.grouped)
+        .scrollContentBackground(.hidden)
     }
 
     private func runTest() async {

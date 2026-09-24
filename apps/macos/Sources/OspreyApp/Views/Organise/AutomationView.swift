@@ -8,17 +8,17 @@ struct AutomationView: View {
 
     var body: some View {
         MasterDetail(items: model.automations, selection: $selection,
-                     onAdd: { draft = AutomationDoc(name: L10n.tr("New Automation")); selection = nil }, onRemove: nil) { a in
-            HStack {
-                Image(systemName: a.executesCode ? "exclamationmark.shield" : "gearshape.2")
-                    .foregroundStyle(a.executesCode ? Theme.warning : (a.enabled ? Theme.accent : .secondary))
-                VStack(alignment: .leading, spacing: 1) {
-                    Text(a.name)
-                    Text(a.lastError ?? "Ran \(a.runCount)×").font(.caption)
-                        .foregroundStyle(a.lastError == nil ? AnyShapeStyle(.secondary) : AnyShapeStyle(Theme.danger))
-                        .lineLimit(1)
-                }
-            }
+                     onAdd: { draft = AutomationDoc(name: L10n.tr("New Automation")); selection = nil },
+                     onRemove: { id in
+                         Task {
+                             await model.perform("Couldn't delete automation") { try await model.engine.deleteAutomation(id) }
+                             await model.load("automations")
+                         }
+                     }) { a in
+            MasterRow(symbol: a.executesCode ? "exclamationmark.shield" : "gearshape.2",
+                      tint: a.executesCode ? Theme.warning : (a.enabled ? Theme.blue : Theme.neutral),
+                      title: a.name, subtitle: a.lastError ?? "Ran \(a.runCount)×",
+                      subtitleTint: a.lastError == nil ? nil : Theme.danger, dimmed: !a.enabled)
         } detail: {
             if let draft {
                 AutomationEditor(automation: draft) { self.draft = nil; selection = $0 }.id(draft.id)
@@ -27,11 +27,10 @@ struct AutomationView: View {
             } else {
                 EmptyStateView("gearshape.2", title: "Let downloads finish themselves",
                                message: "Automations react to download events. Built-in actions are safe; scripts need your explicit consent.") {
-                    Button("New Automation") { draft = AutomationDoc(name: L10n.tr("New Automation")) }.ospreyGlassButton(prominent: true)
+                    Button("New Automation") { draft = AutomationDoc(name: L10n.tr("New Automation")) }.buttonStyle(ProminentCapsuleStyle())
                 }
             }
         }
-        .navigationTitle("Automation")
         .task { await model.load("automations") }
     }
 }

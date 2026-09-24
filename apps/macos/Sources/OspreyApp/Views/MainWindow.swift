@@ -56,6 +56,7 @@ struct MainWindow: View {
         .onAppear {
             delegate?.openMainWindowAction = { openWindow(id: "main") }
             delegate?.openSettingsAction = { openSettings() }
+            delegate?.openAboutAction = { openWindow(id: "about") }
         }
     }
 

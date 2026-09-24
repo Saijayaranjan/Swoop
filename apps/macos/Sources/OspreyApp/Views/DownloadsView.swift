@@ -163,16 +163,19 @@ struct DownloadsView: View {
         } else {
             switch scope {
             case .completed:
-                IllustratedEmptyState(title: "Nothing finished yet", message: "Completed downloads gather here, ready to open or reveal in Finder.") {
+                IllustratedEmptyState(title: "Nothing finished yet", message: "Completed downloads gather here, ready to open or reveal in Finder.",
+                                      glyph: "checkmark") {
                     EmptyView()
                 }
             case .torrents:
                 IllustratedEmptyState(title: "No torrents in the air",
-                                      message: "Open a .torrent file or paste a magnet link. Osprey seeds politely and stops when you say so.") {
+                                      message: "Open a .torrent file or paste a magnet link. Osprey seeds politely and stops when you say so.",
+                                      glyph: "point.3.filled.connected.trianglepath.dotted") {
                     emptyActions(addTitle: "Add Torrent")
                 }
             case .queue:
-                IllustratedEmptyState(title: "This queue is clear", message: "Drag downloads onto the queue in the sidebar, or choose it when adding.") {
+                IllustratedEmptyState(title: "This queue is clear", message: "Drag downloads onto the queue in the sidebar, or choose it when adding.",
+                                      glyph: "tray.full") {
                     emptyActions(addTitle: "Add Download")
                 }
             default:

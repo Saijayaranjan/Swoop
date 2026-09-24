@@ -72,20 +72,14 @@ struct GrabberView: View {
             .frame(height: 40)
             .background(Theme.well, in: Capsule())
             .overlay(Capsule().strokeBorder(Theme.hairline, lineWidth: 1))
-            Stepper(value: Binding(get: { Int(options.maxDepth) }, set: { options.maxDepth = UInt8($0) }), in: 0...5) {
-                LabeledContent("Link depth", value: options.maxDepth == 0 ? L10n.tr("This page only") : "\(options.maxDepth)")
-            }
+            StepperRow("Link depth", value: Binding(get: { Int(options.maxDepth) }, set: { options.maxDepth = UInt8($0) }), in: 0...5, display: options.maxDepth == 0 ? L10n.tr("This page only") : "\(options.maxDepth)")
             Picker("Follow links", selection: $options.scope) {
                 Text("Same site").tag("same_domain")
                 Text("Including subdomains").tag("subdomains")
                 Text("Anywhere").tag("external")
             }
-            Stepper(value: Binding(get: { Int(options.maxPages) }, set: { options.maxPages = UInt32($0) }), in: 1...5000, step: 50) {
-                LabeledContent("Max pages", value: "\(options.maxPages)")
-            }
-            Stepper(value: Binding(get: { Int(options.concurrency) }, set: { options.concurrency = UInt8($0) }), in: 1...16) {
-                LabeledContent("Parallel requests", value: "\(options.concurrency)")
-            }
+            StepperRow("Max pages", value: Binding(get: { Int(options.maxPages) }, set: { options.maxPages = UInt32($0) }), in: 1...5000, step: 50, display: "\(options.maxPages)")
+            StepperRow("Parallel requests", value: Binding(get: { Int(options.concurrency) }, set: { options.concurrency = UInt8($0) }), in: 1...16, display: "\(options.concurrency)")
             TextField("File types (blank = common downloads)", text: $extensionsText)
                 .textFieldStyle(.roundedBorder)
                 .help("Comma-separated extensions, e.g. pdf, zip, mp4")

@@ -128,6 +128,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     /// Set by the main scene so AppKit entry points can reopen the SwiftUI window.
     var openMainWindowAction: (() -> Void)?
     var openSettingsAction: (() -> Void)?
+    var openAboutAction: (() -> Void)?
 
     // MARK: periodic work (power assertion, dashboard refresh)
 

@@ -12,15 +12,13 @@ struct QueuesSettingsPane: View {
             Section {
                 ForEach(model.queues) { q in
                     let s = model.queueSummaries[q.id]
-                    LabeledContent {
-                        HStack {
-                            Text("\(s?.active ?? 0) active · \(s?.waiting ?? 0) waiting").foregroundStyle(.secondary).monospacedDigit()
-                            Button("Edit…") { editing = q }
-                        }
-                    } label: {
-                        Label(q.name, systemImage: q.icon.isEmpty ? "tray" : q.icon)
-                        Text(q.paused ? "Paused" : "Up to \(q.maxConcurrent) at once")
+                    HStack {
+                        MasterRow(symbol: q.icon.isEmpty ? "tray" : q.icon, tint: q.paused ? Theme.warning : Theme.blue, title: q.name,
+                                  subtitle: q.paused ? L10n.tr("Paused") : String(format: L10n.tr("Up to %d at once"), Int(q.maxConcurrent)))
+                        Text("\(s?.active ?? 0) active · \(s?.waiting ?? 0) waiting").font(.system(size: 12)).foregroundStyle(.secondary).monospacedDigit()
+                        Button("Edit…") { editing = q }
                     }
+                    .padding(.vertical, 2)
                 }
             } footer: {
                 HStack {
@@ -60,14 +58,10 @@ struct QueueEditor: View {
                     .pickerStyle(.segmented)
                 }
                 Section("Limits") {
-                    Stepper(value: Binding(get: { Int(q.maxConcurrent) }, set: { q.maxConcurrent = UInt32(max(1, $0)) }), in: 1...32) {
-                        LabeledContent("Downloads at once", value: "\(q.maxConcurrent)")
-                    }
+                    StepperRow("Downloads at once", value: Binding(get: { Int(q.maxConcurrent) }, set: { q.maxConcurrent = UInt32(max(1, $0)) }), in: 1...32, display: "\(q.maxConcurrent)")
                     TextField("Download limit (e.g. 5 MB, blank = unlimited)", text: $downLimit)
                     TextField("Upload limit", text: $upLimit)
-                    Stepper(value: Binding(get: { Int(q.connectionsPerTask) }, set: { q.connectionsPerTask = UInt8(clamping: max(0, $0)) }), in: 0...64) {
-                        LabeledContent("Connections per download", value: q.connectionsPerTask == 0 ? L10n.tr("Default") : "\(q.connectionsPerTask)")
-                    }
+                    StepperRow("Connections per download", value: Binding(get: { Int(q.connectionsPerTask) }, set: { q.connectionsPerTask = UInt8(clamping: max(0, $0)) }), in: 0...64, display: q.connectionsPerTask == 0 ? L10n.tr("Default") : "\(q.connectionsPerTask)")
                 }
                 Section("Behaviour") {
                     Picker("Schedule", selection: Binding(get: { q.scheduleId ?? "" }, set: { q.scheduleId = $0.isEmpty ? nil : $0 })) {

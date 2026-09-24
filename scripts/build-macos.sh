@@ -8,6 +8,8 @@ cd "$ROOT"
 # macOS kills a process whose mapped code pages change underneath it (CODESIGNING "Invalid Page").
 replace_file() { local src="$1" dst="$2"; local tmp="$dst.tmp.$$"; cp "$src" "$tmp" && mv -f "$tmp" "$dst"; }
 export PATH="/opt/homebrew/opt/rustup/bin:$HOME/.cargo/bin:$PATH"
+# Match the app's minimum macOS (Package.swift) so C code compiled into the Rust library links cleanly.
+export MACOSX_DEPLOYMENT_TARGET="${MACOSX_DEPLOYMENT_TARGET:-14.0}"
 
 PROFILE=release
 UNIVERSAL=0

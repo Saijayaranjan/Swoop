@@ -39,19 +39,7 @@ struct EmptyStateView<Actions: View>: View {
     }
     var body: some View {
         VStack(spacing: 14) {
-            ZStack {
-                Circle()
-                    .fill(RadialGradient(colors: [Theme.blue.opacity(0.22), .clear], center: .center, startRadius: 2, endRadius: 60))
-                    .frame(width: 120, height: 120)
-                Image(systemName: symbol)
-                    .font(.system(size: 34, weight: .regular))
-                    .symbolRenderingMode(.hierarchical)
-                    .foregroundStyle(Theme.blue)
-                    .frame(width: 72, height: 72)
-                    .background(Theme.card, in: RoundedRectangle(cornerRadius: 22, style: .continuous))
-                    .overlay(RoundedRectangle(cornerRadius: 22, style: .continuous).strokeBorder(Theme.hairline, lineWidth: 1))
-                    .shadow(color: Theme.blue.opacity(0.18), radius: 12, y: 6)
-            }
+            FeatherIllustration(size: 170, glyph: symbol)
             VStack(spacing: 6) {
                 Text(LocalizedStringKey(title)).font(.system(size: 20, weight: .bold))
                 Text(LocalizedStringKey(message))

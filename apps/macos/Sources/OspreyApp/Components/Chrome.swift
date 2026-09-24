@@ -156,13 +156,16 @@ struct FeatherRachis: Shape {
 /// A fan of feathers rising from a soft glow — the empty-state artwork.
 struct FeatherIllustration: View {
     var size: CGFloat = 220
+    /// When set, a smaller fan frames a tile carrying this symbol.
+    var glyph: String? = nil
     @Environment(\.colorScheme) private var scheme
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @ViewState private var lifted = false
 
-    private let feathers: [(angle: Double, scale: CGFloat, hue: Double)] = [
-        (-52, 0.62, 0.60), (-27, 0.80, 0.63), (0, 1.0, 0.66), (27, 0.80, 0.70), (52, 0.62, 0.73),
-    ]
+    private var feathers: [(angle: Double, scale: CGFloat, hue: Double)] {
+        if glyph != nil { return [(-58, 0.62, 0.60), (-30, 0.78, 0.63), (30, 0.78, 0.70), (58, 0.62, 0.73)] }
+        return [(-52, 0.62, 0.60), (-27, 0.80, 0.63), (0, 1.0, 0.66), (27, 0.80, 0.70), (52, 0.62, 0.73)]
+    }
 
     var body: some View {
         ZStack {
@@ -190,12 +193,32 @@ struct FeatherIllustration: View {
                 .rotationEffect(.degrees(f.angle), anchor: .bottom)
                 .offset(y: size * 0.18)
             }
-            // A small quill cap where the fan meets.
-            Circle()
-                .fill(LinearGradient(colors: [.white, Color(hue: 0.64, saturation: 0.25, brightness: 1)], startPoint: .top, endPoint: .bottom))
-                .frame(width: size * 0.07, height: size * 0.07)
-                .shadow(color: Theme.blue.opacity(0.5), radius: 6)
-                .offset(y: size * 0.18)
+            if let glyph {
+                // A luminous tile at the heart of the fan.
+                RoundedRectangle(cornerRadius: size * 0.1, style: .continuous)
+                    .fill(LinearGradient(colors: [Color(red: 0.30, green: 0.64, blue: 1.0), Color(red: 0.36, green: 0.30, blue: 0.92)],
+                                         startPoint: .topLeading, endPoint: .bottomTrailing))
+                    .overlay {
+                        RoundedRectangle(cornerRadius: size * 0.1, style: .continuous)
+                            .strokeBorder(LinearGradient(colors: [.white.opacity(0.6), .white.opacity(0.05)], startPoint: .top, endPoint: .bottom), lineWidth: 1)
+                    }
+                    .overlay {
+                        Image(systemName: glyph)
+                            .font(.system(size: size * 0.15, weight: .semibold))
+                            .foregroundStyle(.white)
+                            .shadow(color: .black.opacity(0.15), radius: 2, y: 1)
+                    }
+                    .frame(width: size * 0.34, height: size * 0.34)
+                    .shadow(color: Theme.blue.opacity(0.45), radius: 14, y: 6)
+                    .offset(y: size * 0.02)
+            } else {
+                // A small quill cap where the fan meets.
+                Circle()
+                    .fill(LinearGradient(colors: [.white, Color(hue: 0.64, saturation: 0.25, brightness: 1)], startPoint: .top, endPoint: .bottom))
+                    .frame(width: size * 0.07, height: size * 0.07)
+                    .shadow(color: Theme.blue.opacity(0.5), radius: 6)
+                    .offset(y: size * 0.18)
+            }
             // Drifting motes.
             ForEach(0..<5) { i in
                 let a = Double(i) * 1.3 + 0.4
@@ -221,15 +244,17 @@ struct FeatherIllustration: View {
 struct IllustratedEmptyState<Actions: View>: View {
     var title: String
     var message: String
+    var glyph: String?
     var actions: Actions
-    init(title: String, message: String, @ViewBuilder actions: () -> Actions) {
+    init(title: String, message: String, glyph: String? = nil, @ViewBuilder actions: () -> Actions) {
+        self.glyph = glyph
         self.title = title
         self.message = message
         self.actions = actions()
     }
     var body: some View {
         VStack(spacing: 18) {
-            FeatherIllustration(size: 230)
+            FeatherIllustration(size: 230, glyph: glyph)
             VStack(spacing: 8) {
                 Text(LocalizedStringKey(title))
                     .font(.system(size: 26, weight: .bold))
@@ -649,4 +674,44 @@ struct SecondaryCapsuleStyle: ButtonStyle {
             .scaleEffect(configuration.isPressed ? 0.97 : 1)
             .animation(.spring(response: 0.25, dampingFraction: 0.8), value: configuration.isPressed)
     }
+}
+
+// MARK: - Window chrome
+
+/// Hides the title bar of the hosting window and lets content run underneath it.
+struct TransparentTitleBar: NSViewRepresentable {
+    func makeNSView(context: Context) -> NSView { Probe() }
+    func updateNSView(_ nsView: NSView, context: Context) {}
+
+    final class Probe: NSView {
+        private var observations: [NSKeyValueObservation] = []
+
+        override func viewDidMoveToWindow() {
+            super.viewDidMoveToWindow()
+            observations.removeAll()
+            guard let window else { return }
+            apply(window)
+            // SwiftUI may restore the standard title bar while it updates the scene; put ours back.
+            observations = [
+                window.observe(\.titlebarAppearsTransparent) { [weak self] w, _ in self?.reapply(w) },
+                window.observe(\.titleVisibility) { [weak self] w, _ in self?.reapply(w) },
+                window.observe(\.styleMask) { [weak self] w, _ in self?.reapply(w) },
+            ]
+        }
+
+        private func reapply(_ window: NSWindow) {
+            DispatchQueue.main.async { [weak self] in self?.apply(window) }
+        }
+
+        private func apply(_ window: NSWindow) {
+            if !window.titlebarAppearsTransparent { window.titlebarAppearsTransparent = true }
+            if window.titleVisibility != .hidden { window.titleVisibility = .hidden }
+            if !window.styleMask.contains(.fullSizeContentView) { window.styleMask.insert(.fullSizeContentView) }
+            if window.toolbar != nil { window.toolbar = nil }
+        }
+    }
+}
+
+extension View {
+    func transparentTitleBar() -> some View { background(TransparentTitleBar().frame(width: 0, height: 0)) }
 }

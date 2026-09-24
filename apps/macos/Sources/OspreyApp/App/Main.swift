@@ -18,12 +18,21 @@ struct OspreyApp: App {
         .windowStyle(.hiddenTitleBar)
         .commands { OspreyCommands(model: delegate.model, ui: delegate.ui, delegate: delegate) }
 
+        Window("About Osprey", id: "about") {
+            AboutView()
+                .environment(delegate.model)
+        }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultPosition(.center)
+
         Settings {
             SettingsView()
                 .environment(delegate.model)
                 .environment(delegate.ui)
         }
-        .windowToolbarStyle(.unified(showsTitle: false))
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
 
         MenuBarExtra(isInserted: Binding(
             get: { delegate.model.settings.bool("appearance.show_menu_bar_extra", default: true) },
@@ -71,7 +80,12 @@ struct OspreyCommands: Commands {
     let ui: UIState
     let delegate: AppDelegate
 
+    @Environment(\.openWindow) private var openWindow
+
     var body: some Commands {
+        CommandGroup(replacing: .appInfo) {
+            Button("About Osprey") { openWindow(id: "about") }
+        }
         CommandGroup(replacing: .newItem) {
             Button("New Download…") { delegate.showMainWindow(); ui.openAdd() }
                 .keyboardShortcut("n", modifiers: .command)

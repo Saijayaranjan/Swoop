@@ -134,8 +134,14 @@ struct InspectorView: View {
 
     @ViewBuilder
     private func tabContent(_ item: TaskItem) -> some View {
-        if let error = loader.error, loader.detail == nil {
-            Section { Label(error, systemImage: "exclamationmark.triangle").font(.caption).foregroundStyle(.secondary) }
+        if loader.detail == nil {
+            Section {
+                HStack(spacing: 8) {
+                    if loader.error == nil { ProgressView().controlSize(.small) }
+                    Text(loader.error == nil ? "Loading details…" : "More details appear once the engine reports on this download.")
+                        .font(.caption).foregroundStyle(.secondary)
+                }
+            }
         }
         switch tab {
         case .overview: OverviewTab(item: item, detail: loader.detail)
