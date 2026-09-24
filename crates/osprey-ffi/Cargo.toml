@@ -17,7 +17,7 @@ path = "src/bin/uniffi-bindgen.rs"
 osprey-domain = { path = "../osprey-domain" }
 osprey-runtime = { path = "../osprey-runtime" }
 osprey-services = { path = "../osprey-services" }
-osprey-server = { path = "../osprey-server" }
+osprey-server = { path = "../osprey-server", optional = true }
 uniffi = { workspace = true, features = ["cli", "tokio"] }
 tokio = { workspace = true }
 serde = { workspace = true }
@@ -27,3 +27,11 @@ tracing-subscriber = { workspace = true }
 tracing-appender = { workspace = true }
 parking_lot = { workspace = true }
 thiserror = { workspace = true }
+
+[features]
+default = ["local-api"]
+# Embed the REST/WebSocket server (Unix socket for the CLI/native host, optional remote listener).
+local-api = ["dep:osprey-server"]
+
+[dev-dependencies]
+tempfile = { workspace = true }
