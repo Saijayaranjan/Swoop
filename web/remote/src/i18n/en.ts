@@ -4,7 +4,7 @@
 
 const en = {
   // ---- app chrome ----
-  "app.name": "Osprey",
+  "app.name": "Swoop",
   "app.download_speed": "Download speed",
   "app.upload_speed": "Upload speed",
   "app.offline": "Disconnected — reconnecting…",
@@ -20,7 +20,7 @@ const en = {
 
   // ---- pairing ----
   "pair.title": "Pair this device",
-  "pair.subtitle": "Enter the pairing code shown in Osprey to control your downloads from here.",
+  "pair.subtitle": "Enter the pairing code shown in Swoop to control your downloads from here.",
   "pair.code_label": "Pairing code",
   "pair.code_placeholder": "ABCD-EFGH",
   "pair.device_name_label": "Device name",
@@ -227,7 +227,7 @@ const en = {
   "toast.torrent_finished": "{{name}} finished seeding setup",
   "toast.low_disk_space": "Low disk space on {{path}}",
   "toast.duplicate_detected": "{{name}} looks like a duplicate",
-  "toast.update_available": "Osprey {{version}} is available",
+  "toast.update_available": "Swoop {{version}} is available",
   "toast.queue_finished": "Queue {{name}} finished",
   "toast.device_paired": "New device paired: {{name}}",
   "toast.automation_failed": "Automation {{name}} failed",
@@ -271,7 +271,7 @@ const en = {
   "error.disk_full": "The destination disk is full.",
   "error.disk_write": "The file couldn't be written to disk.",
   "error.disk_read": "The file couldn't be read from disk.",
-  "error.permission": "Osprey doesn't have permission to write here.",
+  "error.permission": "Swoop doesn't have permission to write here.",
   "error.volume": "The destination drive isn't available.",
   "error.filename": "The file name isn't valid.",
   "error.path_traversal": "The file name isn't allowed.",
@@ -288,7 +288,7 @@ const en = {
   "error.live_stream": "Live streams can't be downloaded.",
   "error.quota": "The server's bandwidth quota was reached.",
   "error.cancelled": "Cancelled.",
-  "error.internal": "Something went wrong inside Osprey.",
+  "error.internal": "Something went wrong inside Swoop.",
   "error.unknown": "An unknown error occurred.",
 } as const;
 

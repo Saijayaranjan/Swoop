@@ -1,5 +1,5 @@
 /**
- * Owns the single `chrome.runtime.connectNative("app.osprey.bridge")` port
+ * Owns the single `chrome.runtime.connectNative("app.swoop.bridge")` port
  * (docs/api/native-messaging.md), reconnecting it lazily with exponential backoff and replaying
  * the last `subscribe` request whenever a new connection is established. A live port is also what
  * keeps an MV3 service worker alive between browser-initiated wakeups, so `index.ts` opens one
@@ -7,7 +7,7 @@
  * so a suspended worker that has lost its port re-establishes it lazily on the next call rather
  * than assuming one already exists.
  *
- * When the user pairs a remote Osprey (options page → Connection), `useRemote()` swaps the
+ * When the user pairs a remote Swoop (options page → Connection), `useRemote()` swaps the
  * transport for `RemoteApiClient` (HTTPS + WebSocket); every caller keeps using the same
  * `request`/`ping`/`subscribe`/`onEvent` surface and never needs to know which one is live.
  */
@@ -17,7 +17,7 @@ import { NativeApiClient } from '../shared/api-client.ts';
 import type { HttpMethod } from '../shared/native-protocol.ts';
 import { RemoteApiClient } from './remote-client.ts';
 
-export const NATIVE_HOST_ID = 'app.osprey.bridge';
+export const NATIVE_HOST_ID = 'app.swoop.bridge';
 
 const INITIAL_BACKOFF_MS = 1_000;
 const MAX_BACKOFF_MS = 30_000;
@@ -25,7 +25,7 @@ const MAX_BACKOFF_MS = 30_000;
 export interface NativeStatus {
   /** The native-messaging port itself is open (host binary reachable). */
   connected: boolean;
-  /** The Osprey desktop app / daemon answered the last ping as running. `null` = unknown yet. */
+  /** The Swoop desktop app / daemon answered the last ping as running. `null` = unknown yet. */
   running: boolean | null;
   version: string | null;
   mode: 'native' | 'remote';
@@ -78,7 +78,7 @@ export class NativePort {
     return { connected: this.client !== null, running: this.lastRunning, version: this.lastVersion, mode: 'native' };
   }
 
-  /** Switch to a paired remote Osprey (`config`) or back to the local native host (`null`). */
+  /** Switch to a paired remote Swoop (`config`) or back to the local native host (`null`). */
   useRemote(config: RemoteConfig | null): void {
     const same =
       config !== null && this.remote !== null && this.remote.baseUrl === config.baseUrl && this.remoteToken === config.token;
@@ -95,7 +95,7 @@ export class NativePort {
       // Drop the native port so its reconnect loop stops while a remote is in charge.
       const port = this.port;
       this.port = null;
-      this.client?.rejectAllPending(new Error('switched to a remote Osprey'));
+      this.client?.rejectAllPending(new Error('switched to a remote Swoop'));
       this.client = null;
       if (this.reconnectTimer !== undefined) clearTimeout(this.reconnectTimer);
       this.reconnectTimer = undefined;
@@ -265,7 +265,7 @@ export class NativePort {
   }
 
   async launch(): Promise<void> {
-    if (this.remote) throw new Error('Osprey runs on another computer; start it there.');
+    if (this.remote) throw new Error('Swoop runs on another computer; start it there.');
     const client = await this.ensureConnected();
     client.launch();
   }

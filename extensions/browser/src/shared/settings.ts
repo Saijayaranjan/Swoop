@@ -17,7 +17,7 @@ export interface StorageAreaLike {
   };
 }
 
-const STORAGE_KEY = 'ospreySettings';
+const STORAGE_KEY = 'swoopSettings';
 
 function mergeWithDefaults(stored: unknown): ExtensionSettings {
   const defaults = defaultExtensionSettings();

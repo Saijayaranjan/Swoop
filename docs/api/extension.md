@@ -5,7 +5,7 @@
   URL pattern), cancel the browser download and `POST /tasks` with `origin: "browser"`,
   `referer_page`, cookies for the URL (`chrome.cookies.getAll` → `options.cookies`), and the tab
   title as a hint. A toast in the popup confirms; a per-site "always use browser" toggle exists.
-- **Context menus**: "Download with Osprey" on links, images, video, audio, page (all links),
+- **Context menus**: "Download with Swoop" on links, images, video, audio, page (all links),
   selection (links in selection). "Download all links on page…" opens the picker.
 - **Media detection**: `webRequest.onHeadersReceived` (MV3: `declarativeNetRequest` cannot
   observe, so use `webRequest` in observe-only mode where allowed; Firefox: full `webRequest`)

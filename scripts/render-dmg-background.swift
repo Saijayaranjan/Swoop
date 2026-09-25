@@ -96,7 +96,7 @@ func render(scale: CGFloat, to path: String) {
         let attrs: [NSAttributedString.Key: Any] = [.font: font, .foregroundColor: color, .paragraphStyle: para]
         (text as NSString).draw(in: CGRect(x: 0, y: y, width: width, height: size * 1.5), withAttributes: attrs)
     }
-    draw("Install Osprey", size: 22, weight: .bold, color: NSColor(red: 0.08, green: 0.10, blue: 0.20, alpha: 1), y: 82)
+    draw("Install Swoop", size: 22, weight: .bold, color: NSColor(red: 0.08, green: 0.10, blue: 0.20, alpha: 1), y: 82)
     draw("Drag the app onto Applications", size: 13, weight: .regular, color: NSColor(red: 0.25, green: 0.30, blue: 0.42, alpha: 1), y: 112)
     draw("Fast, careful downloads for your Mac", size: 11, weight: .medium, color: NSColor(red: 0.35, green: 0.42, blue: 0.55, alpha: 0.8), y: 404)
     NSGraphicsContext.restoreGraphicsState()

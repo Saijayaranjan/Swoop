@@ -1,4 +1,4 @@
-/* Osprey remote UI. Hand-written CSS, no framework. Custom properties drive light/dark via
+/* Swoop remote UI. Hand-written CSS, no framework. Custom properties drive light/dark via
    prefers-color-scheme, with data-theme="light"/"dark" on <html> overriding the OS preference
    when the user picks an explicit theme in Settings. */
 

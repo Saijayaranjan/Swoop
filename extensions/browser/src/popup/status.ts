@@ -1,5 +1,5 @@
 /**
- * Connection status: the header pill (Connected / Not running / Offline) and, when Osprey can't
+ * Connection status: the header pill (Connected / Not running / Offline) and, when Swoop can't
  * be used, a friendly state card in place of the downloads list with the one action that fixes it
  * (launch the app, finish setting up the browser helper, or check the remote connection).
  */
@@ -45,7 +45,7 @@ export function initStatus(
     if (button) button.disabled = true;
     try {
       await launchApp();
-      ctx.toast(tr('toastLaunching', 'Launching Osprey…'));
+      ctx.toast(tr('toastLaunching', 'Launching Swoop…'));
       // The app takes a moment to come up; check a few times.
       for (const delay of [1500, 3000, 5000]) {
         setTimeout(() => void refresh(), delay);
@@ -71,7 +71,7 @@ export function initStatus(
         pill.classList.add('is-online');
         text.textContent = tr('statusConnectedShort', 'Connected');
         const where = status?.mode === 'remote' ? tr('statusRemote', 'remote') : tr('statusThisComputer', 'this computer');
-        pill.title = status?.version ? `Osprey ${status.version} · ${where}` : `Osprey · ${where}`;
+        pill.title = status?.version ? `Swoop ${status.version} · ${where}` : `Swoop · ${where}`;
         break;
       }
       case 'not-running': {
@@ -108,24 +108,24 @@ export function initStatus(
     switch (state) {
       case 'not-running':
         glyph = 'power';
-        title = tr('offlineNotRunningTitle', 'Osprey isn’t running');
-        body = tr('offlineNotRunningBody', 'Start Osprey to send downloads to it and follow their progress here.');
+        title = tr('offlineNotRunningTitle', 'Swoop isn’t running');
+        body = tr('offlineNotRunningBody', 'Start Swoop to send downloads to it and follow their progress here.');
         actions.push(
-          textButton(tr('actionLaunchApp', 'Launch Osprey'), (e) => launch(e.currentTarget as HTMLButtonElement), 'btn primary', 'power'),
+          textButton(tr('actionLaunchApp', 'Launch Swoop'), (e) => launch(e.currentTarget as HTMLButtonElement), 'btn primary', 'power'),
         );
         break;
       case 'no-host':
-        title = tr('offlineNoHostTitle', 'Can’t reach Osprey');
+        title = tr('offlineNoHostTitle', 'Can’t reach Swoop');
         body = tr(
           'offlineNoHostBody',
-          'The browser helper isn’t set up yet. In Osprey, open Settings → Browser and choose Install, then try again.',
+          'The browser helper isn’t set up yet. In Swoop, open Settings → Browser and choose Install, then try again.',
         );
         actions.push(textButton(tr('actionTryAgain', 'Try again'), () => void refresh(), 'btn primary', 'retry'));
         actions.push(textButton(tr('actionHowToFix', 'How to fix'), () => openOptions('connection'), 'btn'));
         break;
       case 'remote-unreachable':
         glyph = 'server';
-        title = tr('offlineRemoteTitle', 'Can’t reach your Osprey');
+        title = tr('offlineRemoteTitle', 'Can’t reach your Swoop');
         body = tr('offlineRemoteBody', 'Make sure it’s switched on and reachable, and that the address in Connection settings is right.');
         actions.push(textButton(tr('actionTryAgain', 'Try again'), () => void refresh(), 'btn primary', 'retry'));
         actions.push(textButton(tr('actionConnectionSettings', 'Connection settings'), () => openOptions('connection'), 'btn'));
@@ -133,7 +133,7 @@ export function initStatus(
       case 'remote-refused':
       default:
         glyph = 'server';
-        title = tr('offlineRefusedTitle', 'Osprey refused this browser');
+        title = tr('offlineRefusedTitle', 'Swoop refused this browser');
         body = tr('offlineRefusedBody', 'The device token may have been revoked. Pair this browser again in Connection settings.');
         actions.push(
           textButton(tr('actionConnectionSettings', 'Connection settings'), () => openOptions('connection'), 'btn primary'),

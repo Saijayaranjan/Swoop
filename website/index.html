@@ -13,21 +13,21 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Osprey — Download Manager for Mac</title>
-  <meta name="description" content="Osprey is a native macOS download manager with a Rust engine: adaptive segmented acceleration, torrents, queues and schedules, a site grabber, browser capture and remote control. No accounts, no telemetry.">
+  <title>Swoop — Download Manager for Mac</title>
+  <meta name="description" content="Swoop is a native macOS download manager with a Rust engine: adaptive segmented acceleration, torrents, queues and schedules, a site grabber, browser capture and remote control. No accounts, no telemetry.">
   <meta name="theme-color" content="#eef4fc" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#0f0e22" media="(prefers-color-scheme: dark)">
   <meta name="color-scheme" content="light dark">
 
   <meta property="og:type" content="website">
-  <meta property="og:site_name" content="Osprey">
-  <meta property="og:title" content="Osprey — Download Manager for Mac">
+  <meta property="og:site_name" content="Swoop">
+  <meta property="og:title" content="Swoop — Download Manager for Mac">
   <meta property="og:description" content="A native Mac download manager with a Rust engine. Adaptive acceleration, torrents, schedules, browser capture and remote control, with no telemetry.">
-  <meta property="og:url" content="https://OWNER.github.io/osprey/">
-  <meta property="og:image" content="https://OWNER.github.io/osprey/assets/og.jpg">
+  <meta property="og:url" content="https://OWNER.github.io/swoop/">
+  <meta property="og:image" content="https://OWNER.github.io/swoop/assets/og.jpg">
   <meta property="og:image:width" content="1280">
   <meta property="og:image:height" content="800">
-  <meta property="og:image:alt" content="The Osprey dashboard in dark mode">
+  <meta property="og:image:alt" content="The Swoop dashboard in dark mode">
   <meta name="twitter:card" content="summary_large_image">
 
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
@@ -44,7 +44,7 @@
       var d = document.documentElement;
       d.classList.add('js');
       try {
-        var t = localStorage.getItem('osprey-theme');
+        var t = localStorage.getItem('swoop-theme');
         if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
       } catch (e) {}
     })();
@@ -96,9 +96,9 @@
 
   <header class="nav" id="top">
     <nav class="nav-bar" aria-label="Primary">
-      <a class="brand" href="#top" aria-label="Osprey, back to top">
+      <a class="brand" href="#top" aria-label="Swoop, back to top">
         <img src="assets/favicon-64.png" alt="" width="28" height="28">
-        <span>Osprey</span>
+        <span>Swoop</span>
       </a>
       <ul class="nav-links" id="nav-links">
         <li><a href="#features">Features</a></li>
@@ -113,7 +113,7 @@
           <svg class="ic ic-moon" aria-hidden="true"><use href="#i-moon"/></svg>
           <svg class="ic ic-sun" aria-hidden="true"><use href="#i-sun"/></svg>
         </button>
-        <a class="btn btn-primary btn-sm" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
+        <a class="btn btn-primary btn-sm" data-gh="releases" href="https://github.com/OWNER/swoop/releases/latest">
           <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download</span>
         </a>
         <button class="icon-btn menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
@@ -149,16 +149,16 @@
       </div>
 
       <div class="wrap hero-copy">
-        <img class="hero-icon" src="assets/icon-512.webp" alt="Osprey app icon" width="512" height="512">
+        <img class="hero-icon" src="assets/icon-512.webp" alt="Swoop app icon" width="512" height="512">
         <p class="label hero-label"><span class="dot" aria-hidden="true"></span>Version 0.1.0 for macOS</p>
         <h1 id="hero-title">Downloads,<br><span class="accent-text">on the wing.</span></h1>
-        <p class="lede">Osprey is a native Mac download manager with a Rust engine underneath. It splits files into adaptive segments, handles torrents, streams and schedules, and keeps every byte of your data on your Mac.</p>
+        <p class="lede">Swoop is a native Mac download manager with a Rust engine underneath. It splits files into adaptive segments, handles torrents, streams and schedules, and keeps every byte of your data on your Mac.</p>
         <div class="cta-row">
-          <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
+          <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/swoop/releases/latest">
             <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>
             <span>Download for Mac</span>
           </a>
-          <a class="btn btn-glass btn-lg" data-gh="repo" href="https://github.com/OWNER/osprey">
+          <a class="btn btn-glass btn-lg" data-gh="repo" href="https://github.com/OWNER/swoop">
             <svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>
             <span>View on GitHub</span>
           </a>
@@ -172,7 +172,7 @@
           <picture>
             <source srcset="assets/screens/dashboard-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
             <img src="assets/screens/dashboard-light.webp" width="1280" height="800" fetchpriority="high" decoding="async"
-                 alt="The Osprey dashboard: live download and upload throughput at 42.3 MB/s, speed mode set to Unlimited, active, queued and completed counts, a twelve-week activity grid and recently finished files.">
+                 alt="The Swoop dashboard: live download and upload throughput at 42.3 MB/s, speed mode set to Unlimited, active, queued and completed counts, a twelve-week activity grid and recently finished files.">
           </picture>
         </figure>
       </div>
@@ -197,7 +197,7 @@
           <article class="card card-wide reveal">
             <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></div>
             <h3>Adaptive segmented acceleration</h3>
-            <p>Each file is split into segments that steal work from one another. Osprey keeps an extra connection only when it earns at least a 15% gain, backs off the moment a server answers 429, 503 or Retry-After, and splits slow tails at the end so the last few percent don’t crawl.</p>
+            <p>Each file is split into segments that steal work from one another. Swoop keeps an extra connection only when it earns at least a 15% gain, backs off the moment a server answers 429, 503 or Retry-After, and splits slow tails at the end so the last few percent don’t crawl.</p>
             <div class="segbar" aria-hidden="true">
               <div class="seg"><i style="--d:2.6s"></i></div>
               <div class="seg"><i style="--d:3.4s"></i></div>
@@ -252,7 +252,7 @@
           <article class="card reveal">
             <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-browser"/></svg></div>
             <h3>Browser capture</h3>
-            <p>An extension for Chrome, Edge and Firefox hands matching downloads to Osprey, adds “Download with Osprey” menus and spots media on the page.</p>
+            <p>An extension for Chrome, Edge and Firefox hands matching downloads to Swoop, adds “Download with Swoop” menus and spots media on the page.</p>
           </article>
 
           <article class="card reveal">
@@ -264,7 +264,7 @@
           <article class="card reveal">
             <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-restore"/></svg></div>
             <h3>Crash recovery</h3>
-            <p>Progress is checkpointed only after data is safely on disk. After a crash or restart, Osprey checks each download against what’s on disk and picks up where it left off.</p>
+            <p>Progress is checkpointed only after data is safely on disk. After a crash or restart, Swoop checks each download against what’s on disk and picks up where it left off.</p>
           </article>
 
           <article class="card card-wide card-privacy reveal">
@@ -272,7 +272,7 @@
             <div class="privacy-row">
               <div>
                 <h3>Private by design</h3>
-                <p>No accounts, no analytics, no telemetry. Osprey talks to the sites you download from and the devices you pair, and nothing else. Passwords and tokens live in your Keychain.</p>
+                <p>No accounts, no analytics, no telemetry. Swoop talks to the sites you download from and the devices you pair, and nothing else. Passwords and tokens live in your Keychain.</p>
               </div>
               <p class="zero" aria-label="Zero bytes of telemetry"><span>0</span><small>bytes of telemetry</small></p>
             </div>
@@ -305,13 +305,13 @@
             <figure class="window">
               <picture>
                 <source srcset="assets/screens/dashboard-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
-                <img src="assets/screens/dashboard-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Osprey dashboard with throughput graph, speed mode picker, task counts and activity history.">
+                <img src="assets/screens/dashboard-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Swoop dashboard with throughput graph, speed mode picker, task counts and activity history.">
               </picture>
             </figure>
             <figure class="window float float-menubar">
               <picture>
                 <source srcset="assets/screens/menubar-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
-                <img src="assets/screens/menubar-light.webp" width="350" height="572" loading="lazy" decoding="async" alt="The Osprey menu bar extra showing current speed, active and queued counts, speed modes and a paste-a-link field.">
+                <img src="assets/screens/menubar-light.webp" width="350" height="572" loading="lazy" decoding="async" alt="The Swoop menu bar extra showing current speed, active and queued counts, speed modes and a paste-a-link field.">
               </picture>
             </figure>
           </div>
@@ -321,7 +321,7 @@
           <div class="dive-copy">
             <p class="label">Downloads and Inspector</p>
             <h3>Every transfer, fully in view.</h3>
-            <p>Filter by state, then open the inspector for speed, ETA, connections, source and destination. When something fails, Osprey says why and retries without throwing away what it already has.</p>
+            <p>Filter by state, then open the inspector for speed, ETA, connections, source and destination. When something fails, Swoop says why and retries without throwing away what it already has.</p>
             <ul class="ticks">
               <li>Resumes after a restart, and checks the server’s file hasn’t changed first</li>
               <li>Verifies checksums: MD5, SHA‑1, SHA‑256, SHA‑512 or BLAKE3</li>
@@ -348,7 +348,7 @@
           <div class="dive-copy">
             <p class="label">Torrents</p>
             <h3>Torrents, without the clutter.</h3>
-            <p>Open a .torrent file or a magnet link and choose which files you want. Osprey handles the swarm and shows you peers, trackers and the piece map when you ask.</p>
+            <p>Open a .torrent file or a magnet link and choose which files you want. Swoop handles the swarm and shows you peers, trackers and the piece map when you ask.</p>
             <ul class="ticks">
               <li>Stop seeding at a ratio or after a set time</li>
               <li>DHT and tracker support, with private torrents kept private</li>
@@ -389,7 +389,7 @@
           <div class="dive-copy">
             <p class="label">Site Grabber</p>
             <h3>Point it at a page. Keep what matters.</h3>
-            <p>Osprey follows links as deep as you allow, gathers every downloadable file it finds, and lets you pick what to keep before anything is downloaded.</p>
+            <p>Swoop follows links as deep as you allow, gathers every downloadable file it finds, and lets you pick what to keep before anything is downloaded.</p>
             <ul class="ticks">
               <li>Link depth, same-site scope, page limits and parallel requests</li>
               <li>Respects robots.txt and paces its requests to each host</li>
@@ -410,7 +410,7 @@
           <div class="dive-copy">
             <p class="label">Settings</p>
             <h3>Make it yours, down to the folder.</h3>
-            <p>Sort files by type into their own folders, set speed modes and how much runs at once, and decide which devices can reach Osprey. Every option lives in one familiar window.</p>
+            <p>Sort files by type into their own folders, set speed modes and how much runs at once, and decide which devices can reach Swoop. Every option lives in one familiar window.</p>
             <div class="seg-control" role="tablist" aria-label="Settings panes">
               <button role="tab" type="button" id="tab-general" aria-controls="pane-settings" aria-selected="true" data-shot="settings-general" data-alt="Settings, General pane: open at login, show in the menu bar, keep the Mac awake while downloading, theme and language.">General</button>
               <button role="tab" type="button" id="tab-categories" aria-controls="pane-settings" aria-selected="false" tabindex="-1" data-shot="settings-categories" data-alt="Settings, Categories pane: Documents, Images, Videos, Audio, Archives, Software, Torrents and Other, each with matching extensions and a folder.">Categories</button>
@@ -435,31 +435,31 @@
       <div class="wrap split">
         <div class="split-copy reveal">
           <p class="label">Browser extension</p>
-          <h2 id="ext-title">Click a link. Osprey takes it from there.</h2>
-          <p class="lede">One extension for Chrome, Edge and Firefox passes downloads straight to Osprey, with the cookies and referrer the site expects.</p>
+          <h2 id="ext-title">Click a link. Swoop takes it from there.</h2>
+          <p class="lede">One extension for Chrome, Edge and Firefox passes downloads straight to Swoop, with the cookies and referrer the site expects.</p>
           <ul class="browsers" aria-label="Supported browsers">
             <li>Chrome</li><li>Edge</li><li>Firefox</li>
           </ul>
           <ul class="ticks">
             <li>Takes over downloads that match your file types, size and site rules</li>
-            <li>“Download with Osprey” for links, images, media, selections, or every link on a page</li>
+            <li>“Download with Swoop” for links, images, media, selections, or every link on a page</li>
             <li>Detects video, audio and HLS streams on the page and flags DRM streams it can’t save</li>
             <li>Press <kbd>⌥</kbd><kbd>⇧</kbd><kbd>D</kbd> to send the current page</li>
-            <li>Talks to Osprey on your Mac through a native helper, or to a paired Osprey over HTTPS</li>
+            <li>Talks to Swoop on your Mac through a native helper, or to a paired Swoop over HTTPS</li>
           </ul>
-          <p class="note">Store listings are on the way. Until then, build the extension from the repository and load it unpacked; the <a data-gh="tree/main/extensions/browser" href="https://github.com/OWNER/osprey/tree/main/extensions/browser">setup guide</a> covers each browser.</p>
+          <p class="note">Store listings are on the way. Until then, build the extension from the repository and load it unpacked; the <a data-gh="tree/main/extensions/browser" href="https://github.com/OWNER/swoop/tree/main/extensions/browser">setup guide</a> covers each browser.</p>
         </div>
         <div class="split-media reveal">
           <div class="ext-stage">
             <figure class="ext-shot" data-optional>
               <picture>
                 <source srcset="assets/extension/popup-dark.png" media="(prefers-color-scheme: dark)" data-dark>
-                <img src="assets/extension/popup-light.png" loading="lazy" decoding="async" alt="The Osprey browser extension popup, listing detected media and links on the page with download buttons." onerror="this.closest('[data-optional]').hidden=true;this.closest('.ext-stage').classList.add('no-shot')">
+                <img src="assets/extension/popup-light.png" loading="lazy" decoding="async" alt="The Swoop browser extension popup, listing detected media and links on the page with download buttons." onerror="this.closest('[data-optional]').hidden=true;this.closest('.ext-stage').classList.add('no-shot')">
               </picture>
             </figure>
             <div class="ext-fallback" aria-hidden="true">
               <div class="ext-card">
-                <div class="ext-card-head"><img src="assets/favicon-64.png" alt="" width="22" height="22"><span>Osprey</span><em>Connected</em></div>
+                <div class="ext-card-head"><img src="assets/favicon-64.png" alt="" width="22" height="22"><span>Swoop</span><em>Connected</em></div>
                 <p class="ext-sub">Detected on this page</p>
                 <div class="ext-row"><span class="ext-type">HLS</span><span class="ext-name">keynote-1080p.m3u8</span><span class="ext-go"><svg class="ic"><use href="#i-download"/></svg></span></div>
                 <div class="ext-row"><span class="ext-type">MP4</span><span class="ext-name">trailer.mp4 · 84 MB</span><span class="ext-go"><svg class="ic"><use href="#i-download"/></svg></span></div>
@@ -487,7 +487,7 @@
               <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-key"/></svg></div>
               <div>
                 <h3>Pair in seconds</h3>
-                <p>Osprey shows a one-time code and a QR code carrying its certificate fingerprint. Codes expire after two minutes and work once.</p>
+                <p>Swoop shows a one-time code and a QR code carrying its certificate fingerprint. Codes expire after two minutes and work once.</p>
                 <p class="pair-code" aria-label="Example pairing code ABCD-EFGH"><span>ABCD</span><span>EFGH</span></p>
               </div>
             </article>
@@ -522,50 +522,50 @@
 
             <div class="term-pane" role="tabpanel" id="tp-cli" aria-labelledby="tt-cli" tabindex="0">
 <pre><code><span class="c"># Add a file with eight connections</span>
-<span class="p">osprey add https://example.com/file.zip --dir ~/Downloads --connections 8</span>
+<span class="p">swoop add https://example.com/file.zip --dir ~/Downloads --connections 8</span>
 
 <span class="c"># Add a magnet link without starting it</span>
-<span class="p">osprey add 'magnet:?xt=urn:btih:…' --paused</span>
+<span class="p">swoop add 'magnet:?xt=urn:btih:…' --paused</span>
 
 <span class="c"># Watch progress live, then ease off the network</span>
-<span class="p">osprey watch</span>
-<span class="p">osprey mode balanced</span>
+<span class="p">swoop watch</span>
+<span class="p">swoop mode balanced</span>
 
 <span class="c"># Print a pairing code and QR code for a new device</span>
-<span class="p">osprey pair</span></code></pre>
+<span class="p">swoop pair</span></code></pre>
             </div>
 
             <div class="term-pane" role="tabpanel" id="tp-server" aria-labelledby="tt-server" tabindex="0" hidden>
 <pre><code><span class="c"># Run the full engine with no app, plus the TLS remote listener</span>
-<span class="p">osprey server --remote 0.0.0.0:41780 --download-dir ~/Downloads</span>
+<span class="p">swoop server --remote 0.0.0.0:41780 --download-dir ~/Downloads</span>
 
 <span class="c"># From another shell on the same machine</span>
-<span class="p">osprey status</span>
-<span class="p">osprey list --json</span>
+<span class="p">swoop status</span>
+<span class="p">swoop list --json</span>
 
 <span class="c"># From a paired workstation</span>
-<span class="p">osprey --url https://nas.local:41780 --token "$OSPREY_TOKEN" list</span></code></pre>
+<span class="p">swoop --url https://nas.local:41780 --token "$SWOOP_TOKEN" list</span></code></pre>
             </div>
 
             <div class="term-pane" role="tabpanel" id="tp-docker" aria-labelledby="tt-docker" tabindex="0" hidden>
 <pre><code><span class="c"># docker/compose.yaml (excerpt)</span>
 <span class="k">services:</span>
-  <span class="k">osprey:</span>
+  <span class="k">swoop:</span>
     <span class="k">build:</span>
       <span class="k">context:</span> ..
       <span class="k">dockerfile:</span> Dockerfile
-    <span class="k">container_name:</span> osprey
+    <span class="k">container_name:</span> swoop
     <span class="k">restart:</span> unless-stopped
     <span class="k">ports:</span>
       - <span class="s">"41780:41780"</span>
     <span class="k">volumes:</span>
-      - osprey-data:/data
-      - osprey-downloads:/downloads
+      - swoop-data:/data
+      - swoop-downloads:/downloads
     <span class="k">environment:</span>
-      <span class="k">OSPREY_DATA_DIR:</span> /data
+      <span class="k">SWOOP_DATA_DIR:</span> /data
 <span class="k">volumes:</span>
-  <span class="k">osprey-data:</span>
-  <span class="k">osprey-downloads:</span></code></pre>
+  <span class="k">swoop-data:</span>
+  <span class="k">swoop-downloads:</span></code></pre>
               <div class="term-foot">
                 <code><span class="p">docker compose -f docker/compose.yaml up -d --build</span></code>
                 <button class="copy-btn" type="button" aria-label="Copy command" data-label="Copy command">
@@ -585,7 +585,7 @@
         <header class="section-head reveal">
           <p class="label">Security and privacy</p>
           <h2 id="sec-title">Private by default. Careful by design.</h2>
-          <p class="lede">A download manager handles untrusted files, hostile servers and your passwords. Here’s what Osprey guarantees in code.</p>
+          <p class="lede">A download manager handles untrusted files, hostile servers and your passwords. Here’s what Swoop guarantees in code.</p>
         </header>
         <div class="sec-grid">
           <article class="sec reveal">
@@ -616,7 +616,7 @@
           <article class="sec reveal">
             <svg class="ic" aria-hidden="true"><use href="#i-route"/></svg>
             <h3>Safe on hostile networks</h3>
-            <p>A public site can’t redirect Osprey to a local or private address. TLS 1.2 is the minimum, and certificate exceptions are opt-in, per host.</p>
+            <p>A public site can’t redirect Swoop to a local or private address. TLS 1.2 is the minimum, and certificate exceptions are opt-in, per host.</p>
           </article>
         </div>
       </div>
@@ -643,7 +643,7 @@
         </header>
         <div class="faq reveal">
           <details>
-            <summary>What do I need to run Osprey?</summary>
+            <summary>What do I need to run Swoop?</summary>
             <div><p>A Mac running macOS 14 Sonoma or later. The app is a universal build, so it runs natively on Apple silicon and Intel Macs.</p></div>
           </details>
           <details>
@@ -651,16 +651,16 @@
             <div>
               <p>Yes. Version 0.1.0 is ad-hoc signed and not yet notarised by Apple, so Gatekeeper blocks it the first time. To open it:</p>
               <ol>
-                <li>Drag Osprey to your Applications folder.</li>
-                <li>Control-click (or right-click) Osprey and choose <strong>Open</strong>.</li>
+                <li>Drag Swoop to your Applications folder.</li>
+                <li>Control-click (or right-click) Swoop and choose <strong>Open</strong>.</li>
                 <li>Choose <strong>Open</strong> again in the dialog. macOS remembers your choice.</li>
               </ol>
-              <p>If you prefer Terminal, <code>xattr -dr com.apple.quarantine /Applications/Osprey.app</code> does the same thing. Because each ad-hoc build has a new identity, macOS may ask for Keychain or automation permissions again after you update.</p>
+              <p>If you prefer Terminal, <code>xattr -dr com.apple.quarantine /Applications/Swoop.app</code> does the same thing. Because each ad-hoc build has a new identity, macOS may ask for Keychain or automation permissions again after you update.</p>
             </div>
           </details>
           <details>
-            <summary>Does Osprey collect any data?</summary>
-            <div><p>No. There are no accounts, analytics or telemetry. Osprey only connects to the addresses you ask it to download from, and to devices you pair yourself.</p></div>
+            <summary>Does Swoop collect any data?</summary>
+            <div><p>No. There are no accounts, analytics or telemetry. Swoop only connects to the addresses you ask it to download from, and to devices you pair yourself.</p></div>
           </details>
           <details>
             <summary>Which browsers does the extension support?</summary>
@@ -668,11 +668,11 @@
           </details>
           <details>
             <summary>Can I run it without a Mac?</summary>
-            <div><p>The Mac app needs macOS, but the engine, CLI and web app run headless on Linux or in Docker with <code>osprey server</code>. Pair your phone or laptop to control it remotely.</p></div>
+            <div><p>The Mac app needs macOS, but the engine, CLI and web app run headless on Linux or in Docker with <code>swoop server</code>. Pair your phone or laptop to control it remotely.</p></div>
           </details>
           <details>
             <summary>Can it download protected streaming video?</summary>
-            <div><p>No. Osprey downloads HLS streams without DRM and refuses encrypted formats such as FairPlay and Widevine. Live streams and DASH aren’t supported yet.</p></div>
+            <div><p>No. Swoop downloads HLS streams without DRM and refuses encrypted formats such as FairPlay and Widevine. Live streams and DASH aren’t supported yet.</p></div>
           </details>
           <details>
             <summary>How do I update?</summary>
@@ -680,7 +680,7 @@
           </details>
           <details>
             <summary>Is it open source?</summary>
-            <div><p>Yes. Osprey is available under your choice of the MIT or Apache 2.0 licence. The source, docs and issue tracker are on <a data-gh="repo" href="https://github.com/OWNER/osprey">GitHub</a>.</p></div>
+            <div><p>Yes. Swoop is available under your choice of the MIT or Apache 2.0 licence. The source, docs and issue tracker are on <a data-gh="repo" href="https://github.com/OWNER/swoop">GitHub</a>.</p></div>
           </details>
         </div>
       </div>
@@ -701,8 +701,8 @@
           <h2 id="final-title">Ready when you are.</h2>
           <p class="lede">Free and open source. Universal for Apple silicon and Intel, macOS 14 or later.</p>
           <div class="cta-row">
-            <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
-              <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download Osprey 0.1.0</span>
+            <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/swoop/releases/latest">
+              <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download Swoop 0.1.0</span>
             </a>
             <a class="btn btn-glass btn-lg" href="#remote">
               <svg class="ic" aria-hidden="true"><use href="#i-terminal"/></svg><span>Run it headless</span>
@@ -718,20 +718,20 @@
       <div class="footer-brand">
         <img src="assets/favicon-64.png" alt="" width="32" height="32">
         <div>
-          <strong>Osprey</strong>
+          <strong>Swoop</strong>
           <span>A download manager for macOS.</span>
         </div>
       </div>
       <nav aria-label="Footer">
         <ul class="footer-links">
-          <li><a data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">Releases</a></li>
-          <li><a data-gh="repo" href="https://github.com/OWNER/osprey">Source</a></li>
-          <li><a data-gh="tree/main/docs" href="https://github.com/OWNER/osprey/tree/main/docs">Docs</a></li>
-          <li><a data-gh="blob/main/docs/cli.md" href="https://github.com/OWNER/osprey/blob/main/docs/cli.md">CLI reference</a></li>
-          <li><a data-gh="issues" href="https://github.com/OWNER/osprey/issues">Report an issue</a></li>
+          <li><a data-gh="releases" href="https://github.com/OWNER/swoop/releases/latest">Releases</a></li>
+          <li><a data-gh="repo" href="https://github.com/OWNER/swoop">Source</a></li>
+          <li><a data-gh="tree/main/docs" href="https://github.com/OWNER/swoop/tree/main/docs">Docs</a></li>
+          <li><a data-gh="blob/main/docs/cli.md" href="https://github.com/OWNER/swoop/blob/main/docs/cli.md">CLI reference</a></li>
+          <li><a data-gh="issues" href="https://github.com/OWNER/swoop/issues">Report an issue</a></li>
         </ul>
       </nav>
-      <p class="footer-fine">© <span id="year">2026</span> Osprey contributors · MIT or Apache 2.0 · macOS is a trademark of Apple Inc.</p>
+      <p class="footer-fine">© <span id="year">2026</span> Swoop contributors · MIT or Apache 2.0 · macOS is a trademark of Apple Inc.</p>
     </div>
   </footer>
 

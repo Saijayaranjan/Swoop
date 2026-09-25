@@ -83,7 +83,7 @@ async function main(): Promise<void> {
 
   async function render(focusPanel: boolean): Promise<void> {
     const token = ++renderToken;
-    document.title = `${current.title()} · ${tr('extensionName', 'Osprey')}`;
+    document.title = `${current.title()} · ${tr('extensionName', 'Swoop')}`;
     title.textContent = current.title();
     sub.textContent = current.subtitle();
     headIcon.replaceChildren(icon(current.icon));

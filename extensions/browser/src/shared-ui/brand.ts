@@ -1,5 +1,5 @@
 /**
- * Osprey brand artwork, ported from the desktop app so the extension carries the same identity:
+ * Swoop brand artwork, ported from the desktop app so the extension carries the same identity:
  *   - the wing glyph (a pair of crooked wings with swept feather tips over a tapered keel),
  *   - the mark (that glyph on a luminous blue tile),
  *   - the feather-fan illustration used for empty and offline states.
@@ -44,7 +44,7 @@ export function wingGlyph(fill = '#ffffff'): SVGSVGElement {
   ]);
 }
 
-/** The Osprey mark: the wing glyph on a blue tile. Decorative (`aria-hidden`). */
+/** The Swoop mark: the wing glyph on a blue tile. Decorative (`aria-hidden`). */
 export function brandMark(size: number): HTMLSpanElement {
   const tile = document.createElement('span');
   tile.className = 'mark';

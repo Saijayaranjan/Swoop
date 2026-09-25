@@ -1,5 +1,5 @@
 /**
- * Wire types for the extension <-> `osprey native-host` protocol
+ * Wire types for the extension <-> `swoop native-host` protocol
  * (docs/api/native-messaging.md). The host is a stateless relay onto the local REST API
  * (docs/api/rest.md) plus a push channel for WebSocket-shaped events (docs/api/websocket.md).
  */

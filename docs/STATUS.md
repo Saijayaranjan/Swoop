@@ -1,4 +1,4 @@
-# Osprey status
+# Swoop status
 
 A factual inventory of what the code does as of this revision, taken from reading the sources
 rather than the design documents. "Complete" means the feature works end to end through the
@@ -17,14 +17,14 @@ gap. "Partial" lists what is missing.
 | macOS app (`swift build`), Docker image | not built as part of this review |
 
 `cargo fmt --all -- --check` reports formatting drift in files that predate this review, mostly
-in `osprey-cli` and `osprey-server`. It is not enforced in CI.
+in `swoop-cli` and `swoop-server`. It is not enforced in CI.
 
 ## Feature inventory
 
 | Feature | Status | Notes |
 |---|---|---|
 | HTTP/HTTPS | **Complete** | Probe with retry, a segmented download into a part file, resume from a checkpoint after a restart, and validation of `ETag`, `Last-Modified` and size on resume. If the server ignores `Range`, it degrades to one connection and truncates the part file first. Redirects are capped, and a public origin can't redirect to a local or private address. Filenames come from `Content-Disposition` and are sanitised. The file is flushed and renamed from its part file only after every segment is complete. Truncated bodies are detected when the size is known. It detects when a server sends HTML in place of the file. Mirrors are supported, as are per-host and global connection caps. |
-| FTP/FTPS | **Partial** | Osprey has its own Tokio client with USER/PASS, EPSV/PASV, REST resume, explicit TLS (`AUTH TLS`, PBSZ, PROT), MLSD/LIST and rate limiting. Missing: active mode, proxies for FTP, and segmented (multi-connection) FTP. The `suppaftp` workspace dependency is declared but not used. |
+| FTP/FTPS | **Partial** | Swoop has its own Tokio client with USER/PASS, EPSV/PASV, REST resume, explicit TLS (`AUTH TLS`, PBSZ, PROT), MLSD/LIST and rate limiting. Missing: active mode, proxies for FTP, and segmented (multi-connection) FTP. The `suppaftp` workspace dependency is declared but not used. |
 | BitTorrent/magnet | **Partial** | Built on librqbit 9. It handles .torrent files and magnets (metadata resolution), file selection, seeding ratio and time limits, a tracker registry with HTTP/UDP probes, DHT, a peer list, a piece map and the BEP-27 private-torrent policy. Missing: PEX control, protocol encryption (MSE/PE), real per-file priorities and a sequential toggle (librqbit doesn't expose these), uTP listening, WebTorrent trackers, and swarm availability or seed counts. |
 | Metalink | **Partial** | Metalink v3/v4 parsing, mirrors, and the best available whole-file hash verified before promotion. Missing: multi-file metalinks download only the first file (a warning is logged), and `<pieces>` hashes and `<metaurl>` torrents are ignored. |
 | HLS (non-DRM) | **Partial** | Handles master/media playlists, variant choice, byte ranges, `EXT-X-MAP`, AES-128 clear-key decryption, per-segment checkpoints, merge, and an optional ffmpeg remux to MP4. `SAMPLE-AES`/FairPlay/Widevine and live playlists (no `EXT-X-ENDLIST`) are refused. Missing: separate alternate-audio renditions (`EXT-X-MEDIA TYPE=AUDIO`) are parsed but not downloaded or muxed. DASH is detected but not downloaded. |
@@ -37,7 +37,7 @@ in `osprey-cli` and `osprey-server`. It is not enforced in CI.
 | Site grabber | **Complete** | A bounded, robots-aware crawler (streaming `lol_html`, scope, depth, page and concurrency limits, per-host politeness). Files are classified by extension or MIME and can be probed with HEAD. Discovered files can be added as tasks. |
 | Browser extensions + native bridge | **Partial** | An MV3 extension for Chrome, Edge and Firefox: download interception with size, extension and domain rules, context menus, a popup with live rows, media detection, and bulk link collection. The native host relays to the local socket. Missing: store publication. Chromium users must paste the extension ID when installing the host manifest. No Safari build. |
 | Remote control | **Complete** | REST API plus WebSocket events, an embedded Preact web UI, pairing with one-time codes, scoped device tokens, TLS with a persisted self-signed certificate and its fingerprint, rate limiting, lockout and an audit log. |
-| Headless server | **Complete** | `osprey server` (or `osprey --headless`) runs the full engine with a Unix socket, optional loopback TCP and an optional remote listener. Credentials fall back to a mode-0600 file when no keychain is available. |
+| Headless server | **Complete** | `swoop server` (or `swoop --headless`) runs the full engine with a Unix socket, optional loopback TCP and an optional remote listener. Credentials fall back to a mode-0600 file when no keychain is available. |
 | CLI | **Complete** | add, list, status, pause, resume, retry, restart, cancel, remove, pause-all, resume-all, watch, queue, limit, mode, history, export, import, pair, devices, diagnostics, server and native-host. Exit codes are documented in `docs/cli.md`. |
 | Docker | **Partial** | A multi-stage `Dockerfile` (web UI, release binary, slim Debian with a non-root user) and `docker/compose.yaml` with a healthcheck. Not built or run as part of this review (no Docker on the review machine). There's no published image. |
 | Diagnostics | **Complete** | Per-task log ring, a health score, a "copy diagnostics" text report (REST `diagnostics.txt`, CLI `diagnostics`), a redacted process log ring and daily rolling log files. |
@@ -45,7 +45,7 @@ in `osprey-cli` and `osprey-server`. It is not enforced in CI.
 | Security | **Complete** (see the model below) | Recently hardened: remote save-path confinement, the native-host allowlist, safe remove-with-files and staged update downloads. |
 | Accessibility | **Partial** | SwiftUI views carry about 22 `accessibilityLabel`s and a few values and elements. The web UI has 28 ARIA attributes. There's no VoiceOver or keyboard-only audit and no contrast audit. |
 | i18n | **Partial** | English, Hindi and Tamil. The extension is fully translated (66 of 66 keys). The web UI has 44 of 256 keys translated in hi/ta, with fallback to English. The macOS `Localizable.strings` has about 109 of 208 lines in hi/ta. The Rust side returns stable keys plus English fallbacks. |
-| Updates | **Partial** | The Ed25519 signature over the SHA-256 is verified before download. The archive is hashed and its size checked, and it's staged under a temporary name. Downgrades are refused, and https is required. Missing: the verified DMG isn't installed automatically (it's handed to the app or user). The signing key has to be supplied through `OSPREY_UPDATE_PUBLIC_KEY`; without it, update checks return "unavailable". There's no published feed yet. |
+| Updates | **Partial** | The Ed25519 signature over the SHA-256 is verified before download. The archive is hashed and its size checked, and it's staged under a temporary name. Downgrades are refused, and https is required. Missing: the verified DMG isn't installed automatically (it's handed to the app or user). The signing key has to be supplied through `SWOOP_UPDATE_PUBLIC_KEY`; without it, update checks return "unavailable". There's no published feed yet. |
 | Import/export | **Complete** | A JSON bundle containing settings, queues, categories, rules, schedules, automations and recipes, plus tasks and history optionally. IDs are regenerated on conflict unless overwrite is set. Automations are imported without consent. Available through REST, the CLI and the app. |
 | Plugins | **Partial** | Manifest discovery, enable/disable, a permission grant model, and REST and app surfaces. Plugin code execution (an out-of-process host) isn't implemented. |
 | Archive extraction | **Partial** | Listing and selective extraction of ZIP, TAR, TAR.GZ/TGZ and GZ, with no zip-slip, no symlinks and no absolute paths. Local callers only. RAR and 7z are only recognised by their magic bytes; they aren't extracted. |
@@ -53,35 +53,35 @@ in `osprey-cli` and `osprey-server`. It is not enforced in CI.
 ## Architecture
 
 ```
-            ┌──────────── apps/macos (SwiftUI/AppKit, OspreyKit) ────────────┐
-            │  UniFFI Swift bindings  ──►  libosprey_ffi.a (osprey-ffi)       │
+            ┌──────────── apps/macos (SwiftUI/AppKit, SwoopKit) ─────────────┐
+            │  UniFFI Swift bindings  ──►  libswoop_ffi.a (swoop-ffi)          │
             └───────────────────────────────┬────────────────────────────────┘
                                             │ in-process
- osprey CLI ──unix socket / https──►  osprey-server (REST + WS + web UI)
- (osprey-cli)                               │
- browser ext ─► native host (osprey native-host) ─► unix socket
+ swoop CLI ──unix socket / https──►  swoop-server (REST + WS + web UI)
+ (swoop-cli)                                │
+ browser ext ─► native host (swoop native-host) ─► unix socket
                                             ▼
-                              osprey-services  (EngineApi: the one command surface)
+                              swoop-services  (EngineApi: the one command surface)
        ┌─────────────┬──────────────┬───────┴──────┬──────────────┬──────────────┐
   engine-http   engine-ftp   engine-torrent    media (HLS)    grabber   automation/archive/
   (+metalink)                 (librqbit)                                update/plugins
-       └──────────── osprey-runtime (net, safety, disk writer, limiter, bus, redact) ──┘
-                              osprey-store (SQLite, migrations, recovery)
-                              osprey-domain (types, state machine, errors, events)
+       └──────────── swoop-runtime (net, safety, disk writer, limiter, bus, redact) ───┘
+                              swoop-store (SQLite, migrations, recovery)
+                              swoop-domain (types, state machine, errors, events)
 ```
 
-- **osprey-domain**: I/O-free types: tasks, the state machine, errors, events, settings, rules and schedules.
-- **osprey-runtime**: HTTP client factory, redirect and SSRF policy, filesystem safety, the file writer, rate limiters, the event bus, checksums and redaction.
-- **osprey-store**: SQLite in WAL mode with one writer thread, forward-only migrations (`user_version`) and startup recovery.
-- **Engines**: `osprey-engine-http` (plus Metalink and mirrors), `osprey-engine-ftp`, `osprey-engine-torrent` (librqbit) and `osprey-media` (HLS). Each implements the runtime `Transfer` trait.
-- **osprey-grabber**, **osprey-automation**, **osprey-archive**, **osprey-update** and **osprey-plugins**: feature crates.
-- **osprey-services**: `Engine`, which implements `EngineApi`. It handles admission, lifecycle, rules, the scheduler, bandwidth, devices and pairing, history, and import/export.
-- **osprey-server**: axum REST, WebSocket and the embedded web UI on three listener kinds. They are the Unix socket (0600, same uid), loopback TCP, and the remote listener (TLS by default).
-- **osprey-ffi**: a UniFFI object (`OspreyEngine`) that owns a Tokio runtime, the services engine and the local API server. The macOS app links it as a static library. The remote listener starts when the settings enable it.
-- **osprey-cli**: a single `osprey` binary that serves as the CLI client, the headless server (it runs services and the server in-process) and the browser native-messaging host. The app bundle ships it in `Contents/Helpers/osprey`.
-- **osprey-testserver**: a local HTTP fixture server used by the tests.
+- **swoop-domain**: I/O-free types: tasks, the state machine, errors, events, settings, rules and schedules.
+- **swoop-runtime**: HTTP client factory, redirect and SSRF policy, filesystem safety, the file writer, rate limiters, the event bus, checksums and redaction.
+- **swoop-store**: SQLite in WAL mode with one writer thread, forward-only migrations (`user_version`) and startup recovery.
+- **Engines**: `swoop-engine-http` (plus Metalink and mirrors), `swoop-engine-ftp`, `swoop-engine-torrent` (librqbit) and `swoop-media` (HLS). Each implements the runtime `Transfer` trait.
+- **swoop-grabber**, **swoop-automation**, **swoop-archive**, **swoop-update** and **swoop-plugins**: feature crates.
+- **swoop-services**: `Engine`, which implements `EngineApi`. It handles admission, lifecycle, rules, the scheduler, bandwidth, devices and pairing, history, and import/export.
+- **swoop-server**: axum REST, WebSocket and the embedded web UI on three listener kinds. They are the Unix socket (0600, same uid), loopback TCP, and the remote listener (TLS by default).
+- **swoop-ffi**: a UniFFI object (`SwoopEngine`) that owns a Tokio runtime, the services engine and the local API server. The macOS app links it as a static library. The remote listener starts when the settings enable it.
+- **swoop-cli**: a single `swoop` binary that serves as the CLI client, the headless server (it runs services and the server in-process) and the browser native-messaging host. The app bundle ships it in `Contents/Helpers/swoop`.
+- **swoop-testserver**: a local HTTP fixture server used by the tests.
 - **extensions/browser**: an MV3 extension (TypeScript, esbuild) that talks only to the native host.
-- **web/remote**: the Preact remote UI, embedded into `osprey-server` through `rust-embed` at compile time.
+- **web/remote**: the Preact remote UI, embedded into `swoop-server` through `rust-embed` at compile time.
 
 ## Core technologies
 
@@ -111,7 +111,7 @@ What the documentation claims (`docs/security/`) and what the code actually enfo
   - The Unix socket is mode 0600, bound through a private staging directory, and drops peers with a different uid. The local token is accepted there and on loopback TCP only.
   - The loopback TCP listener refuses non-loopback addresses. The app binds it on `settings.remote.local_port` (41779 by default; `0` disables it).
   - The remote listener is off by default. It uses TLS with a persisted self-signed certificate unless `--no-tls` is given, in which case a warning is logged. The local token is always rejected on the remote listener.
-- **Authorization.** One policy table (`osprey-server/src/auth.rs`) maps every route to a scope (read, add, control or admin); unknown routes need admin. Archives are local-only. Device tokens are 32 random bytes and only their SHA-256 hash is stored. They expire and can be revoked. Failed attempts are locked out per IP. Remote requests are audited.
+- **Authorization.** One policy table (`swoop-server/src/auth.rs`) maps every route to a scope (read, add, control or admin); unknown routes need admin. Archives are local-only. Device tokens are 32 random bytes and only their SHA-256 hash is stored. They expire and can be revoked. Failed attempts are locked out per IP. Remote requests are audited.
 - **Pairing.** Codes are 8 characters from a 32-letter alphabet, valid for 120 s, single use and compared in constant time. The pair route is public but rate limited and subject to lockout.
 - **CORS and origin.**
   - Requests that carry an `Origin` header must match the host, a configured allow-list entry, or a browser-extension scheme. A bearer token is always required, and query tokens are accepted only for `/events` and `/tasks/{id}/file`.
@@ -126,7 +126,7 @@ What the documentation claims (`docs/security/`) and what the code actually enfo
 - **Network.** A public origin can't redirect to a loopback, private or link-local target. Webhooks resolve DNS and refuse private targets, and plain http is allowed only to localhost. Header names and values are validated, and hop-by-hop and `Range` headers can't be overridden. TLS 1.2 is the minimum. Certificate exceptions are per host and opt-in.
 - **Native messaging.** The browser pins the host manifest to the extension ID. The host relays only `/api/v1/tasks…` and `/api/v1/media…`, with a fixed set of methods, and rejects ambiguous paths. Messages are capped at 1 MiB.
 - **Automation.** Command, shell and AppleScript actions need a consent record whose BLAKE3 hash matches the resolved action. Only the desktop UI writes consent records (there's no REST route for it). Remote callers can't create or link code-running automations, and imports never carry consent. Commands run with an absolute program path and argv; variables are passed as environment variables. The sandboxed script language has no I/O and is capped by length, token count, steps and time.
-- **Updates.** The Ed25519 signature over the declared SHA-256 is checked before download. The archive is hashed while it downloads and staged under a temporary name. Downgrades are refused, and https is required. The key comes from `OSPREY_UPDATE_PUBLIC_KEY`.
+- **Updates.** The Ed25519 signature over the declared SHA-256 is checked before download. The archive is hashed while it downloads and staged under a temporary name. Downgrades are refused, and https is required. The key comes from `SWOOP_UPDATE_PUBLIC_KEY`.
 - **Secrets.** Credentials live in the OS keychain, with a 0600 file fallback on headless Linux. Log lines are redacted.
 - **Differences from the older docs, now corrected in `docs/security/`.**
   - Loopback TCP is on by default in the app.
@@ -158,26 +158,26 @@ cargo build --workspace
 cargo test --workspace
 
 # Headless engine + API (Unix socket in the data dir; add --remote 0.0.0.0:41780 for LAN)
-cargo run -p osprey-cli -- server --download-dir ~/Downloads
+cargo run -p swoop-cli -- server --download-dir ~/Downloads
 # In another terminal
-cargo run -p osprey-cli -- add https://example.com/file.iso
-cargo run -p osprey-cli -- list
-cargo run -p osprey-cli -- pair        # prints a pairing code for a remote device
+cargo run -p swoop-cli -- add https://example.com/file.iso
+cargo run -p swoop-cli -- list
+cargo run -p swoop-cli -- pair        # prints a pairing code for a remote device
 
-# Web UI (embedded at build time; build it before building osprey-server/osprey-cli)
+# Web UI (embedded at build time; build it before building swoop-server/swoop-cli)
 (cd web/remote && npm install && npm run build)
 
 # Browser extension (load dist/chrome or dist/firefox unpacked)
 (cd extensions/browser && npm install && npm run build)
-osprey native-host --install-manifest chrome --extension-id <32-letter id>
+swoop native-host --install-manifest chrome --extension-id <32-letter id>
 
-# macOS app (Rust static lib → UniFFI bindings → SwiftPM → Osprey.app, ad-hoc signed)
+# macOS app (Rust static lib → UniFFI bindings → SwiftPM → Swoop.app, ad-hoc signed)
 scripts/build-macos.sh --debug        # or --release [--universal] [--dmg]
-open build/Osprey.app
+open build/Swoop.app
 ```
 
 The app can also install the native-messaging manifests itself from Settings. It writes a small
-launcher script that execs `Osprey.app/Contents/Helpers/osprey native-host`.
+launcher script that execs `Swoop.app/Contents/Helpers/swoop native-host`.
 
 Docker: `docker compose -f docker/compose.yaml up -d --build`. This exposes the TLS remote
 listener on 41780 and stores data and downloads in named volumes.
@@ -186,20 +186,20 @@ listener on 41780 and stores data and downloads in named volumes.
 
 `scripts/build-macos.sh --release [--universal] [--dmg]` does the following:
 
-1. It builds `osprey-ffi` and `osprey-cli` in release mode for `aarch64-apple-darwin`. With `--universal` it also builds `x86_64-apple-darwin` when that target is installed, and the outputs are `lipo`'d.
+1. It builds `swoop-ffi` and `swoop-cli` in release mode for `aarch64-apple-darwin`. With `--universal` it also builds `x86_64-apple-darwin` when that target is installed, and the outputs are `lipo`'d.
 2. It generates the UniFFI Swift bindings, header and modulemap with the bundled `uniffi-bindgen`.
-3. It runs `swift build -c release --product OspreyApp`.
-4. It assembles `build/Osprey.app`: the binary, `Contents/Helpers/osprey`, resources and localisations. `Info.plist` gets the version from `Cargo.toml` and a timestamp build number.
-5. It code-signs the helper and then the app with the hardened runtime and `Osprey.entitlements`, using `OSPREY_SIGN_IDENTITY` if it's set. Without it the signature is ad hoc (`-`). It then runs `codesign --verify --deep --strict`.
-6. With `--dmg`, `scripts/make-dmg.sh` stages the app plus an `/Applications` symlink and creates a UDZO DMG at `build/Osprey-<version>.dmg`. When `dmgbuild` is installed (`pip install dmgbuild`) the DMG gets the styled background from `scripts/render-dmg-background.swift` and fixed icon positions; without it an unstyled DMG is produced. `MACOSX_DEPLOYMENT_TARGET` is pinned to 14.0.
+3. It runs `swift build -c release --product SwoopApp`.
+4. It assembles `build/Swoop.app`: the binary, `Contents/Helpers/swoop`, resources and localisations. `Info.plist` gets the version from `Cargo.toml` and a timestamp build number.
+5. It code-signs the helper and then the app with the hardened runtime and `Swoop.entitlements`, using `SWOOP_SIGN_IDENTITY` if it's set. Without it the signature is ad hoc (`-`). It then runs `codesign --verify --deep --strict`.
+6. With `--dmg`, `scripts/make-dmg.sh` stages the app plus an `/Applications` symlink and creates a UDZO DMG at `build/Swoop-<version>.dmg`. When `dmgbuild` is installed (`pip install dmgbuild`) the DMG gets the styled background from `scripts/render-dmg-background.swift` and fixed icon positions; without it an unstyled DMG is produced. `MACOSX_DEPLOYMENT_TARGET` is pinned to 14.0.
 
 Signing and notarisation caveats (there's no Developer ID):
 
-- An ad-hoc signature isn't trusted by Gatekeeper. A DMG downloaded from the internet is quarantined and blocked ("cannot be opened because the developer cannot be verified"). Users must right-click > Open, or run `xattr -dr com.apple.quarantine /Applications/Osprey.app`.
-- Notarisation (`notarytool`) and stapling need an Apple Developer ID Application certificate. With one: set `OSPREY_SIGN_IDENTITY`, then run `xcrun notarytool submit build/Osprey-<v>.dmg --wait` and `xcrun stapler staple`. None of this is scripted yet.
+- An ad-hoc signature isn't trusted by Gatekeeper. A DMG downloaded from the internet is quarantined and blocked ("cannot be opened because the developer cannot be verified"). Users must right-click > Open, or run `xattr -dr com.apple.quarantine /Applications/Swoop.app`.
+- Notarisation (`notarytool`) and stapling need an Apple Developer ID Application certificate. With one: set `SWOOP_SIGN_IDENTITY`, then run `xcrun notarytool submit build/Swoop-<v>.dmg --wait` and `xcrun stapler staple`. None of this is scripted yet.
 - An ad-hoc identity changes with every build. Keychain items and privacy grants (for example the automation/AppleScript prompts) may be requested again after an update.
-- For in-app updates, generate an Ed25519 key pair and build with `OSPREY_UPDATE_PUBLIC_KEY=<hex public key>`. Then sign `sha256(dmg)` with the private key and publish an `appcast.json` in the format documented in `crates/osprey-update/src/lib.rs`. Without the key, update checks are disabled.
-- Chromium users need the extension's store ID in the native-host manifest. Firefox uses the fixed gecko ID `osprey@osprey.app`.
+- For in-app updates, generate an Ed25519 key pair and build with `SWOOP_UPDATE_PUBLIC_KEY=<hex public key>`. Then sign `sha256(dmg)` with the private key and publish an `appcast.json` in the format documented in `crates/swoop-update/src/lib.rs`. Without the key, update checks are disabled.
+- Chromium users need the extension's store ID in the native-host manifest. Firefox uses the fixed gecko ID `swoop@swoop.app`.
 
 ## Suggested future work
 

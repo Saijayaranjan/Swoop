@@ -1,11 +1,11 @@
-# Services layer design (`osprey-services`)
+# Services layer design (`swoop-services`)
 
 `Engine` implements `EngineApi` and owns every long-lived component:
 
 ```
 Engine
 ├── paths: AppPaths, instance lock (InstanceLock)
-├── store: Arc<osprey_store::Store>          (recover() at start, per 002-persistence-and-recovery.md)
+├── store: Arc<swoop_store::Store>          (recover() at start, per 002-persistence-and-recovery.md)
 ├── settings: ArcSwap-like RwLock<Arc<Settings>>   (validated; persisted; SettingsChanged event)
 ├── bus: EventBus (250 ms progress coalescing, 8192 capacity)
 ├── clients: Arc<ClientFactory>                (updated on settings change with resolved global proxy URL)
@@ -15,16 +15,16 @@ Engine
 ├── bandwidth: BandwidthManager (global limiter → per-queue limiters → per-task; traffic mode; measured capacity)
 ├── scheduler: Scheduler (60 s tick + boundary timers; EnvironmentSnapshot with hysteresis; gate tasks/queues; run ScheduleActions; ReadyForSleep)
 ├── rules: RulesEngine (apply at add time + MoveAfterCompletion/FinderTags/RunAutomation at completion)
-├── automation: AutomationRunner (osprey-automation crate executor + consent gate + platform actions as events)
+├── automation: AutomationRunner (swoop-automation crate executor + consent gate + platform actions as events)
 ├── history + duplicates (store lookups by path/name+size/checksum/url)
 ├── disk: DiskMonitor (30 s tick: free space per destination, low-space notifications, volume presence → block/unblock tasks with VolumeUnavailable)
 ├── diagnostics: per-task log ring (last 500 in memory, persisted via store), health inputs → HealthScore recompute every 5 s for active tasks
 ├── devices: pairing (code, TTL 120 s, single-use), tokens (32 random bytes → base64url; sha256 hex stored), lockout per IP
-├── credentials: keyring (service "app.osprey.desktop", account = CredentialId) + store credential index
-├── grabber: osprey_grabber::Crawler
-├── archives: osprey-archive crate
-├── updater: osprey-update crate
-├── plugins: osprey-plugins crate
+├── credentials: keyring (service "app.swoop.desktop", account = CredentialId) + store credential index
+├── grabber: swoop_grabber::Crawler
+├── archives: swoop-archive crate
+├── updater: swoop-update crate
+├── plugins: swoop-plugins crate
 └── logs: tracing layer writing a 2,000-line ring buffer (redacted) + daily rolling file in log_dir
 ```
 
@@ -48,7 +48,7 @@ Reads `control.counters` for every running task, feeds a `SpeedMeter` per task (
 ## Bandwidth
 `RateLimiter` tree: global ("global") → per queue ("queue:<id>") → per task. `set_traffic_mode`/`set_global_limits` update settings + global limiter; queue.bandwidth updates the queue limiter; task limit updates its control + limiter. Torrent limits are applied through `TransferControl.download_limit/upload_limit` (engine polls). `optimize()`: measure capacity as the peak aggregate speed over the last 10 min of samples (fallback: current), set `measured_capacity`, choose `connections_per_task` = clamp(capacity / 2 MB/s, 4, 16) when servers support ranges (from recent tasks' `range_supported`), enable adaptive, persist, return settings.
 
-## Remote auth (used by osprey-server)
+## Remote auth (used by swoop-server)
 `authenticate(token, ip)`: sha256(token) → store.find_device_by_token_hash → not revoked and not expired → touch → Device. Local token: file `local-api.token` (created 0600 on first start, 32 random bytes base64url) → `authenticate` also accepts it and returns a synthetic admin Device{id:"local", kind:"cli"}. Pairing: `start_pairing(scopes)` → code from alphabet `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` (8 chars, shown as `XXXX-XXXX`), expires 120 s, `PairingStarted` event; `complete_pairing(code, name, kind, ip)`: constant-time compare, lockout per IP (`max_failed_attempts` → `lockout_minutes`), single-use → create Device (expires per `session_ttl_hours`), token returned once, `PairingCompleted` + `Notification::DevicePaired`, audit row.
 
 ## Import/export

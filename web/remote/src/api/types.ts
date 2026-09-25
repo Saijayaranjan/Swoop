@@ -1,4 +1,4 @@
-// TypeScript mirrors of the Rust DTOs in crates/osprey-domain and crates/osprey-services.
+// TypeScript mirrors of the Rust DTOs in crates/swoop-domain and crates/swoop-services.
 // Ids and Millis are transparent newtypes serialized as string / number respectively.
 
 export type TaskId = string;

@@ -6,7 +6,7 @@
 
 import browser from 'webextension-polyfill';
 
-const KEY = 'ospreySessionState';
+const KEY = 'swoopSessionState';
 const MAX_HANDLED_DOWNLOAD_IDS = 200;
 
 export interface SessionState {

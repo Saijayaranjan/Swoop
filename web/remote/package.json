@@ -1,8 +1,8 @@
 {
-  "name": "osprey-remote-web",
+  "name": "swoop-remote-web",
   "version": "1.0.0",
   "private": true,
-  "description": "Osprey remote-control web UI, embedded into the server binary and served at /",
+  "description": "Swoop remote-control web UI, embedded into the server binary and served at /",
   "type": "module",
   "engines": {
     "node": ">=23.6"

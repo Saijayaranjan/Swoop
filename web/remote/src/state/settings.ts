@@ -4,7 +4,7 @@
 import { createStore } from "./store.ts";
 import { detectLocale, type Locale } from "../i18n/index.ts";
 
-const KEY = "osprey.settings";
+const KEY = "swoop.settings";
 
 export type Theme = "system" | "light" | "dark";
 

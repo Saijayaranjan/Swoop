@@ -1,8 +1,8 @@
 /**
- * Osprey's in-page UI, rendered in a closed shadow root on a single host element:
+ * Swoop's in-page UI, rendered in a closed shadow root on a single host element:
  *
- *  - Prompts (top-right) after the background captures a download: "Sent to Osprey" with
- *    "Use browser instead", "Kept in your browser" when Osprey is not running, and a sticky
+ *  - Prompts (top-right) after the background captures a download: "Sent to Swoop" with
+ *    "Use browser instead", "Kept in your browser" when Swoop is not running, and a sticky
  *    warning when the hand-off failed. Non-modal and never steal focus; Esc dismisses.
  *  - A media button over video/audio players (when enabled in settings): point at a player — or
  *    focus it and press Tab — to reveal it; it opens a small panel listing the page's media with
@@ -34,7 +34,7 @@ let layer: HTMLElement | null = null;
 
 function ensureLayer(): HTMLElement {
   if (layer?.isConnected) return layer;
-  const host = document.createElement('osprey-layer');
+  const host = document.createElement('swoop-layer');
   host.style.setProperty('all', 'initial', 'important');
   host.style.setProperty('position', 'fixed', 'important');
   host.style.setProperty('inset', '0 auto auto 0', 'important');
@@ -75,7 +75,7 @@ function onEscape(el: HTMLElement, fn: () => void): void {
 function reason(err: unknown): { text: string; notRunning: boolean } {
   const kind = err instanceof BackgroundError ? err.kind : undefined;
   if (kind === 'unavailable' || kind === 'unreachable') {
-    return { text: tr('pageNotRunning', 'Osprey isn’t running'), notRunning: true };
+    return { text: tr('pageNotRunning', 'Swoop isn’t running'), notRunning: true };
   }
   return { text: err instanceof Error ? err.message : String(err), notRunning: false };
 }
@@ -100,7 +100,7 @@ export function showPrompt(prompt: PagePrompt): void {
     attrs: {
       role: prompt.variant === 'failed' ? 'alert' : 'status',
       'aria-live': prompt.variant === 'failed' ? 'assertive' : 'polite',
-      'aria-label': tr('extensionName', 'Osprey'),
+      'aria-label': tr('extensionName', 'Swoop'),
     },
   });
 
@@ -172,7 +172,7 @@ export function showPrompt(prompt: PagePrompt): void {
   };
 
   const openApp = (): HTMLButtonElement =>
-    button(tr('actionOpenApp', 'Open Osprey'), true, async () => {
+    button(tr('actionOpenApp', 'Open Swoop'), true, async () => {
       await launchApp().catch(() => {});
       dismiss();
     }, 'open');
@@ -188,7 +188,7 @@ export function showPrompt(prompt: PagePrompt): void {
               btn.disabled = true;
               try {
                 await promptAction(prompt.promptId, 'always-browser');
-                setContent(tr('pageGotIt', 'Got it'), tr('pageAlwaysDone', 'Osprey will leave $1 to your browser. Change this in Osprey’s Sites settings.', host), [], 'check');
+                setContent(tr('pageGotIt', 'Got it'), tr('pageAlwaysDone', 'Swoop will leave $1 to your browser. Change this in Swoop’s Sites settings.', host), [], 'check');
                 autoMs = 4000;
                 schedule(autoMs);
               } catch (err) {
@@ -217,7 +217,7 @@ export function showPrompt(prompt: PagePrompt): void {
   switch (prompt.variant) {
     case 'sent':
       setContent(
-        tr('pageSentTitle', 'Sent to Osprey'),
+        tr('pageSentTitle', 'Sent to Swoop'),
         null,
         [
           ...(prompt.canLaunch ? [openApp()] : []),
@@ -229,9 +229,9 @@ export function showPrompt(prompt: PagePrompt): void {
     case 'not-running':
       setContent(
         tr('pageKeptTitle', 'Kept in your browser'),
-        tr('pageKeptBody', 'Osprey isn’t running, so this download stayed in the browser.'),
+        tr('pageKeptBody', 'Swoop isn’t running, so this download stayed in the browser.'),
         prompt.canLaunch
-          ? [button(tr('actionLaunchApp', 'Launch Osprey'), true, async () => {
+          ? [button(tr('actionLaunchApp', 'Launch Swoop'), true, async () => {
               await launchApp().catch(() => {});
               dismiss();
             }, 'power')]
@@ -241,7 +241,7 @@ export function showPrompt(prompt: PagePrompt): void {
       break;
     case 'failed':
       setContent(
-        tr('pageFailedTitle', 'Couldn’t send to Osprey'),
+        tr('pageFailedTitle', 'Couldn’t send to Swoop'),
         tr('pageFailedBody', 'The browser’s copy was already stopped. Download it in the browser instead?'),
         [button(tr('actionDownloadInBrowser', 'Download in browser'), true, useBrowser, 'download')],
         'close',
@@ -477,7 +477,7 @@ export function initMediaButton(): void {
     }
     const root = ensureLayer();
     const list = h('ul', { class: 'panel-list' });
-    const titleId = `osprey-panel-title`;
+    const titleId = `swoop-panel-title`;
     const close = h('button', {
       class: 'icon-btn',
       attrs: { type: 'button', 'aria-label': tr('actionClose', 'Close'), title: tr('actionClose', 'Close') },
@@ -507,12 +507,12 @@ export function initMediaButton(): void {
       list.replaceWith(
         h('p', {
           class: 'panel-empty',
-          text: tr('pageMediaProtected', 'This player streams protected media, which Osprey can’t save.'),
+          text: tr('pageMediaProtected', 'This player streams protected media, which Swoop can’t save.'),
         }),
       );
     }
     for (const item of items.slice(0, 12)) list.append(renderItem(item));
-    panel.append(h('div', { class: 'panel-foot', text: tr('pageMediaFoot', 'Downloads start in Osprey right away.') }));
+    panel.append(h('div', { class: 'panel-foot', text: tr('pageMediaFoot', 'Downloads start in Swoop right away.') }));
     position();
     (panel.querySelector<HTMLElement>('.panel-list button, .panel-list select') ?? close).focus();
   }
@@ -547,8 +547,8 @@ export function initMediaButton(): void {
         class: 'icon-btn filled',
         attrs: {
           type: 'button',
-          'aria-label': `${tr('actionDownloadWithOsprey', 'Download with Osprey')}: ${name}`,
-          title: tr('actionDownloadWithOsprey', 'Download with Osprey'),
+          'aria-label': `${tr('actionDownloadWithSwoop', 'Download with Swoop')}: ${name}`,
+          title: tr('actionDownloadWithSwoop', 'Download with Swoop'),
         },
       }, [icon('arrowDown')]);
       dl.addEventListener('click', async () => {
@@ -592,7 +592,7 @@ export function initMediaButton(): void {
         type: 'button',
         'aria-haspopup': 'dialog',
         'aria-expanded': 'false',
-        'aria-label': tr('actionDownloadWithOsprey', 'Download with Osprey'),
+        'aria-label': tr('actionDownloadWithSwoop', 'Download with Swoop'),
       },
     }, [brandMark(22), h('span', { text: tr('actionDownload', 'Download') }), icon('chevronDown', 'icon chev')]);
     button.addEventListener('click', () => void openPanel());

@@ -51,7 +51,7 @@ const html = `<!doctype html>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
-<title>Osprey</title>
+<title>Swoop</title>
 ${cssName ? `<link rel="stylesheet" href="/${cssName}" />` : ""}
 </head>
 <body>

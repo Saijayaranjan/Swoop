@@ -84,7 +84,7 @@ function toConnectionStatus(status: Awaited<ReturnType<NativePort['ping']>>): Co
 }
 
 function deviceName(): string {
-  const target = typeof __OSPREY_TARGET__ === 'string' ? __OSPREY_TARGET__ : 'browser';
+  const target = typeof __SWOOP_TARGET__ === 'string' ? __SWOOP_TARGET__ : 'browser';
   const label = target.charAt(0).toUpperCase() + target.slice(1);
   return `${label} extension`;
 }

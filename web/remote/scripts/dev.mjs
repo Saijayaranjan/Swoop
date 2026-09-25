@@ -19,7 +19,7 @@ writeFileSync(
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="light dark" />
-<title>Osprey (dev)</title>
+<title>Swoop (dev)</title>
 <link rel="stylesheet" href="/main.css" />
 </head>
 <body>
@@ -45,5 +45,5 @@ const ctx = await context({
 
 await ctx.watch();
 const { host, port: boundPort } = await ctx.serve({ servedir: outdir, port });
-console.log(`\nOsprey remote UI dev server: http://${host === "0.0.0.0" ? "localhost" : host}:${boundPort}/\n`);
-console.log("Note: API calls are same-origin; point this at a build that also proxies /api and /api/v1/events to a running osprey daemon, or open the built dist/ from the daemon itself for full functionality.\n");
+console.log(`\nSwoop remote UI dev server: http://${host === "0.0.0.0" ? "localhost" : host}:${boundPort}/\n`);
+console.log("Note: API calls are same-origin; point this at a build that also proxies /api and /api/v1/events to a running swoop daemon, or open the built dist/ from the daemon itself for full functionality.\n");

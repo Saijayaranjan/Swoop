@@ -4,15 +4,15 @@
 
 - SwiftPM package at `apps/macos` (`swift-tools-version: 5.9`, `platforms: [.macOS(.v14)]`),
   built with **Command Line Tools only** — no Xcode project. `scripts/build-macos.sh` builds the
-  Rust static library (`osprey-ffi`, universal when both targets are installed), runs
-  `uniffi-bindgen` to produce `OspreyFFI.swift` + modulemap, `swift build -c release`, then assembles
-  `Osprey.app` (Info.plist, `Osprey.icns`, embedded `osprey` CLI + native host at
-  `Contents/MacOS/osprey`, `Contents/Resources/`), ad-hoc codesigns, and `hdiutil` a DMG.
-- Targets: `OspreyFFI` (system-library target wrapping the generated header/modulemap + link
-  flags), `OspreyKit` (Swift façade over the FFI: `EngineClient`, stores, formatting, l10n),
-  `OspreyApp` (SwiftUI/AppKit executable), `OspreyKitTests`.
+  Rust static library (`swoop-ffi`, universal when both targets are installed), runs
+  `uniffi-bindgen` to produce `SwoopFFI.swift` + modulemap, `swift build -c release`, then assembles
+  `Swoop.app` (Info.plist, `Swoop.icns`, embedded `swoop` CLI + native host at
+  `Contents/MacOS/swoop`, `Contents/Resources/`), ad-hoc codesigns, and `hdiutil` a DMG.
+- Targets: `SwoopFFI` (system-library target wrapping the generated header/modulemap + link
+  flags), `SwoopKit` (Swift façade over the FFI: `EngineClient`, stores, formatting, l10n),
+  `SwoopApp` (SwiftUI/AppKit executable), `SwoopKitTests`.
 - **`@State` shim**: the macOS 27 SDK implements `@State` as a macro whose plugin only ships in
-  Xcode. Use `@ViewState` (a property wrapper over `SwiftUICore.State`, in `OspreyKit/Support/
+  Xcode. Use `@ViewState` (a property wrapper over `SwiftUICore.State`, in `SwoopKit/Support/
   ViewState.swift`) everywhere `@State` would be used. `@Observable`, `@Environment`, `@Bindable`,
   `@FocusState`, `@AppStorage`, `@SceneStorage` work normally.
 
@@ -52,7 +52,7 @@ file selection for torrents, media variant picker).
 
 Menu bar extra (`MenuBarExtra`, window style): global ↓/↑ speed, active count, tiny sparkline,
 speed-mode picker (Unlimited · Balanced · Browsing · Custom), recent completions (click to reveal),
-Pause all / Resume all / Retry failed, Add URL / Paste URL, Open Osprey, Open downloads folder.
+Pause all / Resume all / Retry failed, Add URL / Paste URL, Open Swoop, Open downloads folder.
 
 Dock: badge = active count; progress on the icon (`NSDockTile` with a custom view); Dock menu.
 
@@ -61,8 +61,8 @@ Dock: badge = active count; progress on the icon (`NSDockTile` with a custom vie
 Notifications (`UNUserNotificationCenter`, categories with actions Open / Reveal / Retry), Finder
 reveal (`NSWorkspace.activateFileViewerSelecting`), Finder tags (`URLResourceValues.tagNames`),
 Quick Look (`QLPreviewPanel` via `NSResponder` chain, space bar), drag & drop of URLs/files/
-`.torrent` onto the window and the Dock icon, Services ("Download with Osprey"), URL scheme
-`osprey://add?url=…` and `magnet:`/`.torrent`/`.metalink` document types, Keychain (via the
+`.torrent` onto the window and the Dock icon, Services ("Download with Swoop"), URL scheme
+`swoop://add?url=…` and `magnet:`/`.torrent`/`.metalink` document types, Keychain (via the
 FFI's `store_credential`), login item (`SMAppService.mainApp`), power assertion
 (`IOPMAssertionCreateWithName(kIOPMAssertPreventUserIdleSystemSleep)` while `GlobalStats.active > 0`
 and the setting is on), environment probe (`NWPathMonitor` for availability/expensive/constrained,
@@ -86,4 +86,4 @@ omitted unless location permission is granted) → `update_environment`, sleep/q
   `⌘R` reveal); Dynamic Type not applicable on macOS but honour the system text size setting.
 - Localisation: `Localizable.xcstrings`-style catalog implemented as `Localizable.strings` per
   language (`en`, `hi`, `ta` scaffolds), accessed via `String(localized:)`; Rust keys
-  (`state.*`, `error.*`, `health.*`, `pause.*`) are mapped in `OspreyKit/L10n.swift`.
+  (`state.*`, `error.*`, `health.*`, `pause.*`) are mapped in `SwoopKit/L10n.swift`.

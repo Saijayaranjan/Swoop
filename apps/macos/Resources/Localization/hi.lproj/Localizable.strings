@@ -1,4 +1,4 @@
-/* Osprey — hi strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
+/* Swoop — hi strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
 
 "Active" = "सक्रिय";
 "Add" = "जोड़ें";
@@ -38,7 +38,7 @@
 "Offline" = "ऑफ़लाइन";
 "Online" = "ऑनलाइन";
 "Open" = "खोलें";
-"Open Osprey" = "Osprey खोलें";
+"Open Swoop" = "Swoop खोलें";
 "Organise" = "व्यवस्थित करें";
 "Overview" = "सारांश";
 "Paste" = "चिपकाएँ";
@@ -78,7 +78,7 @@
 "error.dns" = "सर्वर का नाम नहीं मिला। अपना कनेक्शन या पता जाँचें।";
 "error.expired_url" = "लिंक की समय-सीमा समाप्त हो गई है।";
 "error.forbidden" = "सर्वर ने इस फ़ाइल तक पहुँच से मना कर दिया।";
-"error.network_unavailable" = "आप ऑफ़लाइन हैं। नेटवर्क लौटने पर Osprey जारी रखेगा।";
+"error.network_unavailable" = "आप ऑफ़लाइन हैं। नेटवर्क लौटने पर Swoop जारी रखेगा।";
 "error.not_found" = "यह फ़ाइल अब सर्वर पर नहीं है।";
 "error.unknown" = "कुछ गलत हो गया।";
 "health.excellent" = "उत्कृष्ट";

@@ -1,14 +1,14 @@
-# ADR-001 — Osprey architecture decision
+# ADR-001 — Swoop architecture decision
 
-**Status:** accepted (2026-09-17) · **Product name:** Osprey (original; no competitor naming/branding)
+**Status:** accepted (2026-09-17) · **Product name:** Swoop (original; no competitor naming/branding)
 
 ## 1. Decision in one paragraph
 
-Osprey is a **Rust core** (download engine, BitTorrent, media/HLS, site grabber, task/queue/scheduler
+Swoop is a **Rust core** (download engine, BitTorrent, media/HLS, site grabber, task/queue/scheduler
 services, SQLite persistence, automation, REST/WebSocket API, CLI, headless daemon) with a
 **fully native SwiftUI + AppKit macOS application** that links the core **in-process through
-UniFFI**. The same core binary serves as the headless server (`osprey server`), the CLI (`osprey …`),
-and the browser Native-Messaging host (`osprey native-host`). Windows gets a native WinUI 3 shell
+UniFFI**. The same core binary serves as the headless server (`swoop server`), the CLI (`swoop …`),
+and the browser Native-Messaging host (`swoop native-host`). Windows gets a native WinUI 3 shell
 over the same core later; Linux/NAS use the headless server plus the embedded web UI.
 
 ## 2. Options evaluated
@@ -50,7 +50,7 @@ consistency of *engine behaviour* (identical core) and beats B on every UX/nativ
 | macOS UI | SwiftUI (macOS 14+) over AppKit where needed (`NSTableView`-backed `Table`, `NSMenu`, `QLPreviewPanel`, `NSWorkspace`) | Native menus, inspector, menu-bar extra, accessibility, Retina, appearance | — |
 | Extension | WebExtension MV3 (TypeScript, esbuild) | One codebase for Chrome/Chromium/Edge/Firefox with per-browser manifest | — |
 | Remote web UI | Preact + TypeScript (MIT), embedded into the server binary with `rust-embed` | 4 KB runtime; serves phones/tablets/NAS | — |
-| Updates | Own updater: JSON appcast, **Ed25519**-signed archives, downloaded by Osprey's own engine, verified before install, previous bundle retained for rollback | Sparkle needs Xcode-style framework embedding that this host cannot do; own updater dogfoods the engine | Sparkle |
+| Updates | Own updater: JSON appcast, **Ed25519**-signed archives, downloaded by Swoop's own engine, verified before install, previous bundle retained for rollback | Sparkle needs Xcode-style framework embedding that this host cannot do; own updater dogfoods the engine | Sparkle |
 
 ## 4. Shared vs platform-specific
 
@@ -67,7 +67,7 @@ battery/AC & network-path observers (fed to the shared scheduler as *conditions*
 Settings window, accessibility, keyboard shortcuts, update *install/relaunch*.
 
 **Windows-native (future, `apps/windows/`)** — WinUI 3 equivalents of the above over the same
-`osprey-ffi` surface (UniFFI also emits C#/Kotlin/Python bindings).
+`swoop-ffi` surface (UniFFI also emits C#/Kotlin/Python bindings).
 
 ## 5. IPC strategy
 
@@ -75,11 +75,11 @@ Settings window, accessibility, keyboard shortcuts, update *install/relaunch*.
    into the engine) or `async`. Events flow **core → app** through a UniFFI callback interface;
    progress is coalesced by the core into ≤4 batches/second regardless of task count.
 2. **CLI / extension host / remote clients ↔ running instance:** the local API — a Unix-domain
-   socket (`~/Library/Application Support/Osprey/osprey.sock`, mode 0600) plus loopback TCP. Auth
+   socket (`~/Library/Application Support/Swoop/swoop.sock`, mode 0600) plus loopback TCP. Auth
    for local callers is a random token in a 0600 file; the extension never sees it (the native
    host reads it). Remote access is a separate listener that is **off by default** and TLS-only.
 3. **Browser extension ↔ native host:** Chrome/Firefox Native Messaging (length-prefixed JSON on
-   stdio). The host is `osprey native-host`, a stateless relay to the local API.
+   stdio). The host is `swoop native-host`, a stateless relay to the local API.
 
 ## 6. Persistence strategy
 
@@ -88,7 +88,7 @@ migrations via `user_version`. Every task, queue, category, rule, schedule, auto
 history row is durable. In-progress HTTP downloads keep a **segment map** with a *committed*
 watermark per segment that is only advanced after data has been flushed to disk; on restart the
 engine trusts the committed watermark and re-fetches anything past it. Files are written to
-`<name>.osprey-part`, verified, then renamed atomically. Torrent state is persisted by librqbit's
+`<name>.swoop-part`, verified, then renamed atomically. Torrent state is persisted by librqbit's
 session file plus our task row. Settings are a typed struct stored as JSON in one row with schema
 versioning. Export/import is JSON.
 
@@ -96,7 +96,7 @@ versioning. Export/import is JSON.
 
 - **Untrusted input:** URLs, HTTP headers, filenames (`Content-Disposition`), HTML, torrent
   metadata, playlist files, archive listings, extension messages, remote API bodies, import files.
-  All pass through validators in `osprey-runtime::safety` (path traversal, control chars, reserved
+  All pass through validators in `swoop-runtime::safety` (path traversal, control chars, reserved
   names, length, symlink escape, absolute-path rejection).
 - **Trust boundary 1 — FFI:** `catch_unwind` at every exported function; no raw pointers cross.
 - **Trust boundary 2 — local API:** token required even on loopback; origin checks on WebSocket
@@ -139,19 +139,19 @@ versioning. Export/import is JSON.
 
 ```
 Cargo.toml                    workspace
-crates/osprey-domain          ids, task/state machine, queues, rules, schedules, events, errors, engine traits
-crates/osprey-runtime         rate limiter, event bus, safe paths, redaction, disk writer, backoff, net config
-crates/osprey-store           SQLite persistence, migrations, recovery
-crates/osprey-engine-http     HTTP/HTTPS segmented engine, probing, adaptive concurrency, mirrors, metalink, checksum
-crates/osprey-engine-ftp      FTP/FTPS
-crates/osprey-engine-torrent  librqbit adapter
-crates/osprey-media           HLS/M3U8 + direct-media detection
-crates/osprey-grabber         site grabber / crawler
-crates/osprey-services        TaskManager, queues, scheduler, bandwidth, rules, automation, history, disk, diagnostics, updater → `Engine` facade
-crates/osprey-server          axum REST + WS, auth, pairing, embedded web UI
-crates/osprey-cli             `osprey` binary: CLI, `server`, `native-host`
-crates/osprey-ffi             UniFFI surface for Swift/C#
-apps/macos                    SwiftPM package → Osprey.app
+crates/swoop-domain          ids, task/state machine, queues, rules, schedules, events, errors, engine traits
+crates/swoop-runtime         rate limiter, event bus, safe paths, redaction, disk writer, backoff, net config
+crates/swoop-store           SQLite persistence, migrations, recovery
+crates/swoop-engine-http     HTTP/HTTPS segmented engine, probing, adaptive concurrency, mirrors, metalink, checksum
+crates/swoop-engine-ftp      FTP/FTPS
+crates/swoop-engine-torrent  librqbit adapter
+crates/swoop-media           HLS/M3U8 + direct-media detection
+crates/swoop-grabber         site grabber / crawler
+crates/swoop-services        TaskManager, queues, scheduler, bandwidth, rules, automation, history, disk, diagnostics, updater → `Engine` facade
+crates/swoop-server          axum REST + WS, auth, pairing, embedded web UI
+crates/swoop-cli             `swoop` binary: CLI, `server`, `native-host`
+crates/swoop-ffi             UniFFI surface for Swift/C#
+apps/macos                    SwiftPM package → Swoop.app
 extensions/browser            WebExtension (Chrome/Edge/Firefox)
 web/remote                    Preact remote UI (embedded in server)
 docs/                         architecture, engine, API, CLI, security, threat model, …

@@ -52,13 +52,13 @@ test('an error response rejects with ApiError carrying kind/status/message', asy
   client.handleMessage({
     id,
     ok: false,
-    error: { type: 'unavailable', message: 'Osprey is not running' },
+    error: { type: 'unavailable', message: 'Swoop is not running' },
   });
 
   await assert.rejects(promise, (err: unknown) => {
     assert.ok(err instanceof ApiError);
     assert.equal(err.kind, 'unavailable');
-    assert.equal(err.message, 'Osprey is not running');
+    assert.equal(err.message, 'Swoop is not running');
     return true;
   });
 });

@@ -20,7 +20,7 @@ import { handleEventForBadge, updateBadge } from './badge.ts';
 import { handleEventForNotifications } from './notifications.ts';
 import { loadSessionState } from './state.ts';
 import { REMOTE_TOKEN_KEY, normalizeRemoteUrl } from '../shared/remote.ts';
-import type { OspreyEvent } from '../shared/types.ts';
+import type { SwoopEvent } from '../shared/types.ts';
 
 const NATIVE_EVENTS = [
   'task_added',
@@ -56,7 +56,7 @@ browser.runtime.onInstalled.addListener(() => {
 });
 
 nativePort.onEvent((rawEvent) => {
-  const event = rawEvent as OspreyEvent;
+  const event = rawEvent as SwoopEvent;
   void handleEventForBadge(event);
   if (event.type === 'notification') {
     settingsStore
@@ -78,7 +78,7 @@ try {
   // Not supported here: content scripts still never touch storage themselves.
 }
 
-/** Point the connection at the local native host or the paired remote Osprey, per settings. */
+/** Point the connection at the local native host or the paired remote Swoop, per settings. */
 async function configureConnection(): Promise<void> {
   const settings = await settingsStore.get();
   if (settings.connection_mode !== 'remote') {
@@ -113,7 +113,7 @@ void (async () => {
   await configureConnection().catch(() => {});
 
   // Keep retrying (with backoff) as long as the extension is alive: this is also what keeps an
-  // MV3 service worker from being suspended while Osprey is actively reporting progress.
+  // MV3 service worker from being suspended while Swoop is actively reporting progress.
   await nativePort.subscribe(NATIVE_EVENTS).catch(() => {
     // Native host not installed/reachable yet; native-port.ts already scheduled a retry.
   });

@@ -14,7 +14,7 @@ rm -f "$OUT"
 swift "$ROOT/scripts/render-dmg-background.swift" "$WORK/background" >/dev/null
 tiffutil -cathidpicheck "$WORK/background.png" "$WORK/background@2x.png" -out "$WORK/background.tiff" >/dev/null 2>&1
 
-ICON="$APP/Contents/Resources/Osprey.icns"
+ICON="$APP/Contents/Resources/Swoop.icns"
 if command -v dmgbuild >/dev/null 2>&1; then
   DMGBUILD=(dmgbuild)
 elif python3 -c "import dmgbuild" >/dev/null 2>&1; then
@@ -26,7 +26,7 @@ fi
 if [[ ${#DMGBUILD[@]} -gt 0 ]]; then
   "${DMGBUILD[@]}" -s "$ROOT/scripts/dmg-settings.py" \
     -D app="$APP" -D background="$WORK/background.tiff" -D icon="$ICON" \
-    "Osprey" "$OUT" >/dev/null
+    "Swoop" "$OUT" >/dev/null
 else
   echo "  dmgbuild not found: building an unstyled DMG" >&2
   STAGE="$WORK/stage"
@@ -34,6 +34,6 @@ else
   cp -R "$APP" "$STAGE/"
   ln -s /Applications "$STAGE/Applications"
   cp "$ICON" "$STAGE/.VolumeIcon.icns"
-  hdiutil create -volname "Osprey" -srcfolder "$STAGE" -ov -format UDZO -imagekey zlib-level=9 "$OUT" >/dev/null
+  hdiutil create -volname "Swoop" -srcfolder "$STAGE" -ov -format UDZO -imagekey zlib-level=9 "$OUT" >/dev/null
 fi
 echo "  $OUT"

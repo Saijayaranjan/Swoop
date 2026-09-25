@@ -202,7 +202,7 @@ export class NativeApiClient {
     });
   }
 
-  /** Ask the host to launch the desktop app (`open -b app.osprey.desktop`, macOS-only host side). */
+  /** Ask the host to launch the desktop app (`open -b app.swoop.desktop`, macOS-only host side). */
   launch(): void {
     const id = this.nextId++;
     this.transport.postMessage({ id, type: 'launch' });

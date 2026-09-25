@@ -8,7 +8,7 @@
 2. **Checkpoint after flush.** Engines call `ProgressSink::checkpoint` only after the flush that
    covers the data. The services layer persists checkpoints debounced (≤ every 3 s) and
    immediately on pause/stop/shutdown. Persisting an older checkpoint is always safe.
-3. **Completion is transactional.** `.osprey-part` → final rename (after `flush(Full)`), then in
+3. **Completion is transactional.** `.swoop-part` → final rename (after `flush(Full)`), then in
    one SQLite transaction: task state `Completed`, `file_path`, `verified_checksum`, history row,
    checkpoint row deleted.
 4. **Single writer.** One thread owns the SQLite connection (WAL, `synchronous=NORMAL`,
@@ -16,7 +16,7 @@
    Operations arrive over an mpsc channel; each 250 ms tick applies the batch in one
    `BEGIN IMMEDIATE`. `PRAGMA wal_checkpoint(TRUNCATE)` runs on idle (≥ 30 s no writes) and at
    shutdown.
-5. **Single instance.** `osprey.lock` (flock) is taken before the database is opened.
+5. **Single instance.** `swoop.lock` (flock) is taken before the database is opened.
 
 ## Synchronous vs debounced writes
 
@@ -71,8 +71,8 @@ After the table is applied, `EngineStarted` is published and the queue scheduler
 
 ## Files on disk
 
-- `<dir>/<name>.osprey-part` — single-file downloads (HTTP/FTP/mirrors).
-- `<dir>/<name>.osprey-part/` — directory for HLS segments (`init.bin`, `seg-00000.ts`, …).
+- `<dir>/<name>.swoop-part` — single-file downloads (HTTP/FTP/mirrors).
+- `<dir>/<name>.swoop-part/` — directory for HLS segments (`init.bin`, `seg-00000.ts`, …).
 - Torrents: librqbit writes directly into `<dir>/<torrent name>/`; session state under
   `data_dir/torrents/`.
 - Quarantine attribute is applied to the part file before the final rename (macOS).

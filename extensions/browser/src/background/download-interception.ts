@@ -9,8 +9,8 @@
  * silently losing the file.
  *
  * After each decision the active tab gets a small in-page prompt (src/content/page-ui.ts):
- * "Sent to Osprey" with a one-click "Use browser instead" (when `show_confirmation` is on), "Kept
- * in your browser" when Osprey was unreachable, and — always — a warning if the hand-off failed
+ * "Sent to Swoop" with a one-click "Use browser instead" (when `show_confirmation` is on), "Kept
+ * in your browser" when Swoop was unreachable, and — always — a warning if the hand-off failed
  * after the browser's copy was already cancelled, with a way to download it in the browser.
  */
 
@@ -118,7 +118,7 @@ async function showPagePrompt(
   try {
     const [tab] = await browser.tabs.query({ active: true, lastFocusedWindow: true });
     if (tab?.id === undefined || !/^https?:/i.test(tab.url ?? '')) return;
-    const message: ShowPagePromptMessage = { type: 'osprey-page-prompt', prompt };
+    const message: ShowPagePromptMessage = { type: 'swoop-page-prompt', prompt };
     await browser.tabs.sendMessage(tab.id, message);
   } catch {
     // No content script on this tab (store pages, PDFs, …): the badge hint still shows.
@@ -147,7 +147,7 @@ export async function handlePromptAction(
   await browser.downloads.download({ url: entry.url });
 }
 
-/** Returns `true` if the item was (or is being) cancelled and forwarded to Osprey. */
+/** Returns `true` if the item was (or is being) cancelled and forwarded to Swoop. */
 async function maybeIntercept(
   item: DownloadItem,
   deps: InterceptionDeps,

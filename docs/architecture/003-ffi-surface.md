@@ -1,6 +1,6 @@
 # FFI surface (UniFFI → Swift)
 
-Crate `osprey-ffi` exposes the engine to the macOS app in-process. Design rules from the
+Crate `swoop-ffi` exposes the engine to the macOS app in-process. Design rules from the
 architecture review:
 
 1. **Never lower a full `Task` unasked.** The table binds to `FfiTaskRow` (~200 B); details are
@@ -35,7 +35,7 @@ architecture review:
    `set_active_window(bool)` (quiet notifications), `store_credential(name, username, secret)`
    (the FFI writes to the keychain through the Rust `keyring` crate so headless behaves the same).
 
-## Object: `OspreyEngine`
+## Object: `SwoopEngine`
 
 ```
 constructor open(config: FfiEngineConfig) throws FfiError      // data_dir, headless=false, log level, app version, bundle id

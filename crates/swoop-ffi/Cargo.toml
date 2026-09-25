@@ -1,0 +1,37 @@
+[package]
+name = "swoop-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "UniFFI bindings exposing the Swoop engine to Swift"
+
+[lib]
+crate-type = ["lib", "staticlib", "cdylib"]
+name = "swoop_ffi"
+
+[[bin]]
+name = "uniffi-bindgen"
+path = "src/bin/uniffi-bindgen.rs"
+
+[dependencies]
+swoop-domain = { path = "../swoop-domain" }
+swoop-runtime = { path = "../swoop-runtime" }
+swoop-services = { path = "../swoop-services" }
+swoop-server = { path = "../swoop-server", optional = true }
+uniffi = { workspace = true, features = ["cli", "tokio"] }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+parking_lot = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = ["local-api"]
+# Embed the REST/WebSocket server (Unix socket for the CLI/native host, optional remote listener).
+local-api = ["dep:swoop-server"]
+
+[dev-dependencies]
+tempfile = { workspace = true }

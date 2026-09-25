@@ -7,7 +7,7 @@
 import browser from 'webextension-polyfill';
 import type { CandidateLink } from '../shared/messages.ts';
 
-const KEY = 'ospreyPendingBulkLinks';
+const KEY = 'swoopPendingBulkLinks';
 
 function sessionArea(): browser.Storage.StorageArea | undefined {
   return (browser.storage as unknown as { session?: browser.Storage.StorageArea }).session;

@@ -109,7 +109,7 @@ export function initLinks(ctx: PopupContext): LinksHandle {
     );
     const failed = results.filter((r): r is PromiseRejectedResult => r.status === 'rejected');
     if (failed.length === 0) {
-      ctx.toast(tr('toastLinksSent', 'Sent $1 to Osprey', String(chosen.length)));
+      ctx.toast(tr('toastLinksSent', 'Sent $1 to Swoop', String(chosen.length)));
       close();
     } else {
       ctx.toast(errorMessage(failed[0]?.reason), 'error');

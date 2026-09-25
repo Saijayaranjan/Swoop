@@ -37,7 +37,7 @@ function notificationMessage(n: Notification): { message: string; kind: "info" |
     case "duplicate_detected":
       return { message: `${n.name ?? "Download"} looks like a duplicate`, kind: "info" };
     case "update_available":
-      return { message: `Osprey ${n.version ?? ""} is available`, kind: "info" };
+      return { message: `Swoop ${n.version ?? ""} is available`, kind: "info" };
     case "queue_finished":
       return { message: `Queue ${n.name ?? ""} finished`, kind: "info" };
     case "device_paired":

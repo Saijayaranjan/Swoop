@@ -1,6 +1,6 @@
 /**
  * `Alt+Shift+D` ("send-page-url" in manifests/base.json `commands`) — sends the current tab's URL
- * to Osprey as a new task, the keyboard equivalent of the "Download with Osprey" page context
+ * to Swoop as a new task, the keyboard equivalent of the "Download with Swoop" page context
  * menu entry (docs/api/extension.md "keyboard shortcut `Alt+Shift+D` sends the current page URL").
  */
 

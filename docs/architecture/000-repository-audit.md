@@ -12,7 +12,7 @@
 | Rust | not installed → installed via Homebrew `rustup` (stable 1.98, `aarch64` + `x86_64-apple-darwin`) | Rust core is buildable; universal binaries possible |
 | Xcode | **not installed** — only Command Line Tools (Swift 6.4, macOS 27.0 SDK) | No `xcodebuild`; the macOS app is built with **SwiftPM** and bundled by script |
 | SwiftUI on CLT | compiles, links AppKit / UserNotifications / QuickLookUI / Network / ServiceManagement / IOKit | Native macOS UI is feasible |
-| `@State` macro | the macOS 26+/27 SDK implements `@State` as a macro whose plugin (`SwiftUIMacros`) ships only with Xcode | The app uses a thin `@ViewState` property wrapper over `SwiftUICore.State` (see `apps/macos/Sources/OspreyApp/Support/ViewState.swift`) |
+| `@State` macro | the macOS 26+/27 SDK implements `@State` as a macro whose plugin (`SwiftUIMacros`) ships only with Xcode | The app uses a thin `@ViewState` property wrapper over `SwiftUICore.State` (see `apps/macos/Sources/SwoopApp/Support/ViewState.swift`) |
 | Node | v26.8 / npm 11 | browser extension + remote web UI toolchain |
 | Homebrew | 7.0 | `pkg-config`, `cmake` installed; `ffmpeg` optional (runtime-detected, never required) |
 | libtorrent-rasterbar | absent | not used — see ADR-001 (librqbit chosen) |

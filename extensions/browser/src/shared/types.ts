@@ -1,13 +1,13 @@
 /**
  * TypeScript mirrors of the Rust wire types the extension talks to, taken from:
- *   - crates/osprey-domain/src/task.rs      (NewTaskRequest, TaskOptions, Progress, Checksum)
- *   - crates/osprey-domain/src/media.rs     (DetectedMedia, MediaVariant, MediaInfo)
- *   - crates/osprey-domain/src/settings.rs  (BrowserSettings)
- *   - crates/osprey-domain/src/events.rs    (Event, GlobalStats, Notification, TaskLogEntry)
- *   - crates/osprey-domain/src/error.rs     (ErrorKind)
- *   - crates/osprey-services/src/api.rs     (TaskRow, AddTaskResult, ProbeResult, EngineInfo)
+ *   - crates/swoop-domain/src/task.rs      (NewTaskRequest, TaskOptions, Progress, Checksum)
+ *   - crates/swoop-domain/src/media.rs     (DetectedMedia, MediaVariant, MediaInfo)
+ *   - crates/swoop-domain/src/settings.rs  (BrowserSettings)
+ *   - crates/swoop-domain/src/events.rs    (Event, GlobalStats, Notification, TaskLogEntry)
+ *   - crates/swoop-domain/src/error.rs     (ErrorKind)
+ *   - crates/swoop-services/src/api.rs     (TaskRow, AddTaskResult, ProbeResult, EngineInfo)
  *
- * All Osprey ids (`TaskId`, `QueueId`, `CategoryId`, ...) are `#[serde(transparent)]` newtypes
+ * All Swoop ids (`TaskId`, `QueueId`, `CategoryId`, ...) are `#[serde(transparent)]` newtypes
  * over `String`, so they are plain strings on the wire. `Millis` is `#[serde(transparent)]` over
  * `i64`, so it is a plain number (Unix epoch milliseconds) on the wire.
  *
@@ -341,9 +341,9 @@ export interface TaskRemovedData {
 /**
  * The subset of `Event::type_name()` variants (docs/api/websocket.md, events.rs) the extension
  * subscribes to and acts on. `data` is typed per `type` below; unrecognised events still arrive
- * (see `OspreyEvent` catch-all) so a forward-compatible switch never silently drops one.
+ * (see `SwoopEvent` catch-all) so a forward-compatible switch never silently drops one.
  */
-export type OspreyEventType =
+export type SwoopEventType =
   | 'task_added'
   | 'task_updated'
   | 'task_removed'
@@ -353,7 +353,7 @@ export type OspreyEventType =
   | 'notification'
   | 'settings_changed';
 
-export type OspreyEvent =
+export type SwoopEvent =
   | { type: 'task_added'; data: TaskLike }
   | { type: 'task_updated'; data: TaskLike }
   | { type: 'task_removed'; data: TaskRemovedData }
@@ -362,9 +362,9 @@ export type OspreyEvent =
   | { type: 'global_stats'; data: GlobalStats }
   | { type: 'notification'; data: NotificationPayload }
   | { type: 'settings_changed'; data: unknown }
-  | { type: Extensible<OspreyEventType>; data: unknown };
+  | { type: Extensible<SwoopEventType>; data: unknown };
 
-/** `BrowserSettings` (crates/osprey-domain/src/settings.rs) — mirrored 1:1 in the options UI. */
+/** `BrowserSettings` (crates/swoop-domain/src/settings.rs) — mirrored 1:1 in the options UI. */
 export interface BrowserSettings {
   intercept_downloads: boolean;
   /** Minimum size in bytes for automatic interception; smaller files stay in the browser. */
@@ -391,8 +391,8 @@ export function defaultBrowserSettings(): BrowserSettings {
   };
 }
 
-/** How the extension reaches Osprey: the local native-messaging host (default) or a paired
- *  remote Osprey over HTTPS with a device token. */
+/** How the extension reaches Swoop: the local native-messaging host (default) or a paired
+ *  remote Swoop over HTTPS with a device token. */
 export type ConnectionMode = 'native' | 'remote';
 
 /** Extension-only settings, layered on top of the mirrored `BrowserSettings`. */
@@ -405,7 +405,7 @@ export interface ExtensionSettings extends BrowserSettings {
   /** Show the small in-page download button over playing video/audio (needs `detect_media`). */
   media_button: boolean;
   connection_mode: ConnectionMode;
-  /** Base URL of a paired remote Osprey (`https://host:41780`). The device token is stored
+  /** Base URL of a paired remote Swoop (`https://host:41780`). The device token is stored
    *  separately (src/shared/remote.ts) so it never travels with the settings object. */
   remote_url: string;
 }

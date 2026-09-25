@@ -3,25 +3,25 @@
     "message": "hi"
   },
   "extensionName": {
-    "message": "Osprey"
+    "message": "Swoop"
   },
   "extensionDescription": {
-    "message": "डाउनलोड, मीडिया और लिंक सीधे Osprey डाउनलोड मैनेजर को भेजें।"
+    "message": "डाउनलोड, मीडिया और लिंक सीधे Swoop डाउनलोड मैनेजर को भेजें।"
   },
   "commandSendPageUrl": {
-    "message": "मौजूदा पेज का URL Osprey को भेजें"
+    "message": "मौजूदा पेज का URL Swoop को भेजें"
   },
   "menuDownloadLink": {
-    "message": "Osprey से डाउनलोड करें"
+    "message": "Swoop से डाउनलोड करें"
   },
   "menuDownloadImage": {
-    "message": "इमेज Osprey से डाउनलोड करें"
+    "message": "इमेज Swoop से डाउनलोड करें"
   },
   "menuDownloadVideo": {
-    "message": "वीडियो Osprey से डाउनलोड करें"
+    "message": "वीडियो Swoop से डाउनलोड करें"
   },
   "menuDownloadAudio": {
-    "message": "ऑडियो Osprey से डाउनलोड करें"
+    "message": "ऑडियो Swoop से डाउनलोड करें"
   },
   "menuDownloadAllLinks": {
     "message": "पेज के सभी लिंक डाउनलोड करें…"
@@ -112,13 +112,13 @@
     "message": "कुछ भी डाउनलोड नहीं हो रहा"
   },
   "emptyBody": {
-    "message": "ऊपर एक लिंक चिपकाएँ, या बस किसी डाउनलोड लिंक पर क्लिक करें — Osprey उसे ले लेगा।"
+    "message": "ऊपर एक लिंक चिपकाएँ, या बस किसी डाउनलोड लिंक पर क्लिक करें — Swoop उसे ले लेगा।"
   },
   "captureDownloads": {
     "message": "डाउनलोड कैप्चर करें"
   },
   "captureOnHint": {
-    "message": "मिलते-जुलते डाउनलोड Osprey को जाते हैं"
+    "message": "मिलते-जुलते डाउनलोड Swoop को जाते हैं"
   },
   "captureOffHint": {
     "message": "हर डाउनलोड ब्राउज़र में ही रहता है"
@@ -178,8 +178,8 @@
   "actionDownload": {
     "message": "डाउनलोड करें"
   },
-  "actionDownloadWithOsprey": {
-    "message": "Osprey से डाउनलोड करें"
+  "actionDownloadWithSwoop": {
+    "message": "Swoop से डाउनलोड करें"
   },
   "actionQueue": {
     "message": "कतार में जोड़ें"
@@ -203,13 +203,13 @@
     "message": "खोलें"
   },
   "actionLaunchApp": {
-    "message": "Osprey खोलें"
+    "message": "Swoop खोलें"
   },
   "actionOpenApp": {
-    "message": "Osprey खोलें"
+    "message": "Swoop खोलें"
   },
   "actionShowInApp": {
-    "message": "Osprey में दिखाएँ"
+    "message": "Swoop में दिखाएँ"
   },
   "actionPaste": {
     "message": "चिपकाएँ"
@@ -278,10 +278,10 @@
     "message": "कॉपी हो गया"
   },
   "toastLaunching": {
-    "message": "Osprey खुल रहा है…"
+    "message": "Swoop खुल रहा है…"
   },
   "toastLinksSent": {
-    "message": "$ARG1$ Osprey को भेजे गए",
+    "message": "$ARG1$ Swoop को भेजे गए",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -295,34 +295,34 @@
     "message": "यह डाउनलोड लिंक जैसा नहीं लगता।"
   },
   "toastNotRunning": {
-    "message": "Osprey चल नहीं रहा है — उसे शुरू करके फिर कोशिश करें।"
+    "message": "Swoop चल नहीं रहा है — उसे शुरू करके फिर कोशिश करें।"
   },
   "toastUnauthorized": {
-    "message": "Osprey ने इस ब्राउज़र को अस्वीकार कर दिया। सेटिंग्स में इसे फिर से पेयर करें।"
+    "message": "Swoop ने इस ब्राउज़र को अस्वीकार कर दिया। सेटिंग्स में इसे फिर से पेयर करें।"
   },
   "toastSomethingWrong": {
     "message": "कुछ गड़बड़ हो गई।"
   },
   "offlineNotRunningTitle": {
-    "message": "Osprey चल नहीं रहा है"
+    "message": "Swoop चल नहीं रहा है"
   },
   "offlineNotRunningBody": {
-    "message": "डाउनलोड भेजने और उनकी प्रगति यहाँ देखने के लिए Osprey शुरू करें।"
+    "message": "डाउनलोड भेजने और उनकी प्रगति यहाँ देखने के लिए Swoop शुरू करें।"
   },
   "offlineNoHostTitle": {
-    "message": "Osprey तक नहीं पहुँच सके"
+    "message": "Swoop तक नहीं पहुँच सके"
   },
   "offlineNoHostBody": {
-    "message": "ब्राउज़र हेल्पर अभी सेट अप नहीं है। Osprey में सेटिंग्स → ब्राउज़र खोलें, इंस्टॉल चुनें और फिर कोशिश करें।"
+    "message": "ब्राउज़र हेल्पर अभी सेट अप नहीं है। Swoop में सेटिंग्स → ब्राउज़र खोलें, इंस्टॉल चुनें और फिर कोशिश करें।"
   },
   "offlineRemoteTitle": {
-    "message": "आपके Osprey तक नहीं पहुँच सके"
+    "message": "आपके Swoop तक नहीं पहुँच सके"
   },
   "offlineRemoteBody": {
     "message": "पक्का करें कि वह चालू है और पहुँच में है, और कनेक्शन सेटिंग्स में पता सही है।"
   },
   "offlineRefusedTitle": {
-    "message": "Osprey ने इस ब्राउज़र को अस्वीकार कर दिया"
+    "message": "Swoop ने इस ब्राउज़र को अस्वीकार कर दिया"
   },
   "offlineRefusedBody": {
     "message": "हो सकता है डिवाइस टोकन रद्द कर दिया गया हो। कनेक्शन सेटिंग्स में इस ब्राउज़र को फिर से पेयर करें।"
@@ -388,16 +388,16 @@
     "message": "सीडिंग"
   },
   "pageSentTitle": {
-    "message": "Osprey को भेजा गया"
+    "message": "Swoop को भेजा गया"
   },
   "pageKeptTitle": {
     "message": "आपके ब्राउज़र में रखा गया"
   },
   "pageKeptBody": {
-    "message": "Osprey चल नहीं रहा है, इसलिए यह डाउनलोड ब्राउज़र में ही रहा।"
+    "message": "Swoop चल नहीं रहा है, इसलिए यह डाउनलोड ब्राउज़र में ही रहा।"
   },
   "pageFailedTitle": {
-    "message": "Osprey को नहीं भेज सके"
+    "message": "Swoop को नहीं भेज सके"
   },
   "pageFailedBody": {
     "message": "ब्राउज़र की कॉपी पहले ही रोक दी गई थी। क्या इसके बजाय इसे ब्राउज़र में डाउनलोड करें?"
@@ -417,7 +417,7 @@
     "message": "ठीक है"
   },
   "pageAlwaysDone": {
-    "message": "Osprey अब $ARG1$ को आपके ब्राउज़र पर छोड़ देगा। इसे Osprey की साइट सेटिंग्स में बदलें।",
+    "message": "Swoop अब $ARG1$ को आपके ब्राउज़र पर छोड़ देगा। इसे Swoop की साइट सेटिंग्स में बदलें।",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -428,16 +428,16 @@
     "message": "कुछ गड़बड़ हो गई"
   },
   "pageNotRunning": {
-    "message": "Osprey चल नहीं रहा है"
+    "message": "Swoop चल नहीं रहा है"
   },
   "pageMediaTitle": {
     "message": "इस पेज पर मीडिया"
   },
   "pageMediaProtected": {
-    "message": "यह प्लेयर सुरक्षित मीडिया चलाता है, जिसे Osprey सहेज नहीं सकता।"
+    "message": "यह प्लेयर सुरक्षित मीडिया चलाता है, जिसे Swoop सहेज नहीं सकता।"
   },
   "pageMediaFoot": {
-    "message": "डाउनलोड Osprey में तुरंत शुरू हो जाते हैं।"
+    "message": "डाउनलोड Swoop में तुरंत शुरू हो जाते हैं।"
   },
   "sidebarSubtitle": {
     "message": "ब्राउज़र एक्सटेंशन"
@@ -464,10 +464,10 @@
     "message": "कैप्चर"
   },
   "sectionCaptureSub": {
-    "message": "Osprey कौन-से ब्राउज़र डाउनलोड अपने हाथ में लेता है।"
+    "message": "Swoop कौन-से ब्राउज़र डाउनलोड अपने हाथ में लेता है।"
   },
   "captureDownloadsHint": {
-    "message": "मिलते-जुलते डाउनलोड ब्राउज़र की अपनी डाउनलोड सूची के बजाय Osprey को भेजें।"
+    "message": "मिलते-जुलते डाउनलोड ब्राउज़र की अपनी डाउनलोड सूची के बजाय Swoop को भेजें।"
   },
   "settingShowConfirmationShort": {
     "message": "पेज पर पुष्टि दिखाएँ"
@@ -524,7 +524,7 @@
     "message": "साइटें"
   },
   "sectionSitesSub": {
-    "message": "Osprey किन जगहों पर डाउनलोड ब्राउज़र के लिए छोड़ दे।"
+    "message": "Swoop किन जगहों पर डाउनलोड ब्राउज़र के लिए छोड़ दे।"
   },
   "groupSiteLists": {
     "message": "साइट सूचियाँ"
@@ -572,7 +572,7 @@
     "message": "प्लेयर पर डाउनलोड बटन दिखाएँ"
   },
   "settingMediaButtonHint": {
-    "message": "किसी वीडियो या ऑडियो प्लेयर पर पॉइंटर ले जाने पर Osprey का एक छोटा बटन दिखता है।"
+    "message": "किसी वीडियो या ऑडियो प्लेयर पर पॉइंटर ले जाने पर Swoop का एक छोटा बटन दिखता है।"
   },
   "mediaProtectedNote": {
     "message": "DRM से सुरक्षित स्ट्रीम और अस्थायी blob: पतों से चलने वाले प्लेयर सूची में दिखते हैं, पर डाउनलोड नहीं हो सकते।"
@@ -593,13 +593,13 @@
     "message": "कनेक्शन"
   },
   "sectionConnectionSub": {
-    "message": "यह ब्राउज़र Osprey तक कैसे पहुँचता है।"
+    "message": "यह ब्राउज़र Swoop तक कैसे पहुँचता है।"
   },
   "connectTo": {
     "message": "किससे जुड़ें"
   },
   "connectToHint": {
-    "message": "Osprey आमतौर पर इसी कंप्यूटर पर चलता है। किसी दूसरी जगह पेयर किए गए Osprey को डाउनलोड भेजने के लिए “दूसरा कंप्यूटर” चुनें।"
+    "message": "Swoop आमतौर पर इसी कंप्यूटर पर चलता है। किसी दूसरी जगह पेयर किए गए Swoop को डाउनलोड भेजने के लिए “दूसरा कंप्यूटर” चुनें।"
   },
   "modeThisComputer": {
     "message": "यह कंप्यूटर"
@@ -608,7 +608,7 @@
     "message": "दूसरा कंप्यूटर"
   },
   "connectedToVersion": {
-    "message": "Osprey $ARG1$ से जुड़ा है",
+    "message": "Swoop $ARG1$ से जुड़ा है",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -627,7 +627,7 @@
     }
   },
   "notRunningSub": {
-    "message": "ब्राउज़र हेल्पर इंस्टॉल है। जुड़ने के लिए Osprey शुरू करें।"
+    "message": "ब्राउज़र हेल्पर इंस्टॉल है। जुड़ने के लिए Swoop शुरू करें।"
   },
   "noHostSub": {
     "message": "इस ब्राउज़र के लिए ब्राउज़र हेल्पर अभी इंस्टॉल नहीं है।"
@@ -639,37 +639,37 @@
     "message": "सेट अप"
   },
   "groupSetUpDesc": {
-    "message": "एक्सटेंशन एक छोटे हेल्पर के ज़रिए Osprey से बात करता है, जिसे ऐप इंस्टॉल करता है। किसी पते या पासवर्ड की ज़रूरत नहीं।"
+    "message": "एक्सटेंशन एक छोटे हेल्पर के ज़रिए Swoop से बात करता है, जिसे ऐप इंस्टॉल करता है। किसी पते या पासवर्ड की ज़रूरत नहीं।"
   },
   "stepInstallApp": {
-    "message": "Osprey इंस्टॉल करें और उसे खोलें।"
+    "message": "Swoop इंस्टॉल करें और उसे खोलें।"
   },
   "stepInstallHelper": {
-    "message": "Osprey में सेटिंग्स → ब्राउज़र खोलें और इस ब्राउज़र के लिए इंस्टॉल चुनें।"
+    "message": "Swoop में सेटिंग्स → ब्राउज़र खोलें और इस ब्राउज़र के लिए इंस्टॉल चुनें।"
   },
   "stepTest": {
     "message": "यहाँ वापस आएँ और “कनेक्शन जाँचें” चुनें।"
   },
   "launchRowLabel": {
-    "message": "Osprey खुला नहीं है?"
+    "message": "Swoop खुला नहीं है?"
   },
   "launchRowHint": {
     "message": "इस कंप्यूटर पर ऐप शुरू करता है (macOS)।"
   },
   "groupRemote": {
-    "message": "रिमोट Osprey"
+    "message": "रिमोट Swoop"
   },
   "remoteAddress": {
     "message": "पता"
   },
   "remoteAddressHint": {
-    "message": "उस कंप्यूटर पर Osprey में सेटिंग्स → रिमोट में दिखाया जाता है।"
+    "message": "उस कंप्यूटर पर Swoop में सेटिंग्स → रिमोट में दिखाया जाता है।"
   },
   "pairingCode": {
     "message": "पेयरिंग कोड"
   },
   "pairingCodeHint": {
-    "message": "वहाँ Osprey में “डिवाइस पेयर करें” चुनें। कोड एक बार, दो मिनट तक काम करते हैं।"
+    "message": "वहाँ Swoop में “डिवाइस पेयर करें” चुनें। कोड एक बार, दो मिनट तक काम करते हैं।"
   },
   "useTokenInstead": {
     "message": "इसके बजाय डिवाइस टोकन इस्तेमाल करें"
@@ -702,7 +702,7 @@
     "message": "बहुत ज़्यादा कोशिशें हुईं। एक मिनट रुककर फिर कोशिश करें।"
   },
   "errUnreachable": {
-    "message": "उस पते तक नहीं पहुँच सके। अगर Osprey अपना सर्टिफ़िकेट इस्तेमाल करता है, तो पते को एक बार टैब में खोलकर स्वीकार करें।"
+    "message": "उस पते तक नहीं पहुँच सके। अगर Swoop अपना सर्टिफ़िकेट इस्तेमाल करता है, तो पते को एक बार टैब में खोलकर स्वीकार करें।"
   },
   "sectionShortcuts": {
     "message": "शॉर्टकट"
@@ -741,7 +741,7 @@
     "message": "वेब पेजों पर"
   },
   "shortcutPageEsc": {
-    "message": "Osprey का प्रॉम्प्ट या मीडिया पैनल हटाएँ"
+    "message": "Swoop का प्रॉम्प्ट या मीडिया पैनल हटाएँ"
   },
   "shortcutPageTab": {
     "message": "फ़ोकस किए गए प्लेयर के मीडिया बटन तक पहुँचें"
@@ -753,7 +753,7 @@
     "message": "वर्शन, निजता और चीज़ें कहाँ रहती हैं।"
   },
   "aboutTitle": {
-    "message": "$ARG1$ के लिए Osprey",
+    "message": "$ARG1$ के लिए Swoop",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -775,7 +775,7 @@
     "message": "एक्सटेंशन"
   },
   "aboutAppVersion": {
-    "message": "Osprey ऐप"
+    "message": "Swoop ऐप"
   },
   "aboutBuild": {
     "message": "बिल्ड"
@@ -784,7 +784,7 @@
     "message": "निजता"
   },
   "privacyLocal": {
-    "message": "डाउनलोड, कुकीज़ और पेज की जानकारी सिर्फ़ Osprey को जाती है — इस कंप्यूटर पर, या जिसे आपने पेयर किया है।"
+    "message": "डाउनलोड, कुकीज़ और पेज की जानकारी सिर्फ़ Swoop को जाती है — इस कंप्यूटर पर, या जिसे आपने पेयर किया है।"
   },
   "privacyNoTracking": {
     "message": "कोई एनालिटिक्स, ट्रैकिंग या रिमोट कोड नहीं।"

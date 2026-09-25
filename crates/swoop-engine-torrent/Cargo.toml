@@ -1,0 +1,32 @@
+[package]
+name = "swoop-engine-torrent"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "BitTorrent engine adapter (librqbit)"
+
+[dependencies]
+swoop-domain = { path = "../swoop-domain" }
+swoop-runtime = { path = "../swoop-runtime" }
+# `disable-upload` is a compile-time feature in librqbit; it gates the session-wide
+# leech-only switch we need for "seed_when_complete = false && ratio limit = 0".
+librqbit = { workspace = true, features = ["disable-upload"] }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+parking_lot = { workspace = true }
+anyhow = { workspace = true }
+base64 = { workspace = true }
+hex = { workspace = true }
+url = { workspace = true }
+reqwest = { workspace = true }
+futures = { workspace = true }
+bytes = { workspace = true }
+rand = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+axum = { workspace = true }

@@ -1,34 +1,34 @@
-# Osprey Browser Extension
+# Swoop Browser Extension
 
-The official Manifest V3 browser extension for [Osprey](../../docs/architecture/001-architecture-decision.md),
+The official Manifest V3 browser extension for [Swoop](../../docs/architecture/001-architecture-decision.md),
 a production-grade download manager. One TypeScript codebase, three builds: Chrome, Firefox and
 Edge.
 
-The extension never talks to the Osprey HTTP API directly. It speaks
-[Native Messaging](../../docs/api/native-messaging.md) to the `osprey native-host` binary
-(`chrome.runtime.connectNative("app.osprey.bridge")`), which is a stateless relay onto the local
+The extension never talks to the Swoop HTTP API directly. It speaks
+[Native Messaging](../../docs/api/native-messaging.md) to the `swoop native-host` binary
+(`chrome.runtime.connectNative("app.swoop.bridge")`), which is a stateless relay onto the local
 REST API (`docs/api/rest.md`) and event stream (`docs/api/websocket.md`). The extension never sees
-the local API token. Optionally, it can instead be paired with Osprey running on another computer
+the local API token. Optionally, it can instead be paired with Swoop running on another computer
 (see [Remote connection](#remote-connection)).
 
 ## What you see
 
-- **Popup** (`src/popup/`): the Osprey mark with a live connection pill (Connected / Not running
+- **Popup** (`src/popup/`): the Swoop mark with a live connection pill (Connected / Not running
   with a one-click Launch / Offline), a speed card (download speed set large, upload and active
   count as chips, fed by `global_stats`), an "add link" field with a paste button (http, https,
   ftp and magnet links), media found on the current page, and active plus recent downloads with
   file-type tiles, slim status-coloured progress bars, speed/ETA and pause/resume/retry/cancel/show
   actions. The footer holds the **Capture downloads** switch (`intercept_downloads`), a links
-  picker for the current page, Open Osprey and Settings. When Osprey can't be used, a small
+  picker for the current page, Open Swoop and Settings. When Swoop can't be used, a small
   illustrated card explains why and offers the fix (launch the app, install the browser helper, or
   check the remote connection).
 - **Options** (`src/options/`): a sidebar of sections — Capture, Sites, Media, Notifications,
   Connection, Shortcuts, About — each a set of grouped cards. The section lives in the URL hash so
   the popup can deep-link (`options/index.html#connection`). Changes save immediately.
 - **In-page UI** (`src/content/page-ui.ts`), rendered in a closed shadow root so page CSS can't
-  reach it: a small prompt after a download is captured ("Sent to Osprey" with Open Osprey and
+  reach it: a small prompt after a download is captured ("Sent to Swoop" with Open Swoop and
   **Use browser instead**, then an offer to always leave that site to the browser), a "Kept in
-  your browser" note when Osprey isn't running, and a sticky warning if the hand-off failed after
+  your browser" note when Swoop isn't running, and a sticky warning if the hand-off failed after
   the browser's copy was cancelled. Prompts never take focus, pause their timer while hovered or
   focused, and close with Esc. When enabled, a **Download** button appears over video/audio players
   (point at the player, or focus it and press Tab) and opens a panel of the page's media.
@@ -53,7 +53,7 @@ npm test                  # node:test, pure modules only
 
 `npm run build` also (re)generates `icons/*.png` when they are missing, from
 `scripts/generate-icons.mjs` — a small pure-Node PNG encoder (zlib deflate + hand-rolled CRC32, no
-image library) that rasterises the Osprey mark (the wing glyph on a blue tile, with supersampled
+image library) that rasterises the Swoop mark (the wing glyph on a blue tile, with supersampled
 anti-aliasing) at 16/32/48/128px. `npm run icons` regenerates them on demand. The popup and options
 stylesheets are bundled by esbuild so they can `@import` the shared tokens.
 
@@ -83,13 +83,13 @@ not the one pinned in the published host manifest's `allowed_extensions`, instal
 point it at your dev extension id:
 
 ```sh
-osprey native-host --install-manifest chrome --extension-id <your-dev-extension-id>
-osprey native-host --install-manifest firefox --extension-id osprey@osprey.app
+swoop native-host --install-manifest chrome --extension-id <your-dev-extension-id>
+swoop native-host --install-manifest firefox --extension-id swoop@swoop.app
 ```
 
-This writes `app.osprey.bridge.json` to the per-browser native-messaging-hosts directory (see
+This writes `app.swoop.bridge.json` to the per-browser native-messaging-hosts directory (see
 `docs/api/native-messaging.md` for the exact paths) with `allowed_origins`/`allowed_extensions`
-pinned to the id you pass. Without this step the extension's popup will show "Osprey not running"
+pinned to the id you pass. Without this step the extension's popup will show "Swoop not running"
 even if the desktop app is open, because the browser refuses to start the host process for an
 unrecognised extension id.
 
@@ -106,7 +106,7 @@ mid-decision can never intercept (or double-forward) the same item twice.
   this event fires *before* the file is written but offers no synchronous "refuse this download"
   hook, so we call the browser's own `suggest()` immediately (the UI never stalls) and, if
   interception applies, cancel + erase the item right after. Before cancelling we `ping()` the
-  native host — if Osprey isn't running, we deliberately do **not** cancel (the user would lose the
+  native host — if Swoop isn't running, we deliberately do **not** cancel (the user would lose the
   file), and instead raise a short amber badge hint.
 - **Firefox** (`downloads.onCreated` + `downloads.cancel` + `downloads.erase`): Firefox does not
   implement `onDeterminingFilename`, so the item already exists (and may have started writing) by
@@ -115,7 +115,7 @@ mid-decision can never intercept (or double-forward) the same item twice.
 
 Both paths forward the referring page URL (`options.referer`) and the URL's cookies
 (`browser.cookies.getAll({url})` → a `name=value; …` header string in `options.cookies`,
-`src/shared/cookie-utils.ts`) so Osprey can continue a download that needs an authenticated
+`src/shared/cookie-utils.ts`) so Swoop can continue a download that needs an authenticated
 session.
 
 ## Media detection
@@ -156,22 +156,22 @@ in-flight download.
 | Permission | Why |
 |---|---|
 | `downloads` | Read/cancel/erase browser downloads to intercept them (`downloads.onDeterminingFilename`/`onCreated`, `.cancel`, `.erase`). |
-| `contextMenus` | "Download with Osprey" on links/images/video/audio/page/selection. |
-| `nativeMessaging` | Talk to `osprey native-host` — the extension's only channel to Osprey. |
+| `contextMenus` | "Download with Swoop" on links/images/video/audio/page/selection. |
+| `nativeMessaging` | Talk to `swoop native-host` — the extension's only channel to Swoop. |
 | `storage` | Settings (`storage.local`) and session-scoped resilience state (`storage.session`). |
 | `notifications` | Completion/failure toasts when the popup is closed. |
 | `webRequest` | Observe-only response headers for network-level media detection. No blocking, no header modification. |
 | `tabs` | Resolve the active tab's id/URL/title for interception hints, the "send page URL" command, and messaging the content script. |
 | `activeTab` | Least-privilege companion to `tabs` for user-invoked actions (context menu, toolbar). |
-| `cookies` | Forward the intercepted URL's cookies to Osprey (`options.cookies`) so authenticated downloads keep working — never sent anywhere but the local native host. |
+| `cookies` | Forward the intercepted URL's cookies to Swoop (`options.cookies`) so authenticated downloads keep working — never sent anywhere but the local native host. |
 | `host_permissions: ["<all_urls>"]` | Required by `webRequest.onHeadersReceived` to observe response headers on arbitrary sites for media detection, and by the content script to scan any page. No page content is ever sent anywhere except a same-machine native-messaging relay. |
-| `commands` | `Alt+Shift+D` — send the current page URL to Osprey. |
+| `commands` | `Alt+Shift+D` — send the current page URL to Swoop. |
 
 ## Remote connection
 
-Options → **Connection** → *Another computer* pairs the extension with an Osprey whose remote
+Options → **Connection** → *Another computer* pairs the extension with an Swoop whose remote
 listener is on (docs/api/rest.md): enter its `https://` address and a one-time pairing code from
-that Osprey (`POST /api/v1/pair`), or paste a device token. The token is stored under its own
+that Swoop (`POST /api/v1/pair`), or paste a device token. The token is stored under its own
 `storage.local` key, never in the settings object, and where the browser supports it (Chrome/Edge)
 `storage.local` is restricted to trusted contexts; content scripts never read storage themselves. Requests then go over HTTPS with the bearer
 token (`src/background/remote-client.ts`) and live events over the WebSocket stream; plain `http:`
@@ -188,9 +188,9 @@ pairing and everything else are accepted from the extension's own pages only.
 ## Privacy
 
 Nothing the extension sees — page content, detected media, cookies, download URLs — leaves the
-machine, unless you pair it with a remote Osprey (above), in which case it goes only to that
-Osprey over HTTPS. Otherwise the only outbound channel is native messaging to the locally-installed
-`osprey native-host` process, which itself only relays to the local Osprey API over a Unix socket /
+machine, unless you pair it with a remote Swoop (above), in which case it goes only to that
+Swoop over HTTPS. Otherwise the only outbound channel is native messaging to the locally-installed
+`swoop native-host` process, which itself only relays to the local Swoop API over a Unix socket /
 loopback TCP. The extension stores only its own settings and site exclusions (`browser.storage.local`) and a
 small amount of session-scoped resilience state (`browser.storage.session`, cleared on browser
 restart). There is no analytics, telemetry, or remote code — every script shipped is bundled from
@@ -242,5 +242,5 @@ speed formatting (`format`), and remote URL / pairing-code validation (`remote`)
 - **In-page prompts target the active tab**: the `downloads` API doesn't say which tab started a
   download, so the prompt appears in the focused window's active tab (nothing is shown on pages
   without a content script, such as the browser's own pages).
-- **Remote Osprey with its own certificate**: the browser must trust the remote listener's TLS
+- **Remote Swoop with its own certificate**: the browser must trust the remote listener's TLS
   certificate; open the address in a tab once and accept it before pairing.

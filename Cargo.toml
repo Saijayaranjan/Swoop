@@ -1,23 +1,23 @@
 [workspace]
 resolver = "2"
 members = [
-    "crates/osprey-domain",
-    "crates/osprey-runtime",
-    "crates/osprey-store",
-    "crates/osprey-engine-http",
-    "crates/osprey-engine-ftp",
-    "crates/osprey-engine-torrent",
-    "crates/osprey-media",
-    "crates/osprey-grabber",
-    "crates/osprey-services",
-    "crates/osprey-server",
-    "crates/osprey-cli",
-    "crates/osprey-ffi",
-    "crates/osprey-testserver",
-    "crates/osprey-automation",
-    "crates/osprey-archive",
-    "crates/osprey-update",
-    "crates/osprey-plugins",
+    "crates/swoop-domain",
+    "crates/swoop-runtime",
+    "crates/swoop-store",
+    "crates/swoop-engine-http",
+    "crates/swoop-engine-ftp",
+    "crates/swoop-engine-torrent",
+    "crates/swoop-media",
+    "crates/swoop-grabber",
+    "crates/swoop-services",
+    "crates/swoop-server",
+    "crates/swoop-cli",
+    "crates/swoop-ffi",
+    "crates/swoop-testserver",
+    "crates/swoop-automation",
+    "crates/swoop-archive",
+    "crates/swoop-update",
+    "crates/swoop-plugins",
 ]
 
 [workspace.package]
@@ -25,8 +25,8 @@ version = "0.1.0"
 edition = "2021"
 rust-version = "1.85"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/osprey-app/osprey"
-authors = ["Osprey contributors"]
+repository = "https://github.com/swoop-app/swoop"
+authors = ["Swoop contributors"]
 
 [workspace.dependencies]
 # async + runtime

@@ -5,7 +5,7 @@
   },
   "browser_specific_settings": {
     "gecko": {
-      "id": "osprey@osprey.app",
+      "id": "swoop@swoop.app",
       "strict_min_version": "121.0"
     }
   }

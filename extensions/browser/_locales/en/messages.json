@@ -3,25 +3,25 @@
     "message": "en"
   },
   "extensionName": {
-    "message": "Osprey"
+    "message": "Swoop"
   },
   "extensionDescription": {
-    "message": "Send downloads, media and links straight to the Osprey download manager."
+    "message": "Send downloads, media and links straight to the Swoop download manager."
   },
   "commandSendPageUrl": {
-    "message": "Send the current page's URL to Osprey"
+    "message": "Send the current page's URL to Swoop"
   },
   "menuDownloadLink": {
-    "message": "Download with Osprey"
+    "message": "Download with Swoop"
   },
   "menuDownloadImage": {
-    "message": "Download image with Osprey"
+    "message": "Download image with Swoop"
   },
   "menuDownloadVideo": {
-    "message": "Download video with Osprey"
+    "message": "Download video with Swoop"
   },
   "menuDownloadAudio": {
-    "message": "Download audio with Osprey"
+    "message": "Download audio with Swoop"
   },
   "menuDownloadAllLinks": {
     "message": "Download all links on page…"
@@ -112,13 +112,13 @@
     "message": "Nothing downloading"
   },
   "emptyBody": {
-    "message": "Paste a link above, or just click a download link — Osprey will pick it up."
+    "message": "Paste a link above, or just click a download link — Swoop will pick it up."
   },
   "captureDownloads": {
     "message": "Capture downloads"
   },
   "captureOnHint": {
-    "message": "Matching downloads go to Osprey"
+    "message": "Matching downloads go to Swoop"
   },
   "captureOffHint": {
     "message": "Your browser keeps every download"
@@ -178,8 +178,8 @@
   "actionDownload": {
     "message": "Download"
   },
-  "actionDownloadWithOsprey": {
-    "message": "Download with Osprey"
+  "actionDownloadWithSwoop": {
+    "message": "Download with Swoop"
   },
   "actionQueue": {
     "message": "Queue"
@@ -203,13 +203,13 @@
     "message": "Launch"
   },
   "actionLaunchApp": {
-    "message": "Launch Osprey"
+    "message": "Launch Swoop"
   },
   "actionOpenApp": {
-    "message": "Open Osprey"
+    "message": "Open Swoop"
   },
   "actionShowInApp": {
-    "message": "Show in Osprey"
+    "message": "Show in Swoop"
   },
   "actionPaste": {
     "message": "Paste"
@@ -278,10 +278,10 @@
     "message": "Copied"
   },
   "toastLaunching": {
-    "message": "Launching Osprey…"
+    "message": "Launching Swoop…"
   },
   "toastLinksSent": {
-    "message": "Sent $ARG1$ to Osprey",
+    "message": "Sent $ARG1$ to Swoop",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -295,34 +295,34 @@
     "message": "That doesn’t look like a download link."
   },
   "toastNotRunning": {
-    "message": "Osprey isn’t running — start it and try again."
+    "message": "Swoop isn’t running — start it and try again."
   },
   "toastUnauthorized": {
-    "message": "Osprey refused this browser. Pair it again in Settings."
+    "message": "Swoop refused this browser. Pair it again in Settings."
   },
   "toastSomethingWrong": {
     "message": "Something went wrong."
   },
   "offlineNotRunningTitle": {
-    "message": "Osprey isn’t running"
+    "message": "Swoop isn’t running"
   },
   "offlineNotRunningBody": {
-    "message": "Start Osprey to send downloads to it and follow their progress here."
+    "message": "Start Swoop to send downloads to it and follow their progress here."
   },
   "offlineNoHostTitle": {
-    "message": "Can’t reach Osprey"
+    "message": "Can’t reach Swoop"
   },
   "offlineNoHostBody": {
-    "message": "The browser helper isn’t set up yet. In Osprey, open Settings → Browser and choose Install, then try again."
+    "message": "The browser helper isn’t set up yet. In Swoop, open Settings → Browser and choose Install, then try again."
   },
   "offlineRemoteTitle": {
-    "message": "Can’t reach your Osprey"
+    "message": "Can’t reach your Swoop"
   },
   "offlineRemoteBody": {
     "message": "Make sure it’s switched on and reachable, and that the address in Connection settings is right."
   },
   "offlineRefusedTitle": {
-    "message": "Osprey refused this browser"
+    "message": "Swoop refused this browser"
   },
   "offlineRefusedBody": {
     "message": "The device token may have been revoked. Pair this browser again in Connection settings."
@@ -388,16 +388,16 @@
     "message": "Seeding"
   },
   "pageSentTitle": {
-    "message": "Sent to Osprey"
+    "message": "Sent to Swoop"
   },
   "pageKeptTitle": {
     "message": "Kept in your browser"
   },
   "pageKeptBody": {
-    "message": "Osprey isn’t running, so this download stayed in the browser."
+    "message": "Swoop isn’t running, so this download stayed in the browser."
   },
   "pageFailedTitle": {
-    "message": "Couldn’t send to Osprey"
+    "message": "Couldn’t send to Swoop"
   },
   "pageFailedBody": {
     "message": "The browser’s copy was already stopped. Download it in the browser instead?"
@@ -417,7 +417,7 @@
     "message": "Got it"
   },
   "pageAlwaysDone": {
-    "message": "Osprey will leave $ARG1$ to your browser. Change this in Osprey’s Sites settings.",
+    "message": "Swoop will leave $ARG1$ to your browser. Change this in Swoop’s Sites settings.",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -428,16 +428,16 @@
     "message": "Something went wrong"
   },
   "pageNotRunning": {
-    "message": "Osprey isn’t running"
+    "message": "Swoop isn’t running"
   },
   "pageMediaTitle": {
     "message": "Media on this page"
   },
   "pageMediaProtected": {
-    "message": "This player streams protected media, which Osprey can’t save."
+    "message": "This player streams protected media, which Swoop can’t save."
   },
   "pageMediaFoot": {
-    "message": "Downloads start in Osprey right away."
+    "message": "Downloads start in Swoop right away."
   },
   "sidebarSubtitle": {
     "message": "Browser extension"
@@ -464,10 +464,10 @@
     "message": "Capture"
   },
   "sectionCaptureSub": {
-    "message": "Which browser downloads Osprey takes over."
+    "message": "Which browser downloads Swoop takes over."
   },
   "captureDownloadsHint": {
-    "message": "Send matching downloads to Osprey instead of the browser’s own download list."
+    "message": "Send matching downloads to Swoop instead of the browser’s own download list."
   },
   "settingShowConfirmationShort": {
     "message": "Confirm on the page"
@@ -524,7 +524,7 @@
     "message": "Sites"
   },
   "sectionSitesSub": {
-    "message": "Where Osprey should leave downloads to the browser."
+    "message": "Where Swoop should leave downloads to the browser."
   },
   "groupSiteLists": {
     "message": "Site lists"
@@ -572,7 +572,7 @@
     "message": "Show a download button on players"
   },
   "settingMediaButtonHint": {
-    "message": "A small Osprey button appears when you point at a video or audio player."
+    "message": "A small Swoop button appears when you point at a video or audio player."
   },
   "mediaProtectedNote": {
     "message": "Streams protected by DRM, and players that stream from temporary blob: addresses, are listed but can’t be downloaded."
@@ -593,13 +593,13 @@
     "message": "Connection"
   },
   "sectionConnectionSub": {
-    "message": "How this browser reaches Osprey."
+    "message": "How this browser reaches Swoop."
   },
   "connectTo": {
     "message": "Connect to"
   },
   "connectToHint": {
-    "message": "Osprey usually runs on this computer. Pick “Another computer” to send downloads to a paired Osprey elsewhere."
+    "message": "Swoop usually runs on this computer. Pick “Another computer” to send downloads to a paired Swoop elsewhere."
   },
   "modeThisComputer": {
     "message": "This computer"
@@ -608,7 +608,7 @@
     "message": "Another computer"
   },
   "connectedToVersion": {
-    "message": "Connected to Osprey $ARG1$",
+    "message": "Connected to Swoop $ARG1$",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -627,7 +627,7 @@
     }
   },
   "notRunningSub": {
-    "message": "The browser helper is installed. Start Osprey to connect."
+    "message": "The browser helper is installed. Start Swoop to connect."
   },
   "noHostSub": {
     "message": "The browser helper isn’t installed for this browser yet."
@@ -639,37 +639,37 @@
     "message": "Set up"
   },
   "groupSetUpDesc": {
-    "message": "The extension talks to Osprey through a small helper that the app installs. No address or password needed."
+    "message": "The extension talks to Swoop through a small helper that the app installs. No address or password needed."
   },
   "stepInstallApp": {
-    "message": "Install Osprey and open it."
+    "message": "Install Swoop and open it."
   },
   "stepInstallHelper": {
-    "message": "In Osprey, open Settings → Browser and choose Install for this browser."
+    "message": "In Swoop, open Settings → Browser and choose Install for this browser."
   },
   "stepTest": {
     "message": "Come back here and choose Test connection."
   },
   "launchRowLabel": {
-    "message": "Osprey isn’t open?"
+    "message": "Swoop isn’t open?"
   },
   "launchRowHint": {
     "message": "Starts the app on this computer (macOS)."
   },
   "groupRemote": {
-    "message": "Remote Osprey"
+    "message": "Remote Swoop"
   },
   "remoteAddress": {
     "message": "Address"
   },
   "remoteAddressHint": {
-    "message": "Shown in Osprey on that computer under Settings → Remote."
+    "message": "Shown in Swoop on that computer under Settings → Remote."
   },
   "pairingCode": {
     "message": "Pairing code"
   },
   "pairingCodeHint": {
-    "message": "In Osprey there, choose Pair a device. Codes work once, for two minutes."
+    "message": "In Swoop there, choose Pair a device. Codes work once, for two minutes."
   },
   "useTokenInstead": {
     "message": "Use a device token instead"
@@ -702,7 +702,7 @@
     "message": "Too many attempts. Wait a minute, then try again."
   },
   "errUnreachable": {
-    "message": "Couldn’t reach that address. If Osprey uses its own certificate, open the address in a tab once and accept it."
+    "message": "Couldn’t reach that address. If Swoop uses its own certificate, open the address in a tab once and accept it."
   },
   "sectionShortcuts": {
     "message": "Shortcuts"
@@ -741,7 +741,7 @@
     "message": "On web pages"
   },
   "shortcutPageEsc": {
-    "message": "Dismiss an Osprey prompt or media panel"
+    "message": "Dismiss an Swoop prompt or media panel"
   },
   "shortcutPageTab": {
     "message": "Reach the media button of a focused player"
@@ -753,7 +753,7 @@
     "message": "Version, privacy and where things live."
   },
   "aboutTitle": {
-    "message": "Osprey for $ARG1$",
+    "message": "Swoop for $ARG1$",
     "placeholders": {
       "arg1": {
         "content": "$1"
@@ -775,7 +775,7 @@
     "message": "Extension"
   },
   "aboutAppVersion": {
-    "message": "Osprey app"
+    "message": "Swoop app"
   },
   "aboutBuild": {
     "message": "Build"
@@ -784,7 +784,7 @@
     "message": "Privacy"
   },
   "privacyLocal": {
-    "message": "Downloads, cookies and page details go only to Osprey — on this computer, or the one you paired."
+    "message": "Downloads, cookies and page details go only to Swoop — on this computer, or the one you paired."
   },
   "privacyNoTracking": {
     "message": "No analytics, tracking or remote code."

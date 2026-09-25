@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // Generates the extension's PNG icons at build time using only Node's built-in `zlib` module —
-// no third-party image library. Draws the Osprey mark — the wing glyph on a blue tile, the same
+// no third-party image library. Draws the Swoop mark — the wing glyph on a blue tile, the same
 // artwork as the desktop app and src/shared-ui/brand.ts — with supersampled anti-aliasing.
 
 import { deflateSync } from 'node:zlib';

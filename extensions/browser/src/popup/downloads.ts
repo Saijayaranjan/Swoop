@@ -19,7 +19,7 @@ import {
 import { apiRequest, launchApp } from '../shared/background-client.ts';
 import type {
   GlobalStats,
-  OspreyEvent,
+  SwoopEvent,
   Progress,
   ProgressUpdate,
   TaskKind,
@@ -139,7 +139,7 @@ interface RowView {
 
 export interface DownloadsHandle {
   refresh(): Promise<void>;
-  handleEvent(event: OspreyEvent): void;
+  handleEvent(event: SwoopEvent): void;
   setUsable(usable: boolean): void;
 }
 
@@ -217,7 +217,7 @@ export function initDownloads(ctx: PopupContext): DownloadsHandle {
     if (row.state === 'paused') add('resume', 'play', tr('actionResume', 'Resume'), () => runAction(row.id, 'resume'));
     if (row.state === 'failed') add('retry', 'retry', tr('actionRetry', 'Retry'), () => runAction(row.id, 'retry'));
     if (row.state === 'completed' && ctx.connection?.mode !== 'remote') {
-      add('open', 'open', tr('actionShowInApp', 'Show in Osprey'), async () => {
+      add('open', 'open', tr('actionShowInApp', 'Show in Swoop'), async () => {
         try {
           await launchApp();
         } catch (err) {
@@ -321,7 +321,7 @@ export function initDownloads(ctx: PopupContext): DownloadsHandle {
           featherIllustration({ width: 150 }),
           h('h3', { text: tr('emptyTitle', 'Nothing downloading') }),
           h('p', {
-            text: tr('emptyBody', 'Paste a link above, or just click a download link — Osprey will pick it up.'),
+            text: tr('emptyBody', 'Paste a link above, or just click a download link — Swoop will pick it up.'),
           }),
         );
       }
@@ -387,7 +387,7 @@ export function initDownloads(ctx: PopupContext): DownloadsHandle {
     rows.set(row.id, row);
   }
 
-  function handleEvent(event: OspreyEvent): void {
+  function handleEvent(event: SwoopEvent): void {
     switch (event.type) {
       case 'task_added':
         upsert(toDisplayRow(event.data as TaskLike), true);

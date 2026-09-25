@@ -1,5 +1,5 @@
 /**
- * Osprey's small stroke icon set, drawn on a 24×24 grid. Icons are built with
+ * Swoop's small stroke icon set, drawn on a 24×24 grid. Icons are built with
  * `createElementNS` from plain data (never parsed from markup strings) so they are safe to use in
  * the popup, the options page and inside the content script's shadow root on any page.
  */

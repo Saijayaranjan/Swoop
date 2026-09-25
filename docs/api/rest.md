@@ -1,10 +1,10 @@
-# Osprey HTTP API (v1)
+# Swoop HTTP API (v1)
 
 One API, three listeners:
 
 | Listener | Default | Purpose | Auth |
 |---|---|---|---|
-| Unix socket `~/Library/Application Support/Osprey/osprey.sock` (mode 0600) | always on while the app/daemon runs | CLI, native-messaging host | peer must be the same uid **and** present the local token |
+| Unix socket `~/Library/Application Support/Swoop/swoop.sock` (mode 0600) | always on while the app/daemon runs | CLI, native-messaging host | peer must be the same uid **and** present the local token |
 | Loopback TCP `127.0.0.1:41779` | on for headless/Windows, **off** on the macOS app by default | CLI/extension host where Unix sockets are unavailable | local token |
 | Remote TCP `0.0.0.0:41780` (TLS) | **off** | phones, tablets, other computers, browsers | paired-device bearer token with scopes |
 
@@ -36,7 +36,7 @@ POST /api/v1/pair                       {"code":"ABCD-EFGH","device_name":"iPhon
 ```
 Pairing codes are created from the desktop UI (`EngineApi::start_pairing`), are 8 characters
 (`ABCD-EFGH`, unambiguous alphabet), single-use, and expire after 2 minutes. The QR code encodes
-`osprey://pair?host=<ip>&port=<port>&fp=<sha256 of TLS cert>`; the code is typed separately.
+`swoop://pair?host=<ip>&port=<port>&fp=<sha256 of TLS cert>`; the code is typed separately.
 
 ## Engine
 

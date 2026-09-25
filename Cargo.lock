@@ -2883,419 +2883,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "04744f49eae99ab78e0d5c0b603ab218f515ea8cfe5a456d7629ad883a3b6e7d"
 
 [[package]]
-name = "osprey-archive"
-version = "0.1.0"
-dependencies = [
- "flate2",
- "osprey-domain",
- "osprey-runtime",
- "serde",
- "tar",
- "tempfile",
- "tokio",
- "tracing",
- "zip",
-]
-
-[[package]]
-name = "osprey-automation"
-version = "0.1.0"
-dependencies = [
- "blake3",
- "hex",
- "osprey-domain",
- "osprey-runtime",
- "osprey-testserver",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-cli"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "bytes",
- "clap",
- "directories",
- "futures",
- "http",
- "http-body-util",
- "humansize",
- "hyper",
- "hyper-util",
- "osprey-domain",
- "osprey-runtime",
- "osprey-server",
- "osprey-services",
- "percent-encoding",
- "qrcode",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.26.2",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "url",
-]
-
-[[package]]
-name = "osprey-domain"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "regex",
- "serde",
- "serde_json",
- "thiserror 2.0.20",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "osprey-engine-ftp"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "bytes",
- "chrono",
- "futures",
- "osprey-domain",
- "osprey-runtime",
- "parking_lot",
- "percent-encoding",
- "rustls",
- "rustls-platform-verifier",
- "serde",
- "tempfile",
- "tokio",
- "tokio-rustls",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-engine-http"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "axum",
- "base64 0.22.1",
- "bytes",
- "futures",
- "hex",
- "http",
- "mime_guess",
- "osprey-domain",
- "osprey-runtime",
- "osprey-testserver",
- "parking_lot",
- "quick-xml 0.37.5",
- "rand 0.8.8",
- "reqwest",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-engine-torrent"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "async-trait",
- "axum",
- "base64 0.22.1",
- "bytes",
- "futures",
- "hex",
- "librqbit",
- "osprey-domain",
- "osprey-runtime",
- "parking_lot",
- "rand 0.8.8",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-ffi"
-version = "0.1.0"
-dependencies = [
- "osprey-domain",
- "osprey-runtime",
- "osprey-server",
- "osprey-services",
- "parking_lot",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "uniffi",
-]
-
-[[package]]
-name = "osprey-grabber"
-version = "0.1.0"
-dependencies = [
- "axum",
- "dashmap",
- "futures",
- "lol_html",
- "mime_guess",
- "osprey-domain",
- "osprey-runtime",
- "osprey-testserver",
- "parking_lot",
- "regex",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
- "uuid",
-]
-
-[[package]]
-name = "osprey-media"
-version = "0.1.0"
-dependencies = [
- "aes",
- "async-trait",
- "axum",
- "bytes",
- "cbc",
- "futures",
- "hex",
- "mime_guess",
- "osprey-domain",
- "osprey-runtime",
- "osprey-testserver",
- "parking_lot",
- "reqwest",
- "serde",
- "serde_json",
- "tempfile",
- "tokio",
- "tokio-util",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-plugins"
-version = "0.1.0"
-dependencies = [
- "osprey-domain",
- "semver",
- "serde",
- "serde_json",
- "tempfile",
- "tracing",
-]
-
-[[package]]
-name = "osprey-runtime"
-version = "0.1.0"
-dependencies = [
- "async-trait",
- "blake3",
- "bytes",
- "directories",
- "hex",
- "http",
- "libc",
- "md-5",
- "mime_guess",
- "osprey-domain",
- "parking_lot",
- "percent-encoding",
- "rand 0.8.8",
- "regex",
- "reqwest",
- "serde",
- "serde_json",
- "sha1",
- "sha2 0.10.9",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tokio-util",
- "tracing",
- "unicode-normalization",
- "url",
-]
-
-[[package]]
-name = "osprey-server"
-version = "0.1.0"
-dependencies = [
- "axum",
- "axum-server",
- "bytes",
- "dashmap",
- "futures",
- "hex",
- "http",
- "mime_guess",
- "osprey-domain",
- "osprey-runtime",
- "osprey-services",
- "percent-encoding",
- "rcgen",
- "rust-embed",
- "rustls",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tokio-tungstenite 0.26.2",
- "tokio-util",
- "tower",
- "tower-http",
- "tracing",
- "url",
-]
-
-[[package]]
-name = "osprey-services"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "argon2",
- "async-trait",
- "axum",
- "base64 0.22.1",
- "blake3",
- "chrono",
- "dashmap",
- "ed25519-dalek",
- "flate2",
- "futures",
- "hex",
- "keyring",
- "osprey-archive",
- "osprey-automation",
- "osprey-domain",
- "osprey-engine-ftp",
- "osprey-engine-http",
- "osprey-engine-torrent",
- "osprey-grabber",
- "osprey-media",
- "osprey-plugins",
- "osprey-runtime",
- "osprey-store",
- "osprey-testserver",
- "osprey-update",
- "parking_lot",
- "rand 0.8.8",
- "reqwest",
- "semver",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "sysinfo",
- "tar",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tokio-util",
- "tracing",
- "tracing-appender",
- "tracing-subscriber",
- "url",
- "uuid",
- "zip",
-]
-
-[[package]]
-name = "osprey-store"
-version = "0.1.0"
-dependencies = [
- "chrono",
- "osprey-domain",
- "osprey-runtime",
- "parking_lot",
- "rusqlite",
- "serde",
- "serde_json",
- "tempfile",
- "thiserror 2.0.20",
- "tokio",
- "tracing",
-]
-
-[[package]]
-name = "osprey-testserver"
-version = "0.1.0"
-dependencies = [
- "axum",
- "base64 0.22.1",
- "bytes",
- "futures",
- "hex",
- "http",
- "parking_lot",
- "rand 0.8.8",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tokio",
- "tokio-util",
-]
-
-[[package]]
-name = "osprey-update"
-version = "0.1.0"
-dependencies = [
- "base64 0.22.1",
- "ed25519-dalek",
- "hex",
- "osprey-domain",
- "osprey-runtime",
- "osprey-testserver",
- "rand 0.8.8",
- "reqwest",
- "semver",
- "serde",
- "serde_json",
- "sha2 0.10.9",
- "tempfile",
- "tokio",
- "tracing",
- "url",
-]
-
-[[package]]
 name = "parking_lot"
 version = "0.12.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4512,6 +4099,419 @@ name = "subtle"
 version = "2.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
+
+[[package]]
+name = "swoop-archive"
+version = "0.1.0"
+dependencies = [
+ "flate2",
+ "serde",
+ "swoop-domain",
+ "swoop-runtime",
+ "tar",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "zip",
+]
+
+[[package]]
+name = "swoop-automation"
+version = "0.1.0"
+dependencies = [
+ "blake3",
+ "hex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-testserver",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-cli"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "base64 0.22.1",
+ "bytes",
+ "clap",
+ "directories",
+ "futures",
+ "http",
+ "http-body-util",
+ "humansize",
+ "hyper",
+ "hyper-util",
+ "percent-encoding",
+ "qrcode",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-server",
+ "swoop-services",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.26.2",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "url",
+]
+
+[[package]]
+name = "swoop-domain"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "regex",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.20",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "swoop-engine-ftp"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "bytes",
+ "chrono",
+ "futures",
+ "parking_lot",
+ "percent-encoding",
+ "rustls",
+ "rustls-platform-verifier",
+ "serde",
+ "swoop-domain",
+ "swoop-runtime",
+ "tempfile",
+ "tokio",
+ "tokio-rustls",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-engine-http"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "axum",
+ "base64 0.22.1",
+ "bytes",
+ "futures",
+ "hex",
+ "http",
+ "mime_guess",
+ "parking_lot",
+ "quick-xml 0.37.5",
+ "rand 0.8.8",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-testserver",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-engine-torrent"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "axum",
+ "base64 0.22.1",
+ "bytes",
+ "futures",
+ "hex",
+ "librqbit",
+ "parking_lot",
+ "rand 0.8.8",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-ffi"
+version = "0.1.0"
+dependencies = [
+ "parking_lot",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-server",
+ "swoop-services",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "uniffi",
+]
+
+[[package]]
+name = "swoop-grabber"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "dashmap",
+ "futures",
+ "lol_html",
+ "mime_guess",
+ "parking_lot",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-testserver",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
+name = "swoop-media"
+version = "0.1.0"
+dependencies = [
+ "aes",
+ "async-trait",
+ "axum",
+ "bytes",
+ "cbc",
+ "futures",
+ "hex",
+ "mime_guess",
+ "parking_lot",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-testserver",
+ "tempfile",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-plugins"
+version = "0.1.0"
+dependencies = [
+ "semver",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "tempfile",
+ "tracing",
+]
+
+[[package]]
+name = "swoop-runtime"
+version = "0.1.0"
+dependencies = [
+ "async-trait",
+ "blake3",
+ "bytes",
+ "directories",
+ "hex",
+ "http",
+ "libc",
+ "md-5",
+ "mime_guess",
+ "parking_lot",
+ "percent-encoding",
+ "rand 0.8.8",
+ "regex",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "sha1",
+ "sha2 0.10.9",
+ "swoop-domain",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "unicode-normalization",
+ "url",
+]
+
+[[package]]
+name = "swoop-server"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-server",
+ "bytes",
+ "dashmap",
+ "futures",
+ "hex",
+ "http",
+ "mime_guess",
+ "percent-encoding",
+ "rcgen",
+ "rust-embed",
+ "rustls",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-services",
+ "tempfile",
+ "tokio",
+ "tokio-tungstenite 0.26.2",
+ "tokio-util",
+ "tower",
+ "tower-http",
+ "tracing",
+ "url",
+]
+
+[[package]]
+name = "swoop-services"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "argon2",
+ "async-trait",
+ "axum",
+ "base64 0.22.1",
+ "blake3",
+ "chrono",
+ "dashmap",
+ "ed25519-dalek",
+ "flate2",
+ "futures",
+ "hex",
+ "keyring",
+ "parking_lot",
+ "rand 0.8.8",
+ "reqwest",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "swoop-archive",
+ "swoop-automation",
+ "swoop-domain",
+ "swoop-engine-ftp",
+ "swoop-engine-http",
+ "swoop-engine-torrent",
+ "swoop-grabber",
+ "swoop-media",
+ "swoop-plugins",
+ "swoop-runtime",
+ "swoop-store",
+ "swoop-testserver",
+ "swoop-update",
+ "sysinfo",
+ "tar",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tokio-util",
+ "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
+ "url",
+ "uuid",
+ "zip",
+]
+
+[[package]]
+name = "swoop-store"
+version = "0.1.0"
+dependencies = [
+ "chrono",
+ "parking_lot",
+ "rusqlite",
+ "serde",
+ "serde_json",
+ "swoop-domain",
+ "swoop-runtime",
+ "tempfile",
+ "thiserror 2.0.20",
+ "tokio",
+ "tracing",
+]
+
+[[package]]
+name = "swoop-testserver"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "base64 0.22.1",
+ "bytes",
+ "futures",
+ "hex",
+ "http",
+ "parking_lot",
+ "rand 0.8.8",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "tokio",
+ "tokio-util",
+]
+
+[[package]]
+name = "swoop-update"
+version = "0.1.0"
+dependencies = [
+ "base64 0.22.1",
+ "ed25519-dalek",
+ "hex",
+ "rand 0.8.8",
+ "reqwest",
+ "semver",
+ "serde",
+ "serde_json",
+ "sha2 0.10.9",
+ "swoop-domain",
+ "swoop-runtime",
+ "swoop-testserver",
+ "tempfile",
+ "tokio",
+ "tracing",
+ "url",
+]
 
 [[package]]
 name = "symlink"

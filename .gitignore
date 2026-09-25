@@ -8,5 +8,5 @@
 /web/remote/dist
 *.dmg
 .DS_Store
-/crates/osprey-ffi/generated
+/crates/swoop-ffi/generated
 /build

@@ -4,8 +4,8 @@
 
 import { createStore } from "./store.ts";
 
-const TOKEN_KEY = "osprey.token";
-const DEVICE_KEY = "osprey.device";
+const TOKEN_KEY = "swoop.token";
+const DEVICE_KEY = "swoop.device";
 
 export interface StoredDevice {
   id: string;
@@ -96,7 +96,7 @@ export function clearAuth(): void {
   authStore.setState({ token: null, device: null });
 }
 
-/** Pull `?token=` from the `osprey://pair` QR handoff URL, if present, and strip it from the URL. */
+/** Pull `?token=` from the `swoop://pair` QR handoff URL, if present, and strip it from the URL. */
 export function consumeTokenFromUrl(): string | null {
   if (typeof window === "undefined") return null;
   const params = new URLSearchParams(window.location.search);

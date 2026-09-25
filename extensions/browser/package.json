@@ -1,8 +1,8 @@
 {
-  "name": "osprey-browser-extension",
+  "name": "swoop-browser-extension",
   "version": "0.1.0",
   "private": true,
-  "description": "Official browser extension for Osprey, a production-grade download manager.",
+  "description": "Official browser extension for Swoop, a production-grade download manager.",
   "type": "module",
   "scripts": {
     "build": "node build.mjs chrome firefox edge",

@@ -147,7 +147,7 @@ export function buildScanResult(mode: 'scan' | 'scan-selection'): ScanResultMess
   };
 }
 
-/** A player we can't hand to Osprey directly: MSE/EME (`blob:`) playback or DRM-encrypted. */
+/** A player we can't hand to Swoop directly: MSE/EME (`blob:`) playback or DRM-encrypted. */
 export function isProtectedMedia(el: HTMLMediaElement): boolean {
   const url = mediaSourceUrl(el);
   return !url || url.startsWith('blob:') || encryptedElements.has(el);

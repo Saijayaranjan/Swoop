@@ -2,13 +2,13 @@
  * Remote-connection helpers (docs/api/rest.md "Pairing", "Authentication"). Pure — no browser
  * globals — so the URL rules are unit tested (test/remote.test.ts).
  *
- * A remote Osprey is reached over its TLS listener with a paired-device bearer token. Plain
+ * A remote Swoop is reached over its TLS listener with a paired-device bearer token. Plain
  * `http:` is only accepted for loopback addresses, so a token is never sent in clear text over a
  * network.
  */
 
 /** `browser.storage.local` key holding the device token, kept apart from the settings object. */
-export const REMOTE_TOKEN_KEY = 'ospreyRemoteToken';
+export const REMOTE_TOKEN_KEY = 'swoopRemoteToken';
 
 const LOOPBACK_HOSTS = new Set(['localhost', '127.0.0.1', '[::1]', '::1']);
 

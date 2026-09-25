@@ -12,34 +12,34 @@ import type { NewTaskRequest } from '../shared/types.ts';
 import { setPendingBulkLinks } from './state-bulk.ts';
 import type { CandidateLink, ScanResultMessage } from '../shared/messages.ts';
 
-const MENU_LINK = 'osprey-download-link';
-const MENU_IMAGE = 'osprey-download-image';
-const MENU_VIDEO = 'osprey-download-video';
-const MENU_AUDIO = 'osprey-download-audio';
-const MENU_PAGE = 'osprey-download-page-links';
-const MENU_SELECTION = 'osprey-download-selection-links';
+const MENU_LINK = 'swoop-download-link';
+const MENU_IMAGE = 'swoop-download-image';
+const MENU_VIDEO = 'swoop-download-video';
+const MENU_AUDIO = 'swoop-download-audio';
+const MENU_PAGE = 'swoop-download-page-links';
+const MENU_SELECTION = 'swoop-download-selection-links';
 
 export function createContextMenus(): void {
   browser.contextMenus.removeAll().then(() => {
     browser.contextMenus.create({
       id: MENU_LINK,
       contexts: ['link'],
-      title: browser.i18n.getMessage('menuDownloadLink') || 'Download with Osprey',
+      title: browser.i18n.getMessage('menuDownloadLink') || 'Download with Swoop',
     });
     browser.contextMenus.create({
       id: MENU_IMAGE,
       contexts: ['image'],
-      title: browser.i18n.getMessage('menuDownloadImage') || 'Download image with Osprey',
+      title: browser.i18n.getMessage('menuDownloadImage') || 'Download image with Swoop',
     });
     browser.contextMenus.create({
       id: MENU_VIDEO,
       contexts: ['video'],
-      title: browser.i18n.getMessage('menuDownloadVideo') || 'Download video with Osprey',
+      title: browser.i18n.getMessage('menuDownloadVideo') || 'Download video with Swoop',
     });
     browser.contextMenus.create({
       id: MENU_AUDIO,
       contexts: ['audio'],
-      title: browser.i18n.getMessage('menuDownloadAudio') || 'Download audio with Osprey',
+      title: browser.i18n.getMessage('menuDownloadAudio') || 'Download audio with Swoop',
     });
     browser.contextMenus.create({
       id: MENU_PAGE,

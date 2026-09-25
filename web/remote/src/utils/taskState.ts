@@ -1,4 +1,4 @@
-// Small state-machine helpers mirroring crates/osprey-domain/src/state.rs so the UI only shows
+// Small state-machine helpers mirroring crates/swoop-domain/src/state.rs so the UI only shows
 // actions that the server will actually accept.
 
 import type { TaskState } from "../api/types.ts";

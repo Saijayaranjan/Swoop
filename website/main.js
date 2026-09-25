@@ -4,7 +4,7 @@
    ═══════════════════════════════════════════════════════════════════ */
 const CONFIG = {
   owner: 'OWNER',
-  repo: 'osprey',
+  repo: 'swoop',
 };
 
 (function () {
@@ -56,10 +56,10 @@ const CONFIG = {
       const systemTheme = darkQuery.matches ? 'dark' : 'light';
       if (next === systemTheme) {
         root.removeAttribute('data-theme');
-        try { localStorage.removeItem('osprey-theme'); } catch (e) {}
+        try { localStorage.removeItem('swoop-theme'); } catch (e) {}
       } else {
         root.setAttribute('data-theme', next);
-        try { localStorage.setItem('osprey-theme', next); } catch (e) {}
+        try { localStorage.setItem('swoop-theme', next); } catch (e) {}
       }
       applyTheme();
     });
@@ -231,7 +231,7 @@ const CONFIG = {
     ['downloads-empty', 'Ready for a first download', 1280, 800],
     ['add', 'Add Download', 660, 720],
     ['menubar', 'Menu bar extra', 350, 572],
-    ['about', 'About Osprey', 380, 548],
+    ['about', 'About Swoop', 380, 548],
     ['settings-general', 'Settings: General', 1000, 728],
     ['settings-categories', 'Settings: Categories', 1000, 728],
     ['settings-bandwidth', 'Settings: Bandwidth', 1000, 728],
@@ -273,7 +273,7 @@ const CONFIG = {
       img.src = 'assets/screens/' + s[0] + '-' + effectiveTheme() + '.webp';
       img.width = s[2];
       img.height = s[3];
-      img.alt = 'Osprey screenshot: ' + s[1];
+      img.alt = 'Swoop screenshot: ' + s[1];
       cap.textContent = s[1];
       count.textContent = (index + 1) + ' of ' + SHOTS.length;
       // Preload neighbours.

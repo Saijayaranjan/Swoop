@@ -1,0 +1,55 @@
+[package]
+name = "swoop-services"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Swoop application services: task manager, queues, scheduler, bandwidth, rules, automation, history, diagnostics; exposes the Engine facade"
+
+[dependencies]
+swoop-domain = { path = "../swoop-domain" }
+swoop-runtime = { path = "../swoop-runtime" }
+swoop-store = { path = "../swoop-store" }
+swoop-engine-http = { path = "../swoop-engine-http" }
+swoop-engine-ftp = { path = "../swoop-engine-ftp" }
+swoop-engine-torrent = { path = "../swoop-engine-torrent" }
+swoop-media = { path = "../swoop-media" }
+swoop-grabber = { path = "../swoop-grabber" }
+swoop-automation = { path = "../swoop-automation" }
+swoop-archive = { path = "../swoop-archive" }
+swoop-update = { path = "../swoop-update" }
+swoop-plugins = { path = "../swoop-plugins" }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+tracing-appender = { workspace = true }
+parking_lot = { workspace = true }
+dashmap = { workspace = true }
+thiserror = { workspace = true }
+anyhow = { workspace = true }
+url = { workspace = true }
+uuid = { workspace = true }
+chrono = { workspace = true }
+reqwest = { workspace = true }
+base64 = { workspace = true }
+blake3 = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+rand = { workspace = true }
+argon2 = { workspace = true }
+zip = { workspace = true }
+tar = { workspace = true }
+flate2 = { workspace = true }
+semver = { workspace = true }
+ed25519-dalek = { workspace = true }
+sysinfo = { workspace = true }
+keyring = { workspace = true }
+futures = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+axum = { workspace = true }
+swoop-testserver = { path = "../swoop-testserver" }

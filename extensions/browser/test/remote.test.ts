@@ -4,7 +4,7 @@ import { normalizePairingCode, normalizeRemoteUrl, remoteEventsUrl } from '../sr
 
 test('normalizeRemoteUrl adds https and strips paths', () => {
   assert.equal(normalizeRemoteUrl('nas.local:41780'), 'https://nas.local:41780');
-  assert.equal(normalizeRemoteUrl(' https://Osprey.example.com/api/v1/ '), 'https://osprey.example.com');
+  assert.equal(normalizeRemoteUrl(' https://Swoop.example.com/api/v1/ '), 'https://swoop.example.com');
 });
 
 test('normalizeRemoteUrl refuses clear-text http except on loopback', () => {

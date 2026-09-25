@@ -1,4 +1,4 @@
-# dmgbuild settings for the Osprey installer window. Paths arrive through -D defines from
+# dmgbuild settings for the Swoop installer window. Paths arrive through -D defines from
 # scripts/make-dmg.sh. Icon centres match scripts/render-dmg-background.swift.
 import os.path
 

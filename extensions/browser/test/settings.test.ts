@@ -82,7 +82,7 @@ test('onChange fires when storage.onChanged reports a new value from elsewhere',
   store.onChange((settings) => seen.push(settings.intercept_downloads));
 
   // Simulate another context (e.g. the popup) writing settings directly to the same area.
-  await area.set({ ospreySettings: { ...defaultExtensionSettings(), intercept_downloads: false } });
+  await area.set({ swoopSettings: { ...defaultExtensionSettings(), intercept_downloads: false } });
 
   assert.deepEqual(seen, [false]);
   assert.equal((await store.get()).intercept_downloads, false);

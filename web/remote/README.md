@@ -1,8 +1,8 @@
-# Osprey remote web UI
+# Swoop remote web UI
 
 A small Preact + TypeScript single-page app that lets a phone, tablet, or another computer
-control Osprey over its remote REST/WebSocket API. It is built to a static `dist/` bundle and
-embedded directly into the `osprey-server` binary, so it ships with zero runtime dependencies
+control Swoop over its remote REST/WebSocket API. It is built to a static `dist/` bundle and
+embedded directly into the `swoop-server` binary, so it ships with zero runtime dependencies
 beyond what a browser already provides.
 
 ## Requirements
@@ -26,22 +26,22 @@ so the size budget is enforced automatically rather than by convention.
 
 ## How the server embeds `dist/`
 
-`crates/osprey-server` (axum) embeds the contents of `web/remote/dist/` at compile time with
+`crates/swoop-server` (axum) embeds the contents of `web/remote/dist/` at compile time with
 [`rust-embed`](https://docs.rs/rust-embed) (see `docs/architecture/001-architecture-decision.md`,
 "Remote web UI"). The SPA is served at `/` on every listener (the remote TLS listener, and the
 local loopback/Unix-socket listeners for troubleshooting), with a catch-all fallback to
 `index.html` for client-side routes (`#/downloads/<id>`, etc. — the router uses hash paths
 specifically so no server-side route table is needed).
 
-Build the UI (`npm run build` in this directory) before building `osprey-server`/`osprey-cli` so
+Build the UI (`npm run build` in this directory) before building `swoop-server`/`swoop-cli` so
 `dist/` exists for the embed macro to pick up; the exact wiring (embed struct, fallback handler)
-lives in `crates/osprey-server/src`.
+lives in `crates/swoop-server/src`.
 
 ## Pairing walkthrough
 
 1. On the desktop app (or headless daemon admin UI), start pairing: this calls
    `EngineApi::start_pairing`, which shows an 8-character code (`ABCD-EFGH`, unambiguous
-   alphabet) and a QR code encoding `osprey://pair?host=<ip>&port=<port>&fp=<sha256 of cert>`.
+   alphabet) and a QR code encoding `swoop://pair?host=<ip>&port=<port>&fp=<sha256 of cert>`.
    The code is single-use and expires after 2 minutes.
 2. Open the remote UI on the other device — either by scanning the QR code (which opens
    `https://<host>:<port>/?token=...` for a direct handoff, if the platform layer includes one)
@@ -91,7 +91,7 @@ lives in `crates/osprey-server/src`.
   unparsable bodies to one `ApiError` shape (`src/api/errors.ts`) that the UI branches on. A
   `401` anywhere calls the client's `onUnauthorized` hook, which clears auth app-wide.
 - **Task actions respect the state machine.** `src/utils/taskState.ts` mirrors
-  `crates/osprey-domain/src/state.rs`'s `can_pause`/`can_resume`/etc. so the row menu and detail
+  `crates/swoop-domain/src/state.rs`'s `can_pause`/`can_resume`/etc. so the row menu and detail
   view only ever offer actions the server will accept.
 
 ## Testing

@@ -1,9 +1,9 @@
 /**
- * Client for a paired remote Osprey (docs/api/rest.md, docs/api/websocket.md): REST over HTTPS
+ * Client for a paired remote Swoop (docs/api/rest.md, docs/api/websocket.md): REST over HTTPS
  * with a device bearer token, and the WebSocket event stream for live progress. Used by
- * `native-port.ts` in place of the native-messaging relay when the user picks "Remote Osprey" in
+ * `native-port.ts` in place of the native-messaging relay when the user picks "Remote Swoop" in
  * the options page. The server accepts the extension's own origin (`chrome-extension://…`,
- * `moz-extension://…`), so no CORS configuration is needed on the Osprey side.
+ * `moz-extension://…`), so no CORS configuration is needed on the Swoop side.
  */
 
 import { ApiError } from '../shared/api-client.ts';
@@ -57,7 +57,7 @@ export async function remoteFetch<T>(
       redirect: 'error',
     });
   } catch {
-    throw new ApiError('unreachable', `Could not reach Osprey at ${new URL(baseUrl).host}`);
+    throw new ApiError('unreachable', `Could not reach Swoop at ${new URL(baseUrl).host}`);
   } finally {
     clearTimeout(timer);
   }

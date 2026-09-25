@@ -1,4 +1,4 @@
-/* Osprey — en strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
+/* Swoop — en strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
 
 "Active" = "Active";
 "Activity" = "Activity";
@@ -79,7 +79,7 @@
 "Offline" = "Offline";
 "Online" = "Online";
 "Open" = "Open";
-"Open Osprey" = "Open Osprey";
+"Open Swoop" = "Open Swoop";
 "Organise" = "Organise";
 "Overview" = "Overview";
 "Pair a device" = "Pair a device";
@@ -97,7 +97,7 @@
 "Queues" = "Queues";
 "Quick Look" = "Quick Look";
 "Quit" = "Quit";
-"Quit Osprey?" = "Quit Osprey?";
+"Quit Swoop?" = "Quit Swoop?";
 "Recent" = "Recent";
 "Recipes" = "Recipes";
 "Remote" = "Remote";
@@ -140,24 +140,24 @@
 "error.connect_timeout" = "The server took too long to respond.";
 "error.dht" = "The distributed hash table is unavailable.";
 "error.disk_full" = "There isn't enough free space on the destination disk.";
-"error.disk_read" = "Osprey couldn't read the partial file.";
-"error.disk_write" = "Osprey couldn't write to the destination.";
+"error.disk_read" = "Swoop couldn't read the partial file.";
+"error.disk_write" = "Swoop couldn't write to the destination.";
 "error.dns" = "The server name could not be found. Check your connection or the address.";
 "error.expired_url" = "The link has expired. Get a fresh link and retry from source.";
 "error.file_exists" = "A file with this name already exists.";
 "error.filename" = "The file name is not valid on this Mac.";
 "error.forbidden" = "The server denied access to this file.";
-"error.internal" = "Osprey hit an internal error.";
+"error.internal" = "Swoop hit an internal error.";
 "error.invalid_torrent" = "The torrent file is damaged or invalid.";
 "error.invalid_url" = "The link is not a valid URL.";
 "error.live_stream" = "Live streams can't be downloaded.";
 "error.mirrors_exhausted" = "Every mirror failed.";
-"error.network_unavailable" = "You're offline. Osprey will continue when the network returns.";
+"error.network_unavailable" = "You're offline. Swoop will continue when the network returns.";
 "error.no_peers" = "No peers are sharing this torrent right now.";
 "error.not_found" = "The file no longer exists on the server.";
 "error.parse" = "The response could not be understood.";
 "error.path_traversal" = "The file name tried to escape the download folder and was blocked.";
-"error.permission" = "Osprey doesn't have permission to save here.";
+"error.permission" = "Swoop doesn't have permission to save here.";
 "error.protected" = "This media is DRM-protected and can't be downloaded.";
 "error.proxy" = "The proxy server reported an error.";
 "error.quota" = "The server's download quota was reached.";
@@ -166,9 +166,9 @@
 "error.redirect_loop" = "The server redirected too many times.";
 "error.refused" = "The server refused the connection.";
 "error.reset" = "The connection was interrupted.";
-"error.server" = "The server had a problem. Osprey will retry.";
+"error.server" = "The server had a problem. Swoop will retry.";
 "error.source_changed" = "The file changed on the server, so the download restarted.";
-"error.throttled" = "The server is limiting requests. Osprey will slow down and retry.";
+"error.throttled" = "The server is limiting requests. Swoop will slow down and retry.";
 "error.tls" = "A secure connection could not be established.";
 "error.tracker" = "The trackers could not be reached.";
 "error.truncated" = "The server sent less data than expected.";

@@ -5,7 +5,7 @@
  */
 
 import browser from 'webextension-polyfill';
-import type { GlobalStats, OspreyEvent, TaskStateChangedData } from '../shared/types.ts';
+import type { GlobalStats, SwoopEvent, TaskStateChangedData } from '../shared/types.ts';
 import { ACTIVE_TASK_STATES } from '../shared/types.ts';
 import { setBadgeCount } from './state.ts';
 
@@ -40,7 +40,7 @@ function applyTaskStateChange(data: TaskStateChangedData): number | null {
   return locallyActiveTasks.size;
 }
 
-export async function handleEventForBadge(event: OspreyEvent): Promise<void> {
+export async function handleEventForBadge(event: SwoopEvent): Promise<void> {
   if (event.type === 'global_stats') {
     const stats = event.data as GlobalStats;
     await updateBadge(stats.active);

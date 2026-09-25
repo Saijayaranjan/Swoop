@@ -1,4 +1,4 @@
-/* Osprey — ta strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
+/* Swoop — ta strings. UI strings use the English text as key; engine keys map state.*, error.*, health.*, pause.* */
 
 "Active" = "செயலில்";
 "Add" = "சேர்";
@@ -38,7 +38,7 @@
 "Offline" = "இணைப்பில் இல்லை";
 "Online" = "இணைப்பில்";
 "Open" = "திற";
-"Open Osprey" = "Osprey-ஐத் திற";
+"Open Swoop" = "Swoop-ஐத் திற";
 "Organise" = "ஒழுங்கமை";
 "Overview" = "கண்ணோட்டம்";
 "Paste" = "ஒட்டு";
@@ -78,7 +78,7 @@
 "error.dns" = "சேவையகப் பெயர் கிடைக்கவில்லை. இணைப்பு அல்லது முகவரியைச் சரிபார்க்கவும்.";
 "error.expired_url" = "இணைப்பு காலாவதியானது.";
 "error.forbidden" = "சேவையகம் இந்தக் கோப்பை அணுக மறுத்தது.";
-"error.network_unavailable" = "நீங்கள் இணைப்பில் இல்லை. இணையம் திரும்பியதும் Osprey தொடரும்.";
+"error.network_unavailable" = "நீங்கள் இணைப்பில் இல்லை. இணையம் திரும்பியதும் Swoop தொடரும்.";
 "error.not_found" = "இந்தக் கோப்பு சேவையகத்தில் இல்லை.";
 "error.unknown" = "ஏதோ தவறு நடந்தது.";
 "health.excellent" = "மிகச் சிறப்பு";

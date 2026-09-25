@@ -54,7 +54,7 @@ const capture: SectionDef = {
   id: 'capture',
   icon: 'capture',
   title: () => tr('sectionCapture', 'Capture'),
-  subtitle: () => tr('sectionCaptureSub', 'Which browser downloads Osprey takes over.'),
+  subtitle: () => tr('sectionCaptureSub', 'Which browser downloads Swoop takes over.'),
   render({ settings, patch, rerender }) {
     const resetTypes = textButton(tr('actionResetDefaults', 'Reset to defaults'), () => {
       patch({ intercept_extensions: defaultBrowserSettings().intercept_extensions });
@@ -64,7 +64,7 @@ const capture: SectionDef = {
       ...group([
         switchRow({
           label: tr('captureDownloads', 'Capture downloads'),
-          hint: tr('captureDownloadsHint', 'Send matching downloads to Osprey instead of the browser’s own download list.'),
+          hint: tr('captureDownloadsHint', 'Send matching downloads to Swoop instead of the browser’s own download list.'),
           checked: settings.intercept_downloads,
           onChange: (checked) => patch({ intercept_downloads: checked }),
         }),
@@ -111,7 +111,7 @@ const sites: SectionDef = {
   id: 'sites',
   icon: 'globe',
   title: () => tr('sectionSites', 'Sites'),
-  subtitle: () => tr('sectionSitesSub', 'Where Osprey should leave downloads to the browser.'),
+  subtitle: () => tr('sectionSitesSub', 'Where Swoop should leave downloads to the browser.'),
   render({ settings, patch }) {
     return [
       ...group(
@@ -180,7 +180,7 @@ const media: SectionDef = {
         }),
         switchRow({
           label: tr('settingMediaButton', 'Show a download button on players'),
-          hint: tr('settingMediaButtonHint', 'A small Osprey button appears when you point at a video or audio player.'),
+          hint: tr('settingMediaButtonHint', 'A small Swoop button appears when you point at a video or audio player.'),
           checked: settings.media_button,
           disabled: !settings.detect_media,
           onChange: (checked) => patch({ media_button: checked }),
@@ -252,7 +252,7 @@ const shortcuts: SectionDef = {
       );
 
     const commandsApi = browser.commands as unknown as { openShortcutSettings?: () => Promise<void> };
-    const target = __OSPREY_TARGET__;
+    const target = __SWOOP_TARGET__;
     const change = textButton(tr('actionChangeShortcuts', 'Change shortcuts'), async () => {
       if (commandsApi.openShortcutSettings) {
         await commandsApi.openShortcutSettings();
@@ -280,7 +280,7 @@ const shortcuts: SectionDef = {
       ),
       ...group(
         [
-          valueRow(tr('shortcutPageEsc', 'Dismiss an Osprey prompt or media panel'), keys('Esc')),
+          valueRow(tr('shortcutPageEsc', 'Dismiss an Swoop prompt or media panel'), keys('Esc')),
           valueRow(tr('shortcutPageTab', 'Reach the media button of a focused player'), keys('Tab')),
         ],
         tr('groupOnPages', 'On web pages'),
@@ -298,12 +298,12 @@ const about: SectionDef = {
   subtitle: () => tr('sectionAboutSub', 'Version, privacy and where things live.'),
   async render() {
     const manifest = browser.runtime.getManifest();
-    const browserName = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' }[__OSPREY_TARGET__] ?? 'your browser';
+    const browserName = { chrome: 'Chrome', edge: 'Edge', firefox: 'Firefox' }[__SWOOP_TARGET__] ?? 'your browser';
     const appValue = h('span', { class: 'value is-muted', text: tr('statusChecking', 'Checking…') });
     void getConnectionStatus()
       .then((status) => {
         if (status.connected && status.running) {
-          appValue.textContent = status.version ? `Osprey ${status.version}` : tr('statusConnectedShort', 'Connected');
+          appValue.textContent = status.version ? `Swoop ${status.version}` : tr('statusConnectedShort', 'Connected');
           appValue.classList.remove('is-muted');
         } else {
           appValue.textContent = tr('statusNotConnected', 'Not connected');
@@ -316,8 +316,8 @@ const about: SectionDef = {
     const hero = h('div', { class: 'about-hero card' }, [
       brandMark(72),
       h('div', {}, [
-        h('h2', { text: tr('aboutTitle', 'Osprey for $1', browserName) }),
-        h('p', { text: tr('extensionDescription', 'Send downloads, media and links straight to Osprey.') }),
+        h('h2', { text: tr('aboutTitle', 'Swoop for $1', browserName) }),
+        h('p', { text: tr('extensionDescription', 'Send downloads, media and links straight to Swoop.') }),
         capsule(tr('versionLabel', 'Version $1', manifest.version), 'blue'),
       ]),
     ]);
@@ -327,7 +327,7 @@ const about: SectionDef = {
       ...group(
         [
           valueRow(tr('aboutExtensionVersion', 'Extension'), manifest.version),
-          valueRow(tr('aboutAppVersion', 'Osprey app'), appValue),
+          valueRow(tr('aboutAppVersion', 'Swoop app'), appValue),
           valueRow(tr('aboutBuild', 'Build'), browserName),
         ],
         tr('groupVersions', 'Versions'),
@@ -335,7 +335,7 @@ const about: SectionDef = {
       ...group(
         [
           h('ul', { class: 'privacy' }, [
-            h('li', {}, [icon('shield'), h('span', { text: tr('privacyLocal', 'Downloads, cookies and page details go only to Osprey — on this computer, or the one you paired.') })]),
+            h('li', {}, [icon('shield'), h('span', { text: tr('privacyLocal', 'Downloads, cookies and page details go only to Swoop — on this computer, or the one you paired.') })]),
             h('li', {}, [icon('shield'), h('span', { text: tr('privacyNoTracking', 'No analytics, tracking or remote code.') })]),
             h('li', {}, [icon('shield'), h('span', { text: tr('privacyStorage', 'Settings are kept in this browser’s extension storage, out of reach of web pages.') })]),
           ]),

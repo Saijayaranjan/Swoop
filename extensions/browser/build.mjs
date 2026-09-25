@@ -77,7 +77,7 @@ function bundleConfigsFor(target) {
     target: ['chrome116', 'firefox121'],
     logLevel: 'info',
     define: {
-      __OSPREY_TARGET__: JSON.stringify(target),
+      __SWOOP_TARGET__: JSON.stringify(target),
     },
   };
   return [

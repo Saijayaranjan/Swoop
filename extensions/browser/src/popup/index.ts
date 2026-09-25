@@ -1,7 +1,7 @@
 /**
  * Popup entry point. One glanceable screen: connection status, live speed, an "add link" field,
  * media found on the current page, and active/recent downloads — with a links picker as a sheet
- * and the "Capture downloads" switch, Open Osprey and Settings in the footer.
+ * and the "Capture downloads" switch, Open Swoop and Settings in the footer.
  *
  * Talks to the background through `runtime.sendMessage` (src/shared/background-client.ts) and
  * the long-lived popup port (live native events), and to the page's content script with
@@ -12,7 +12,7 @@ import browser from 'webextension-polyfill';
 import { POPUP_PORT_NAME, type ConnectionStatus, type PopupPortMessage } from '../shared/messages.ts';
 import { getActiveTabId, launchApp, quickDownload, takePendingBulkLinks } from '../shared/background-client.ts';
 import { SettingsStore } from '../shared/settings.ts';
-import type { AddTaskResult, NewTaskRequest, OspreyEvent } from '../shared/types.ts';
+import type { AddTaskResult, NewTaskRequest, SwoopEvent } from '../shared/types.ts';
 import { brandMark } from '../shared-ui/brand.ts';
 import { applyI18n, tr } from '../shared-ui/dom.ts';
 import { hydrateIcons } from '../shared-ui/icons.ts';
@@ -108,7 +108,7 @@ async function initCapture(): Promise<void> {
   const paint = (on: boolean): void => {
     toggle.checked = on;
     sub.textContent = on
-      ? tr('captureOnHint', 'Matching downloads go to Osprey')
+      ? tr('captureOnHint', 'Matching downloads go to Swoop')
       : tr('captureOffHint', 'Your browser keeps every download');
   };
   paint((await store.get()).intercept_downloads);
@@ -123,7 +123,7 @@ async function main(): Promise<void> {
   applyI18n();
   hydrateIcons(document);
   byId('brand-mark').replaceWith(brandMark(26));
-  document.title = tr('extensionName', 'Osprey');
+  document.title = tr('extensionName', 'Swoop');
 
   // Opened as a regular tab (context-menu fallback) rather than as the toolbar popup.
   if (window.innerWidth > 520) document.documentElement.classList.add('in-tab');
@@ -150,14 +150,14 @@ async function main(): Promise<void> {
   byId('open-app-btn').addEventListener('click', async () => {
     const connection: ConnectionStatus | null = ctx.connection;
     if (connection?.mode === 'remote') {
-      const stored = await browser.storage.local.get('ospreySettings');
-      const url = (stored['ospreySettings'] as { remote_url?: string } | undefined)?.remote_url;
+      const stored = await browser.storage.local.get('swoopSettings');
+      const url = (stored['swoopSettings'] as { remote_url?: string } | undefined)?.remote_url;
       if (url) await browser.tabs.create({ url });
       return;
     }
     try {
       await launchApp();
-      ctx.toast(tr('toastLaunching', 'Launching Osprey…'));
+      ctx.toast(tr('toastLaunching', 'Launching Swoop…'));
     } catch (err) {
       ctx.toast(errorMessage(err), 'error');
     }
@@ -172,7 +172,7 @@ async function main(): Promise<void> {
     if (message.type === 'connection-status') {
       if (statusChecked) status.apply(message.status);
     } else if (message.type === 'event') {
-      downloads.handleEvent(message.event as OspreyEvent);
+      downloads.handleEvent(message.event as SwoopEvent);
     }
   });
 

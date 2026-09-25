@@ -1,0 +1,19 @@
+[package]
+name = "swoop-archive"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Archive inspection and safe selective extraction (zip, tar, tar.gz)"
+
+[dependencies]
+swoop-domain = { path = "../swoop-domain" }
+swoop-runtime = { path = "../swoop-runtime" }
+tokio = { workspace = true }
+serde = { workspace = true }
+zip = { workspace = true }
+tar = { workspace = true }
+flate2 = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }

@@ -88,7 +88,7 @@ export interface TakePendingBulkLinksMessage {
   type: 'take-pending-bulk-links';
 }
 
-/** Options page: complete pairing with a remote Osprey using a one-time code. */
+/** Options page: complete pairing with a remote Swoop using a one-time code. */
 export interface PairRemoteMessage {
   type: 'pair-remote';
   url: string;
@@ -102,7 +102,7 @@ export interface SetRemoteTokenMessage {
   token: string;
 }
 
-/** Options page: forget the remote Osprey and return to the local native host. */
+/** Options page: forget the remote Swoop and return to the local native host. */
 export interface ForgetRemoteMessage {
   type: 'forget-remote';
 }
@@ -198,7 +198,7 @@ export interface PagePrompt {
 }
 
 export interface ShowPagePromptMessage {
-  type: 'osprey-page-prompt';
+  type: 'swoop-page-prompt';
   prompt: PagePrompt;
 }
 
@@ -211,7 +211,7 @@ export interface DetectedMediaForTab {
 // long-lived popup <-> background port ("popup")
 // ---------------------------------------------------------------------------------------------
 
-export const POPUP_PORT_NAME = 'osprey-popup';
+export const POPUP_PORT_NAME = 'swoop-popup';
 
 export interface PortEventFrame {
   type: 'event';

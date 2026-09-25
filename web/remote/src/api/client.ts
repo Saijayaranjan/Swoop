@@ -1,4 +1,4 @@
-// Thin REST client for the Osprey remote API. Every call targets a same-origin relative path
+// Thin REST client for the Swoop remote API. Every call targets a same-origin relative path
 // (`/api/v1/...`) -- the embedded web UI is always served by the same daemon it controls, so
 // there is never a reason to talk to any other origin.
 

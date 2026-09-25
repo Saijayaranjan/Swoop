@@ -1,0 +1,40 @@
+[package]
+name = "swoop-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Local + remote REST/WebSocket API with pairing, scopes and the embedded web UI"
+build = "build.rs"
+
+[dependencies]
+swoop-domain = { path = "../swoop-domain" }
+swoop-runtime = { path = "../swoop-runtime" }
+swoop-services = { path = "../swoop-services" }
+axum = { workspace = true }
+axum-server = { workspace = true }
+tower = { workspace = true }
+tower-http = { workspace = true }
+tokio = { workspace = true }
+tokio-util = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+dashmap = { workspace = true }
+rcgen = { workspace = true }
+hex = { workspace = true }
+sha2 = { workspace = true }
+rust-embed = { workspace = true }
+mime_guess = { workspace = true }
+http = { workspace = true }
+bytes = { workspace = true }
+url = { workspace = true }
+percent-encoding = { workspace = true }
+# Explicit `ring` provider: both aws-lc-rs and ring are compiled into rustls in this workspace,
+# so the process-default provider is ambiguous; we always build the ServerConfig with ring.
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12", "logging"] }
+
+[dev-dependencies]
+tokio-tungstenite = "0.26"
+tempfile = { workspace = true }
+tower = { workspace = true, features = ["util"] }

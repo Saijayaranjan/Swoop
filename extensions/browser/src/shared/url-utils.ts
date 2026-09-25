@@ -91,7 +91,7 @@ export interface InterceptDecision {
 }
 
 /**
- * Decide whether a browser download should be cancelled and handed to Osprey instead. Mirrors
+ * Decide whether a browser download should be cancelled and handed to Swoop instead. Mirrors
  * docs/api/extension.md: "when enabled and the item matches (extension list, min size when
  * known, not excluded domain / URL pattern)".
  */

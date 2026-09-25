@@ -1,8 +1,8 @@
 /**
- * Connection section: how the extension reaches Osprey.
- *   - This computer (default): the `osprey native-host` relay over Native Messaging
+ * Connection section: how the extension reaches Swoop.
+ *   - This computer (default): the `swoop native-host` relay over Native Messaging
  *     (docs/api/native-messaging.md) — no URL or token; set up from the app.
- *   - Another computer: a remote Osprey's TLS listener with a paired-device token
+ *   - Another computer: a remote Swoop's TLS listener with a paired-device token
  *     (docs/api/rest.md "Pairing"), paired here with a one-time code or a pasted token.
  */
 
@@ -41,7 +41,7 @@ function pairingError(err: unknown): string {
     case 'unreachable':
       return tr(
         'errUnreachable',
-        'Couldn’t reach that address. If Osprey uses its own certificate, open the address in a tab once and accept it.',
+        'Couldn’t reach that address. If Swoop uses its own certificate, open the address in a tab once and accept it.',
       );
     default:
       return err instanceof Error ? err.message : String(err);
@@ -69,18 +69,18 @@ function heroFor(status: ConnectionStatus | null, mode: Mode, remoteUrl: string)
     return {
       color: 'is-green',
       iconName: mode === 'remote' ? 'server' : 'laptop',
-      title: status.version ? tr('connectedToVersion', 'Connected to Osprey $1', status.version) : tr('statusConnectedShort', 'Connected'),
+      title: status.version ? tr('connectedToVersion', 'Connected to Swoop $1', status.version) : tr('statusConnectedShort', 'Connected'),
       sub: mode === 'remote' ? tr('connectedRemoteSub', 'Paired with $1', where) : tr('connectedNativeSub', 'Through the browser helper on this computer'),
     };
   }
   if (mode === 'remote') {
     return status.connected
-      ? { color: 'is-red', iconName: 'lock', title: tr('offlineRefusedTitle', 'Osprey refused this browser'), sub: tr('refusedSub', 'The device token was rejected. Pair again below.') }
-      : { color: 'is-red', iconName: 'server', title: tr('offlineRemoteTitle', 'Can’t reach your Osprey'), sub: where };
+      ? { color: 'is-red', iconName: 'lock', title: tr('offlineRefusedTitle', 'Swoop refused this browser'), sub: tr('refusedSub', 'The device token was rejected. Pair again below.') }
+      : { color: 'is-red', iconName: 'server', title: tr('offlineRemoteTitle', 'Can’t reach your Swoop'), sub: where };
   }
   return status.connected
-    ? { color: 'is-orange', iconName: 'power', title: tr('offlineNotRunningTitle', 'Osprey isn’t running'), sub: tr('notRunningSub', 'The browser helper is installed. Start Osprey to connect.') }
-    : { color: 'is-red', iconName: 'plug', title: tr('offlineNoHostTitle', 'Can’t reach Osprey'), sub: tr('noHostSub', 'The browser helper isn’t installed for this browser yet.') };
+    ? { color: 'is-orange', iconName: 'power', title: tr('offlineNotRunningTitle', 'Swoop isn’t running'), sub: tr('notRunningSub', 'The browser helper is installed. Start Swoop to connect.') }
+    : { color: 'is-red', iconName: 'plug', title: tr('offlineNoHostTitle', 'Can’t reach Swoop'), sub: tr('noHostSub', 'The browser helper isn’t installed for this browser yet.') };
 }
 
 export function connectionSection(onStatus: (status: ConnectionStatus | null) => void): SectionDef {
@@ -88,7 +88,7 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
     id: 'connection',
     icon: 'plug',
     title: () => tr('sectionConnection', 'Connection'),
-    subtitle: () => tr('sectionConnectionSub', 'How this browser reaches Osprey.'),
+    subtitle: () => tr('sectionConnectionSub', 'How this browser reaches Swoop.'),
     async render(ctx: SectionContext) {
       const { settings, rerender } = ctx;
       const stored = await browser.storage.local.get(REMOTE_TOKEN_KEY);
@@ -152,11 +152,11 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
 
       const out: HTMLElement[] = [
         hero,
-        ...group([controlRow(tr('connectTo', 'Connect to'), picker, tr('connectToHint', 'Osprey usually runs on this computer. Pick “Another computer” to send downloads to a paired Osprey elsewhere.'))]),
+        ...group([controlRow(tr('connectTo', 'Connect to'), picker, tr('connectToHint', 'Swoop usually runs on this computer. Pick “Another computer” to send downloads to a paired Swoop elsewhere.'))]),
       ];
 
       if (mode === 'native') {
-        const launch = textButton(tr('actionLaunchApp', 'Launch Osprey'), async () => {
+        const launch = textButton(tr('actionLaunchApp', 'Launch Swoop'), async () => {
           try {
             await launchApp();
             setTimeout(() => void test(), 2500);
@@ -168,14 +168,14 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
           ...group(
             [
               h('ol', { class: 'steps' }, [
-                h('li', { text: tr('stepInstallApp', 'Install Osprey and open it.') }),
-                h('li', { text: tr('stepInstallHelper', 'In Osprey, open Settings → Browser and choose Install for this browser.') }),
+                h('li', { text: tr('stepInstallApp', 'Install Swoop and open it.') }),
+                h('li', { text: tr('stepInstallHelper', 'In Swoop, open Settings → Browser and choose Install for this browser.') }),
                 h('li', { text: tr('stepTest', 'Come back here and choose Test connection.') }),
               ]),
-              valueRow(tr('launchRowLabel', 'Osprey isn’t open?'), launch, tr('launchRowHint', 'Starts the app on this computer (macOS).')),
+              valueRow(tr('launchRowLabel', 'Swoop isn’t open?'), launch, tr('launchRowHint', 'Starts the app on this computer (macOS).')),
             ],
             tr('groupSetUp', 'Set up'),
-            tr('groupSetUpDesc', 'The extension talks to Osprey through a small helper that the app installs. No address or password needed.'),
+            tr('groupSetUpDesc', 'The extension talks to Swoop through a small helper that the app installs. No address or password needed.'),
           ),
         );
         return out;
@@ -242,13 +242,13 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
         controlRow(
           tr('remoteAddress', 'Address'),
           h('div', { class: 'field-row' }, [urlInput]),
-          tr('remoteAddressHint', 'Shown in Osprey on that computer under Settings → Remote.'),
+          tr('remoteAddressHint', 'Shown in Swoop on that computer under Settings → Remote.'),
           urlId,
         ),
         h('div', { class: 'opt-row' }, [
           h('div', { class: 'opt-text' }, [
             h('span', { class: 'opt-label', text: tr('pairingCode', 'Pairing code') }),
-            h('span', { class: 'opt-hint', text: tr('pairingCodeHint', 'In Osprey there, choose Pair a device. Codes work once, for two minutes.') }),
+            h('span', { class: 'opt-hint', text: tr('pairingCodeHint', 'In Swoop there, choose Pair a device. Codes work once, for two minutes.') }),
             error,
           ]),
           h('div', { class: 'field-row', attrs: { style: 'width:auto' } }, [codeInput, pairBtn]),
@@ -263,7 +263,7 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
         }, 'btn danger');
         rows.unshift(valueRow(tr('pairedLabel', 'Paired'), forget, tr('pairedHint', 'A device token for this browser is saved. Forget it to unpair.')));
       }
-      out.push(...group(rows, tr('groupRemote', 'Remote Osprey')));
+      out.push(...group(rows, tr('groupRemote', 'Remote Swoop')));
       out.push(
         note(
           tr('remotePrivacyNote', 'Captured downloads — including the cookies needed to fetch them — are sent to that computer over HTTPS.'),

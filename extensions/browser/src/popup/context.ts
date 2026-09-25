@@ -24,13 +24,13 @@ export function showToast(message: string, kind: 'info' | 'error' = 'info'): voi
   }, 3200);
 }
 
-/** A friendly message for an error coming back from the background / Osprey. */
+/** A friendly message for an error coming back from the background / Swoop. */
 export function errorMessage(err: unknown): string {
   const kind = (err as { kind?: unknown }).kind;
   if (kind === 'unavailable' || kind === 'unreachable') {
-    return tr('toastNotRunning', 'Osprey isn’t running — start it and try again.');
+    return tr('toastNotRunning', 'Swoop isn’t running — start it and try again.');
   }
-  if (kind === 'unauthorized') return tr('toastUnauthorized', 'Osprey refused this browser. Pair it again in Settings.');
+  if (kind === 'unauthorized') return tr('toastUnauthorized', 'Swoop refused this browser. Pair it again in Settings.');
   if (err instanceof Error && err.message) return err.message;
   return tr('toastSomethingWrong', 'Something went wrong.');
 }

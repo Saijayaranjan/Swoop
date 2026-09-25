@@ -6,11 +6,11 @@
  */
 
 import browser from 'webextension-polyfill';
-import type { ExtensionSettings, NotificationPayload, OspreyEvent } from '../shared/types.ts';
+import type { ExtensionSettings, NotificationPayload, SwoopEvent } from '../shared/types.ts';
 import { loadSessionState } from './state.ts';
 
 function notificationId(taskId: string, suffix: string): string {
-  return `osprey-${suffix}-${taskId}`;
+  return `swoop-${suffix}-${taskId}`;
 }
 
 async function notify(id: string, title: string, message: string): Promise<void> {
@@ -23,7 +23,7 @@ async function notify(id: string, title: string, message: string): Promise<void>
 }
 
 export async function handleEventForNotifications(
-  event: OspreyEvent,
+  event: SwoopEvent,
   settings: ExtensionSettings,
 ): Promise<void> {
   if (event.type !== 'notification') return;
@@ -47,6 +47,6 @@ export async function handleEventForNotifications(
 }
 
 browser.notifications.onClicked?.addListener((id) => {
-  if (!id.startsWith('osprey-')) return;
+  if (!id.startsWith('swoop-')) return;
   browser.notifications.clear(id).catch(() => {});
 });
