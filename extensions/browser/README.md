@@ -51,10 +51,9 @@ npm run lint             # tsc --noEmit (strict)
 npm test                  # node:test, pure modules only
 ```
 
-`npm run build` also (re)generates `icons/*.png` when they are missing, from
-`scripts/generate-icons.mjs` — a small pure-Node PNG encoder (zlib deflate + hand-rolled CRC32, no
-image library) that rasterises the Swoop mark (the wing glyph on a blue tile, with supersampled
-anti-aliasing) at 16/32/48/128px. `npm run icons` regenerates them on demand. The popup and options
+The PNG icons in `icons/` (16/32/48/128px) are rendered together with the app icon by
+`scripts/render-icon.swift` at the repository root and committed; `icons/icon.svg` is the same mark
+as a vector. `npm run build` copies them and stops with an error if one is missing. The popup and options
 stylesheets are bundled by esbuild so they can `@import` the shared tokens.
 
 ## Loading it unpacked

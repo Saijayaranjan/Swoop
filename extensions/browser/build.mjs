@@ -15,7 +15,6 @@ import * as esbuild from 'esbuild';
 import { readFileSync, writeFileSync, mkdirSync, cpSync, existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execFileSync } from 'node:child_process';
 
 const ROOT = path.dirname(fileURLToPath(import.meta.url));
 const VALID_TARGETS = ['chrome', 'firefox', 'edge'];
@@ -26,15 +25,13 @@ const targets = args.filter((a) => VALID_TARGETS.includes(a));
 if (targets.length === 0) targets.push(...VALID_TARGETS);
 
 function ensureIcons() {
+  // The PNG icons are rendered with the app icon by scripts/render-icon.swift and committed.
   const iconsDir = path.join(ROOT, 'icons');
-  const need = ['icon16.png', 'icon32.png', 'icon48.png', 'icon128.png'].some(
+  const missing = ['icon16.png', 'icon32.png', 'icon48.png', 'icon128.png'].filter(
     (f) => !existsSync(path.join(iconsDir, f)),
   );
-  if (need) {
-    console.log('[icons] generating PNG icons...');
-    execFileSync(process.execPath, [path.join(ROOT, 'scripts', 'generate-icons.mjs')], {
-      stdio: 'inherit',
-    });
+  if (missing.length > 0) {
+    throw new Error(`[icons] missing ${missing.join(', ')} in ${iconsDir}`);
   }
 }
 

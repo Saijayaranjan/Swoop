@@ -1,4 +1,4 @@
-// Renders the DMG window background (original artwork): a pale sky wash, a wing mark, an install
+// Renders the DMG window background (original artwork): a pale sky wash, the Swoop mark, an install
 // hint and an arrow from the app to Applications. Writes <out>.png (1x) and <out>@2x.png.
 // Usage: swift scripts/render-dmg-background.swift <out-path-without-extension>
 import AppKit
@@ -74,16 +74,16 @@ func render(scale: CGFloat, to path: String) {
     ctx.fillPath()
     ctx.restoreGState()
 
-    // Wing mark.
+    // Swoop mark: the app icon's indigo tile with the diving-bird glyph.
     let tile = CGRect(x: width / 2 - 20, y: 34, width: 40, height: 40)
     ctx.saveGState()
-    ctx.setShadow(offset: CGSize(width: 0, height: 3), blur: 10, color: rgb(0x2F6BF0, 0.35))
+    ctx.setShadow(offset: CGSize(width: 0, height: 3), blur: 10, color: rgb(0x2E2A7E, 0.35))
     ctx.addPath(CGPath(roundedRect: tile, cornerWidth: 12, cornerHeight: 12, transform: nil))
     ctx.clip()
-    let tileGrad = CGGradient(colorsSpace: cs, colors: [rgb(0x409EFF), rgb(0x295CED)] as CFArray, locations: [0, 1])!
-    ctx.drawLinearGradient(tileGrad, start: CGPoint(x: tile.minX, y: tile.minY), end: CGPoint(x: tile.maxX, y: tile.maxY), options: [])
+    let tileGrad = CGGradient(colorsSpace: cs, colors: [rgb(0x3B3699), rgb(0x1F1C57)] as CFArray, locations: [0, 1])!
+    ctx.drawLinearGradient(tileGrad, start: CGPoint(x: tile.midX, y: tile.minY), end: CGPoint(x: tile.midX, y: tile.maxY), options: [])
     ctx.restoreGState()
-    drawWing(in: CGRect(x: tile.minX + 6, y: tile.minY + 11, width: 28, height: 18), ctx: ctx)
+    drawGlyph(in: tile.insetBy(dx: 6, dy: 6), ctx: ctx)
 
     // Text.
     NSGraphicsContext.saveGraphicsState()
@@ -107,30 +107,47 @@ func render(scale: CGFloat, to path: String) {
     try? rep.representation(using: .png, properties: [:])?.write(to: URL(fileURLWithPath: path))
 }
 
-/// The wing glyph used in the app's sidebar mark.
-func drawWing(in r: CGRect, ctx: CGContext) {
-    func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + x / 100 * r.width, y: r.minY + y / 64 * r.height) }
-    let right = CGMutablePath()
-    right.move(to: pt(50, 40))
-    right.addCurve(to: pt(71, 13), control1: pt(56, 30), control2: pt(61, 15))
-    right.addCurve(to: pt(99, 24), control1: pt(81, 11), control2: pt(92, 16))
-    right.addLine(to: pt(90, 26.5))
-    right.addLine(to: pt(94, 31))
-    right.addLine(to: pt(84, 30))
-    right.addLine(to: pt(87, 35))
-    right.addLine(to: pt(77, 32.5))
-    right.addCurve(to: pt(52, 52), control1: pt(67, 33), control2: pt(58, 42))
-    right.closeSubpath()
-    let all = CGMutablePath()
-    all.addPath(right)
-    all.addPath(right, transform: CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: 2 * r.midX, ty: 0))
-    all.move(to: pt(50, 34))
-    all.addCurve(to: pt(54, 50), control1: pt(53, 38), control2: pt(55, 45))
-    all.addLine(to: pt(50, 62))
-    all.addLine(to: pt(46, 50))
-    all.addCurve(to: pt(50, 34), control1: pt(45, 45), control2: pt(47, 38))
-    all.closeSubpath()
-    ctx.addPath(all)
+/// The Swoop glyph (the same path as the app's `SwoopGlyph`, on a 100×100 grid), filled white.
+let glyphPath = "M50 78.79C60.36 67.34 77.95 41.99 97.71 17.45C83.4 26.45 67.04 36.26 56.27 40.62C55.32 31.08 54.23 21.54 53.68 14.04C54.63 8.59 56.54 3.54 58.45 0Q53.54 1.64 50 6Q46.46 1.64 41.55 0C43.46 3.54 45.37 8.59 46.32 14.04C45.77 21.54 44.68 31.08 43.73 40.62C32.96 36.26 16.6 26.45 2.29 17.45C22.05 41.99 39.64 67.34 50 78.79ZM20.29 96.41C29.86 89.7 38.84 89.47 48.55 95.17C60.17 101.98 71.56 101.68 82.99 93.68C84.29 92.77 84.61 90.99 83.7 89.69C82.79 88.4 81.01 88.08 79.71 88.99C70.14 95.69 61.16 95.93 51.45 90.23C39.83 83.41 28.44 83.71 17.01 91.71C15.71 92.62 15.39 94.41 16.3 95.7C17.21 97 18.99 97.31 20.29 96.41Z"
+
+/// Draws `glyphPath` (absolute M/C/Q/Z commands only) scaled into `r`.
+func drawGlyph(in r: CGRect, ctx: CGContext) {
+    func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + x / 100 * r.width, y: r.minY + y / 100 * r.height) }
+    var tokens: [String] = []
+    var current = ""
+    for ch in glyphPath {
+        if "MCQZ".contains(ch) {
+            if !current.isEmpty { tokens.append(current) }
+            tokens.append(String(ch)); current = ""
+        } else if ch == " " || ch == "," {
+            if !current.isEmpty { tokens.append(current) }
+            current = ""
+        } else if ch == "-" && !current.isEmpty {
+            tokens.append(current); current = "-"
+        } else {
+            current.append(ch)
+        }
+    }
+    if !current.isEmpty { tokens.append(current) }
+    let path = CGMutablePath()
+    var i = 0
+    var command = "M"
+    func num() -> CGFloat { defer { i += 1 }; return CGFloat(Double(tokens[i]) ?? 0) }
+    while i < tokens.count {
+        if "MCQZ".contains(tokens[i]) { command = tokens[i]; i += 1 }
+        switch command {
+        case "M": path.move(to: pt(num(), num())); command = "L"
+        case "C":
+            let c1 = pt(num(), num()), c2 = pt(num(), num()), e = pt(num(), num())
+            path.addCurve(to: e, control1: c1, control2: c2)
+        case "Q":
+            let c = pt(num(), num()), e = pt(num(), num())
+            path.addQuadCurve(to: e, control: c)
+        case "Z": path.closeSubpath()
+        default: path.addLine(to: pt(num(), num()))
+        }
+    }
+    ctx.addPath(path)
     ctx.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
     ctx.fillPath()
 }

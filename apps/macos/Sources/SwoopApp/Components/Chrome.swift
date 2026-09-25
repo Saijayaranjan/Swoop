@@ -55,56 +55,25 @@ private struct CardSurface: ViewModifier {
 
 // MARK: - Brand mark
 
-/// Swoop's wing glyph: a pair of crooked wings with swept feather tips.
-struct WingGlyph: Shape {
-    func path(in r: CGRect) -> Path {
-        func pt(_ x: CGFloat, _ y: CGFloat) -> CGPoint { CGPoint(x: r.minX + x / 100 * r.width, y: r.minY + y / 64 * r.height) }
-        var right = Path()
-        right.move(to: pt(50, 40))
-        right.addCurve(to: pt(71, 13), control1: pt(56, 30), control2: pt(61, 15))
-        right.addCurve(to: pt(99, 24), control1: pt(81, 11), control2: pt(92, 16))
-        // Primary feathers along the trailing edge.
-        right.addLine(to: pt(90, 26.5))
-        right.addLine(to: pt(94, 31))
-        right.addLine(to: pt(84, 30))
-        right.addLine(to: pt(87, 35))
-        right.addLine(to: pt(77, 32.5))
-        right.addCurve(to: pt(52, 52), control1: pt(67, 33), control2: pt(58, 42))
-        right.closeSubpath()
-        var p = Path()
-        p.addPath(right)
-        p.addPath(right.applying(CGAffineTransform(a: -1, b: 0, c: 0, d: 1, tx: 2 * r.midX, ty: 0)))
-        // Body: a short tapered keel between the wings.
-        p.move(to: pt(50, 34))
-        p.addCurve(to: pt(54, 50), control1: pt(53, 38), control2: pt(55, 45))
-        p.addLine(to: pt(50, 62))
-        p.addLine(to: pt(46, 50))
-        p.addCurve(to: pt(50, 34), control1: pt(45, 45), control2: pt(47, 38))
-        p.closeSubpath()
-        return p
-    }
-}
-
-/// The app mark: the wing glyph on a luminous blue tile.
+/// The app mark: the diving-bird glyph (``SwoopGlyph``) on the app icon's indigo tile.
 struct SwoopMark: View {
     var size: CGFloat = 30
     var body: some View {
         RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
-            .fill(LinearGradient(colors: [Color(red: 0.25, green: 0.62, blue: 1.0), Color(red: 0.16, green: 0.36, blue: 0.93)],
-                                 startPoint: .topLeading, endPoint: .bottomTrailing))
+            .fill(LinearGradient(colors: [Color(red: 0.23, green: 0.21, blue: 0.60), Color(red: 0.12, green: 0.11, blue: 0.34)],
+                                 startPoint: .top, endPoint: .bottom))
             .overlay {
                 RoundedRectangle(cornerRadius: size * 0.3, style: .continuous)
-                    .strokeBorder(LinearGradient(colors: [.white.opacity(0.55), .white.opacity(0.05)], startPoint: .top, endPoint: .bottom), lineWidth: 0.8)
+                    .strokeBorder(LinearGradient(colors: [.white.opacity(0.45), .white.opacity(0.04)], startPoint: .top, endPoint: .bottom), lineWidth: 0.8)
             }
             .overlay {
-                WingGlyph()
+                SwoopGlyph()
                     .fill(.white)
-                    .frame(width: size * 0.74, height: size * 0.74 * 0.64)
-                    .offset(y: size * 0.02)
-                    .shadow(color: .black.opacity(0.18), radius: 1, y: 0.5)
+                    .frame(width: size * 0.7, height: size * 0.7)
+                    .shadow(color: .black.opacity(0.25), radius: 1, y: 0.5)
             }
             .frame(width: size, height: size)
-            .shadow(color: Color.blue.opacity(0.28), radius: size * 0.2, y: size * 0.08)
+            .shadow(color: Color(red: 0.18, green: 0.16, blue: 0.49).opacity(0.35), radius: size * 0.2, y: size * 0.08)
             .accessibilityHidden(true)
     }
 }

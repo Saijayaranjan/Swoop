@@ -53,9 +53,10 @@
   <script src="main.js" defer></script>
 </head>
 <body>
-  <!-- Shared SVG symbols: icons and the feather motif -->
+  <!-- Shared SVG symbols: icons, the Swoop glyph and the feather motif -->
   <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
     <defs>
+      <symbol id="swoop-glyph" viewBox="0 0 100 100"><path fill="currentColor" d="M50 78.79C60.36 67.34 77.95 41.99 97.71 17.45C83.4 26.45 67.04 36.26 56.27 40.62C55.32 31.08 54.23 21.54 53.68 14.04C54.63 8.59 56.54 3.54 58.45 0Q53.54 1.64 50 6Q46.46 1.64 41.55 0C43.46 3.54 45.37 8.59 46.32 14.04C45.77 21.54 44.68 31.08 43.73 40.62C32.96 36.26 16.6 26.45 2.29 17.45C22.05 41.99 39.64 67.34 50 78.79ZM20.29 96.41C29.86 89.7 38.84 89.47 48.55 95.17C60.17 101.98 71.56 101.68 82.99 93.68C84.29 92.77 84.61 90.99 83.7 89.69C82.79 88.4 81.01 88.08 79.71 88.99C70.14 95.69 61.16 95.93 51.45 90.23C39.83 83.41 28.44 83.71 17.01 91.71C15.71 92.62 15.39 94.41 16.3 95.7C17.21 97 18.99 97.31 20.29 96.41Z"/></symbol>
       <symbol id="feather" viewBox="0 0 120 350">
         <path style="fill:var(--feather-fill);stroke:var(--feather-line);stroke-width:1.2" d="M60 6C84 30 101 90 100 150C99 210 84 262 60 312C36 262 21 210 20 150C19 90 36 30 60 6Z"/>
         <path style="fill:none;stroke:var(--feather-line);stroke-width:1.1;stroke-linecap:round" d="M60 44Q68.5 41 76.5 24M60 44Q51.5 41 43.5 24M60 62Q72 59 83.3 42M60 62Q48 59 36.7 42M60 80Q75 77 89.1 60M60 80Q45 77 30.9 60M60 98Q77 95 93 78M60 98Q43 95 27 78M60 116Q78.5 113 95.9 96M60 116Q41.5 113 30.4 103M60 134Q79.5 131 97.8 114M60 134Q40.5 131 22.2 114M60 152Q80 149 92 139M60 152Q40 149 21.2 132M60 170Q80 167 98.8 150M60 170Q40 167 21.2 150M60 188Q79.5 185 97.8 168M60 188Q40.5 185 22.2 168M60 206Q78.5 203 95.9 186M60 206Q41.5 203 30.4 193M60 224Q76.5 221 92 204M60 224Q43.5 221 28 204M60 242Q74 239 82.4 229M60 242Q46 239 32.8 222M60 260Q71 257 81.3 240M60 260Q49 257 38.7 240M60 278Q67.5 275 74.5 258M60 278Q52.5 275 45.5 258M60 294Q64 291 67.8 274M60 294Q56 291 52.2 274M60 318Q52 316 46 306M60 318Q68 316 73 305"/>
@@ -97,7 +98,7 @@
   <header class="nav" id="top">
     <nav class="nav-bar" aria-label="Primary">
       <a class="brand" href="#top" aria-label="Swoop, back to top">
-        <img src="assets/favicon-64.png" alt="" width="28" height="28">
+        <span class="mark" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#swoop-glyph"/></svg></span>
         <span>Swoop</span>
       </a>
       <ul class="nav-links" id="nav-links">
@@ -716,7 +717,7 @@
   <footer class="footer">
     <div class="wrap footer-inner">
       <div class="footer-brand">
-        <img src="assets/favicon-64.png" alt="" width="32" height="32">
+        <span class="mark" aria-hidden="true"><svg viewBox="0 0 100 100"><use href="#swoop-glyph"/></svg></span>
         <div>
           <strong>Swoop</strong>
           <span>A download manager for macOS.</span>

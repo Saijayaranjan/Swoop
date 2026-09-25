@@ -93,10 +93,10 @@ button { cursor: pointer; }
   place-items: center;
   flex: none;
   border-radius: 30%;
-  background: linear-gradient(135deg, #409eff, #295ced);
-  box-shadow: inset 0 0 0 0.75px rgba(255, 255, 255, 0.35), 0 3px 8px rgba(41, 92, 237, 0.3);
+  background: linear-gradient(180deg, #3b3699, #1f1c57);
+  box-shadow: inset 0 0 0 0.75px rgba(255, 255, 255, 0.3), 0 3px 8px rgba(46, 42, 126, 0.32);
 }
-.mark svg { width: 74%; height: auto; margin-top: 4%; }
+.mark svg { width: 70%; height: auto; }
 
 .btn {
   display: inline-flex;

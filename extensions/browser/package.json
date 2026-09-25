@@ -9,7 +9,6 @@
     "build:chrome": "node build.mjs chrome",
     "build:firefox": "node build.mjs firefox",
     "build:edge": "node build.mjs edge",
-    "icons": "node scripts/generate-icons.mjs",
     "locales": "node scripts/build-locales.mjs",
     "watch": "node build.mjs chrome firefox edge --watch",
     "lint": "tsc --noEmit -p tsconfig.json",

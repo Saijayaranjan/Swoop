@@ -10,3 +10,4 @@
 .DS_Store
 /crates/swoop-ffi/generated
 /build
+/apps/macos/Resources/Swoop.iconset

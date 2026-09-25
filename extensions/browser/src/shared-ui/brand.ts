@@ -1,7 +1,7 @@
 /**
  * Swoop brand artwork, ported from the desktop app so the extension carries the same identity:
- *   - the wing glyph (a pair of crooked wings with swept feather tips over a tapered keel),
- *   - the mark (that glyph on a luminous blue tile),
+ *   - the Swoop glyph (a diving bird whose wings form a download arrow, over a water line),
+ *   - the mark (that glyph on the app icon's indigo tile),
  *   - the feather-fan illustration used for empty and offline states.
  * Everything is built with `createElementNS` from numbers — no markup parsing — so it is safe to
  * render inside the content script's shadow root as well as on extension pages.
@@ -27,31 +27,32 @@ function svgEl<K extends keyof SVGElementTagNameMap>(
 let idCounter = 0;
 function uid(prefix: string): string {
   idCounter += 1;
-  return `osp-${prefix}-${idCounter}`;
+  return `swp-${prefix}-${idCounter}`;
 }
 
-// --- Wing glyph ------------------------------------------------------------------------------
+// --- Swoop glyph -----------------------------------------------------------------------------
 
-/** The wing glyph on a 100×64 grid (the right wing, its mirror image, and the keel). */
-export const WING_PATH =
-  'M50 40C56 30 61 15 71 13C81 11 92 16 99 24L90 26.5L94 31L84 30L87 35L77 32.5C67 33 58 42 52 52Z' +
-  'M50 40C44 30 39 15 29 13C19 11 8 16 1 24L10 26.5L6 31L16 30L13 35L23 32.5C33 33 42 42 48 52Z' +
-  'M50 34C53 38 55 45 54 50L50 62L46 50C45 45 47 38 50 34Z';
+/**
+ * The Swoop glyph on a 100×100 grid: a bird in a vertical dive whose swept-back wings form a
+ * download arrow, above a water line. Rendered from the app icon by scripts/render-icon.swift.
+ */
+export const SWOOP_GLYPH_PATH =
+  'M50 78.79C60.36 67.34 77.95 41.99 97.71 17.45C83.4 26.45 67.04 36.26 56.27 40.62C55.32 31.08 54.23 21.54 53.68 14.04C54.63 8.59 56.54 3.54 58.45 0Q53.54 1.64 50 6Q46.46 1.64 41.55 0C43.46 3.54 45.37 8.59 46.32 14.04C45.77 21.54 44.68 31.08 43.73 40.62C32.96 36.26 16.6 26.45 2.29 17.45C22.05 41.99 39.64 67.34 50 78.79ZM20.29 96.41C29.86 89.7 38.84 89.47 48.55 95.17C60.17 101.98 71.56 101.68 82.99 93.68C84.29 92.77 84.61 90.99 83.7 89.69C82.79 88.4 81.01 88.08 79.71 88.99C70.14 95.69 61.16 95.93 51.45 90.23C39.83 83.41 28.44 83.71 17.01 91.71C15.71 92.62 15.39 94.41 16.3 95.7C17.21 97 18.99 97.31 20.29 96.41Z';
 
-export function wingGlyph(fill = '#ffffff'): SVGSVGElement {
-  return svgEl('svg', { viewBox: '0 0 100 64', 'aria-hidden': 'true', focusable: 'false' }, [
-    svgEl('path', { d: WING_PATH, fill }),
+export function swoopGlyph(fill = '#ffffff'): SVGSVGElement {
+  return svgEl('svg', { viewBox: '0 0 100 100', 'aria-hidden': 'true', focusable: 'false' }, [
+    svgEl('path', { d: SWOOP_GLYPH_PATH, fill }),
   ]);
 }
 
-/** The Swoop mark: the wing glyph on a blue tile. Decorative (`aria-hidden`). */
+/** The Swoop mark: the glyph on the app icon's indigo tile. Decorative (`aria-hidden`). */
 export function brandMark(size: number): HTMLSpanElement {
   const tile = document.createElement('span');
   tile.className = 'mark';
   tile.setAttribute('aria-hidden', 'true');
   tile.style.width = `${size}px`;
   tile.style.height = `${size}px`;
-  tile.appendChild(wingGlyph());
+  tile.appendChild(swoopGlyph());
   return tile;
 }
 
