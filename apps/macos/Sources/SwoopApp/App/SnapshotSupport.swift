@@ -139,8 +139,22 @@ enum SnapshotSupport {
         return fn(.null, 1 << 3, UInt32(window.windowNumber), (1 << 0) | (1 << 3))?.takeRetainedValue()
     }
 
+    /// True when every sampled pixel has the same colour (an empty compositor capture).
+    private static func isBlank(_ image: CGImage) -> Bool {
+        let w = 32, h = 32
+        var px = [UInt8](repeating: 0, count: w * h * 4)
+        guard let ctx = CGContext(data: &px, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                                  space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return false }
+        ctx.draw(image, in: CGRect(x: 0, y: 0, width: w, height: h))
+        let first = Array(px[0..<4])
+        return stride(from: 0, to: px.count, by: 4).allSatisfy { Array(px[$0..<$0 + 4]) == first }
+    }
+
     private static func save(_ window: NSWindow, to path: String) {
-        if let cg = compositedImage(window), cg.width > 10 {
+        // The compositor hands back a blank image while the screen is locked; fall back to
+        // drawing the view hierarchy then.
+        if let cg = compositedImage(window), cg.width > 10, !isBlank(cg) {
             let rep = NSBitmapImageRep(cgImage: cg)
             if let data = rep.representation(using: .png, properties: [:]) {
                 try? data.write(to: URL(fileURLWithPath: path))
