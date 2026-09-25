@@ -1,0 +1,751 @@
+<!doctype html>
+<!--
+  ┌──────────────────────────────────────────────────────────────────────┐
+  │ SITE CONFIG                                                          │
+  │ GitHub owner placeholder: OWNER                                      │
+  │ Change it in ONE place: CONFIG.owner at the top of main.js.          │
+  │ main.js rewrites every GitHub link (elements with data-gh) at load.  │
+  │ The og:url / og:image tags below also contain OWNER: update them     │
+  │ when you know the final address, since link previews don't run JS.   │
+  └──────────────────────────────────────────────────────────────────────┘
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Osprey — Download Manager for Mac</title>
+  <meta name="description" content="Osprey is a native macOS download manager with a Rust engine: adaptive segmented acceleration, torrents, queues and schedules, a site grabber, browser capture and remote control. No accounts, no telemetry.">
+  <meta name="theme-color" content="#eef4fc" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#0f0e22" media="(prefers-color-scheme: dark)">
+  <meta name="color-scheme" content="light dark">
+
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="Osprey">
+  <meta property="og:title" content="Osprey — Download Manager for Mac">
+  <meta property="og:description" content="A native Mac download manager with a Rust engine. Adaptive acceleration, torrents, schedules, browser capture and remote control, with no telemetry.">
+  <meta property="og:url" content="https://OWNER.github.io/osprey/">
+  <meta property="og:image" content="https://OWNER.github.io/osprey/assets/og.jpg">
+  <meta property="og:image:width" content="1280">
+  <meta property="og:image:height" content="800">
+  <meta property="og:image:alt" content="The Osprey dashboard in dark mode">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon-64.png">
+  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+
+  <script>
+    /* Apply a saved theme before first paint to avoid a flash. */
+    (function () {
+      var d = document.documentElement;
+      d.classList.add('js');
+      try {
+        var t = localStorage.getItem('osprey-theme');
+        if (t === 'light' || t === 'dark') d.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="stylesheet" href="styles.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <!-- Shared SVG symbols: icons and the feather motif -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+    <defs>
+      <symbol id="feather" viewBox="0 0 120 350">
+        <path style="fill:var(--feather-fill);stroke:var(--feather-line);stroke-width:1.2" d="M60 6C84 30 101 90 100 150C99 210 84 262 60 312C36 262 21 210 20 150C19 90 36 30 60 6Z"/>
+        <path style="fill:none;stroke:var(--feather-line);stroke-width:1.1;stroke-linecap:round" d="M60 44Q68.5 41 76.5 24M60 44Q51.5 41 43.5 24M60 62Q72 59 83.3 42M60 62Q48 59 36.7 42M60 80Q75 77 89.1 60M60 80Q45 77 30.9 60M60 98Q77 95 93 78M60 98Q43 95 27 78M60 116Q78.5 113 95.9 96M60 116Q41.5 113 30.4 103M60 134Q79.5 131 97.8 114M60 134Q40.5 131 22.2 114M60 152Q80 149 92 139M60 152Q40 149 21.2 132M60 170Q80 167 98.8 150M60 170Q40 167 21.2 150M60 188Q79.5 185 97.8 168M60 188Q40.5 185 22.2 168M60 206Q78.5 203 95.9 186M60 206Q41.5 203 30.4 193M60 224Q76.5 221 92 204M60 224Q43.5 221 28 204M60 242Q74 239 82.4 229M60 242Q46 239 32.8 222M60 260Q71 257 81.3 240M60 260Q49 257 38.7 240M60 278Q67.5 275 74.5 258M60 278Q52.5 275 45.5 258M60 294Q64 291 67.8 274M60 294Q56 291 52.2 274M60 318Q52 316 46 306M60 318Q68 316 73 305"/>
+        <path style="fill:none;stroke:var(--feather-quill);stroke-width:2;stroke-linecap:round" d="M60 346C60.8 250 60.4 120 60 8"/>
+      </symbol>
+
+      <symbol id="i-download" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 3.5v11.5m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></symbol>
+      <symbol id="i-github" viewBox="0 0 24 24"><path fill="currentColor" d="M12 1.8a10.2 10.2 0 0 0-3.23 19.88c.51.1.7-.22.7-.49v-1.7c-2.84.62-3.44-1.37-3.44-1.37-.46-1.18-1.13-1.5-1.13-1.5-.93-.63.07-.62.07-.62 1.02.07 1.56 1.05 1.56 1.05.91 1.56 2.39 1.11 2.97.85.09-.66.36-1.11.65-1.37-2.27-.26-4.65-1.13-4.65-5.04 0-1.11.4-2.02 1.05-2.74-.1-.26-.46-1.3.1-2.7 0 0 .86-.28 2.8 1.05a9.7 9.7 0 0 1 5.1 0c1.94-1.33 2.8-1.05 2.8-1.05.56 1.4.2 2.44.1 2.7.65.72 1.05 1.63 1.05 2.74 0 3.92-2.39 4.78-4.66 5.03.37.32.7.94.7 1.9v2.82c0 .27.18.6.7.49A10.2 10.2 0 0 0 12 1.8Z"/></symbol>
+      <symbol id="i-sun" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6l1.4 1.4M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/></g></symbol>
+      <symbol id="i-moon" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M20 14.6A8.3 8.3 0 0 1 9.4 4a8.3 8.3 0 1 0 10.6 10.6Z"/></symbol>
+      <symbol id="i-menu" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h16M4 12h16M4 17h16"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M6 6l12 12M18 6 6 18"/></symbol>
+      <symbol id="i-left" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 5l-7 7 7 7"/></symbol>
+      <symbol id="i-right" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></symbol>
+      <symbol id="i-check" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" d="M5 12.5l4.3 4.3L19 7.2"/></symbol>
+      <symbol id="i-copy" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="8.5" y="8.5" width="11" height="11" rx="2.5"/><path d="M15.5 8.5V6A1.5 1.5 0 0 0 14 4.5H6A1.5 1.5 0 0 0 4.5 6v8A1.5 1.5 0 0 0 6 15.5h2.5"/></g></symbol>
+      <symbol id="i-bolt" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M13.5 2.8 5 13.5h6l-1 7.7 8.5-10.7h-6l1-7.7Z"/></symbol>
+      <symbol id="i-layers" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3.5 21 8l-9 4.5L3 8l9-4.5Z"/><path d="m3 12 9 4.5 9-4.5M3 16l9 4.5 9-4.5"/></g></symbol>
+      <symbol id="i-queue" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3.5" y="4" width="17" height="16" rx="3.5"/><path d="M7.5 9h9M7.5 12.5h9M7.5 16h5"/></g></symbol>
+      <symbol id="i-gauge" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4.2 17.5a8.5 8.5 0 1 1 15.6 0"/><path d="m12 13.5 4-4.5"/><circle cx="12" cy="13.8" r="1.3" fill="currentColor"/></g></symbol>
+      <symbol id="i-branch" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="5.5" r="2"/><circle cx="18" cy="5.5" r="2"/><circle cx="12" cy="19" r="2"/><path d="M6 7.5c0 4 6 4 6 9.5M18 7.5c0 4-6 4-6 9.5"/></g></symbol>
+      <symbol id="i-globe" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="8.5"/><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.3 3.6 8.5s-1.1 5.9-3.6 8.5c-2.5-2.6-3.6-5.3-3.6-8.5s1.1-5.9 3.6-8.5Z"/></g></symbol>
+      <symbol id="i-browser" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="M3 9h18M6.5 6.8h.01M9 6.8h.01"/><path d="M12 12v4.5m0 0-2-2m2 2 2-2"/></g></symbol>
+      <symbol id="i-remote" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="7" y="3" width="10" height="18" rx="2.5"/><path d="M11 17.5h2"/><path d="M3.5 9a8 8 0 0 0 0 6M20.5 9a8 8 0 0 1 0 6"/></g></symbol>
+      <symbol id="i-restore" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.6-5.9"/><path d="M4 4.5V9h4.5"/><path d="M12 8v4.5l3 2"/></g></symbol>
+      <symbol id="i-shield" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 4.5 6v5.5c0 4.6 3.1 8 7.5 9.5 4.4-1.5 7.5-4.9 7.5-9.5V6L12 3Z"/><path stroke-linecap="round" d="m8.8 12 2.3 2.3 4.3-4.6"/></g></symbol>
+      <symbol id="i-key" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="8" cy="15" r="4"/><path d="m11 12 8.5-8.5M16 7l2.5 2.5M14 9l2 2"/></g></symbol>
+      <symbol id="i-folder" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" d="M3.5 7.5A2 2 0 0 1 5.5 5.5h4l2 2.2h7a2 2 0 0 1 2 2V17a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2V7.5Z"/></symbol>
+      <symbol id="i-lock" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="10.5" width="14" height="10" rx="2.5"/><path d="M8 10.5V8a4 4 0 0 1 8 0v2.5"/><path d="M12 14.5v2"/></g></symbol>
+      <symbol id="i-hand" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11V5.5a1.5 1.5 0 0 1 3 0V10m0-4.5V4a1.5 1.5 0 0 1 3 0v6m0-3.5a1.5 1.5 0 0 1 3 0V14a7 7 0 0 1-7 7h-.6a6 6 0 0 1-4.6-2.2L3.6 15a1.6 1.6 0 0 1 2.4-2.1L9 15.5"/></g></symbol>
+      <symbol id="i-route" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="6" cy="18" r="2.2"/><circle cx="18" cy="6" r="2.2"/><path d="M8.2 18H15a3.5 3.5 0 0 0 0-7H9a3.5 3.5 0 0 1 0-7h6.8"/></g></symbol>
+      <symbol id="i-terminal" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="15" rx="3"/><path d="m7.5 10 3 2.5-3 2.5M13 15.5h4"/></g></symbol>
+      <symbol id="i-expand" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" d="M14.5 4.5h5v5M9.5 19.5h-5v-5M19.5 4.5 13.5 10.5M4.5 19.5l6-6"/></symbol>
+    </defs>
+  </svg>
+
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="nav" id="top">
+    <nav class="nav-bar" aria-label="Primary">
+      <a class="brand" href="#top" aria-label="Osprey, back to top">
+        <img src="assets/favicon-64.png" alt="" width="28" height="28">
+        <span>Osprey</span>
+      </a>
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#features">Features</a></li>
+        <li><a href="#tour">Tour</a></li>
+        <li><a href="#extension">Extension</a></li>
+        <li><a href="#remote">Remote</a></li>
+        <li><a href="#security">Privacy</a></li>
+        <li><a href="#faq">FAQ</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="icon-btn theme-toggle" type="button" aria-label="Switch to dark theme" title="Switch theme">
+          <svg class="ic ic-moon" aria-hidden="true"><use href="#i-moon"/></svg>
+          <svg class="ic ic-sun" aria-hidden="true"><use href="#i-sun"/></svg>
+        </button>
+        <a class="btn btn-primary btn-sm" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
+          <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download</span>
+        </a>
+        <button class="icon-btn menu-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-links">
+          <svg class="ic ic-open" aria-hidden="true"><use href="#i-menu"/></svg>
+          <svg class="ic ic-shut" aria-hidden="true"><use href="#i-close"/></svg>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <main id="main">
+    <!-- ═══════════════ HERO ═══════════════ -->
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wing" aria-hidden="true">
+        <svg class="wing-l" viewBox="0 0 600 420"><g transform="translate(560 400)">
+          <use href="#feather" width="60" height="175" x="-30" y="-175" transform="rotate(-88)"/>
+          <use href="#feather" width="68" height="200" x="-34" y="-200" transform="rotate(-76)"/>
+          <use href="#feather" width="76" height="225" x="-38" y="-225" transform="rotate(-64)"/>
+          <use href="#feather" width="84" height="250" x="-42" y="-250" transform="rotate(-52)"/>
+          <use href="#feather" width="92" height="272" x="-46" y="-272" transform="rotate(-40)"/>
+          <use href="#feather" width="98" height="290" x="-49" y="-290" transform="rotate(-28)"/>
+          <use href="#feather" width="100" height="300" x="-50" y="-300" transform="rotate(-16)"/>
+        </g></svg>
+        <svg class="wing-r" viewBox="0 0 600 420"><g transform="translate(40 400) scale(-1 1)">
+          <use href="#feather" width="60" height="175" x="-30" y="-175" transform="rotate(-88)"/>
+          <use href="#feather" width="68" height="200" x="-34" y="-200" transform="rotate(-76)"/>
+          <use href="#feather" width="76" height="225" x="-38" y="-225" transform="rotate(-64)"/>
+          <use href="#feather" width="84" height="250" x="-42" y="-250" transform="rotate(-52)"/>
+          <use href="#feather" width="92" height="272" x="-46" y="-272" transform="rotate(-40)"/>
+          <use href="#feather" width="98" height="290" x="-49" y="-290" transform="rotate(-28)"/>
+          <use href="#feather" width="100" height="300" x="-50" y="-300" transform="rotate(-16)"/>
+        </g></svg>
+      </div>
+
+      <div class="wrap hero-copy">
+        <img class="hero-icon" src="assets/icon-512.webp" alt="Osprey app icon" width="512" height="512">
+        <p class="label hero-label"><span class="dot" aria-hidden="true"></span>Version 0.1.0 for macOS</p>
+        <h1 id="hero-title">Downloads,<br><span class="accent-text">on the wing.</span></h1>
+        <p class="lede">Osprey is a native Mac download manager with a Rust engine underneath. It splits files into adaptive segments, handles torrents, streams and schedules, and keeps every byte of your data on your Mac.</p>
+        <div class="cta-row">
+          <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
+            <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg>
+            <span>Download for Mac</span>
+          </a>
+          <a class="btn btn-glass btn-lg" data-gh="repo" href="https://github.com/OWNER/osprey">
+            <svg class="ic" aria-hidden="true"><use href="#i-github"/></svg>
+            <span>View on GitHub</span>
+          </a>
+        </div>
+        <p class="fine">v0.1.0 · Universal: Apple silicon and Intel · macOS 14 Sonoma or later</p>
+      </div>
+
+      <div class="wrap hero-stage">
+        <div class="window-glow" aria-hidden="true"></div>
+        <figure class="window hero-window">
+          <picture>
+            <source srcset="assets/screens/dashboard-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+            <img src="assets/screens/dashboard-light.webp" width="1280" height="800" fetchpriority="high" decoding="async"
+                 alt="The Osprey dashboard: live download and upload throughput at 42.3 MB/s, speed mode set to Unlimited, active, queued and completed counts, a twelve-week activity grid and recently finished files.">
+          </picture>
+        </figure>
+      </div>
+
+      <ul class="wrap facts" aria-label="At a glance">
+        <li><strong>SwiftUI</strong><span>Native, with Liquid Glass</span></li>
+        <li><strong>Rust</strong><span>Engine, CLI and server</span></li>
+        <li><strong>Zero</strong><span>Accounts or telemetry</span></li>
+        <li><strong>Universal</strong><span>Apple silicon and Intel</span></li>
+      </ul>
+    </section>
+
+    <!-- ═══════════════ FEATURES ═══════════════ -->
+    <section class="section" id="features" aria-labelledby="features-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="label">Features</p>
+          <h2 id="features-title">Everything a serious download needs. Nothing it doesn’t.</h2>
+        </header>
+
+        <div class="bento">
+          <article class="card card-wide reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></div>
+            <h3>Adaptive segmented acceleration</h3>
+            <p>Each file is split into segments that steal work from one another. Osprey keeps an extra connection only when it earns at least a 15% gain, backs off the moment a server answers 429, 503 or Retry-After, and splits slow tails at the end so the last few percent don’t crawl.</p>
+            <div class="segbar" aria-hidden="true">
+              <div class="seg"><i style="--d:2.6s"></i></div>
+              <div class="seg"><i style="--d:3.4s"></i></div>
+              <div class="seg"><i style="--d:2.9s"></i></div>
+              <div class="seg"><i style="--d:4.1s"></i></div>
+              <div class="seg"><i style="--d:3.1s"></i></div>
+              <div class="seg"><i style="--d:3.8s"></i></div>
+              <div class="seg"><i style="--d:2.7s"></i></div>
+              <div class="seg"><i style="--d:3.5s"></i></div>
+            </div>
+            <p class="segbar-meta" aria-hidden="true"><span>8 connections</span><span>work-stealing</span></p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-layers"/></svg></div>
+            <h3>Every common source</h3>
+            <p>HTTP and HTTPS with resume and mirrors, FTP and FTPS, BitTorrent and magnet links, Metalink, and HLS streams without DRM.</p>
+            <ul class="chips" aria-label="Supported sources">
+              <li>HTTP(S)</li><li>FTP(S)</li><li>BitTorrent</li><li>Magnet</li><li>Metalink</li><li>HLS</li>
+            </ul>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-queue"/></svg></div>
+            <h3>Queues and schedules</h3>
+            <p>Queues with their own folder, concurrency and order. Schedule windows for nights and weekends, optionally only on power or unmetered Wi‑Fi.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-gauge"/></svg></div>
+            <h3>Bandwidth modes</h3>
+            <p>Limits apply globally, per queue and per download, and change live.</p>
+            <ul class="modes" aria-label="Speed modes">
+              <li class="on"><strong>Unlimited</strong><span>Everything the connection has</span></li>
+              <li><strong>Balanced</strong><span>Leaves headroom for other apps</span></li>
+              <li><strong>Quiet</strong><span>Stays out of the way</span></li>
+            </ul>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-branch"/></svg></div>
+            <h3>Rules and automation</h3>
+            <p>Rules pick the category, folder, queue and tags as a download is added. When it finishes, move it, tag it in Finder, notify you or call a webhook.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-globe"/></svg></div>
+            <h3>Site grabber</h3>
+            <p>Crawl a page and the pages it links to, within the depth and scope you set, and pick the files worth keeping. It respects robots.txt.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-browser"/></svg></div>
+            <h3>Browser capture</h3>
+            <p>An extension for Chrome, Edge and Firefox hands matching downloads to Osprey, adds “Download with Osprey” menus and spots media on the page.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-remote"/></svg></div>
+            <h3>Remote control</h3>
+            <p>Pair a phone or another computer with a one-time code, then add and manage downloads from the built-in web app over TLS.</p>
+          </article>
+
+          <article class="card reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-restore"/></svg></div>
+            <h3>Crash recovery</h3>
+            <p>Progress is checkpointed only after data is safely on disk. After a crash or restart, Osprey checks each download against what’s on disk and picks up where it left off.</p>
+          </article>
+
+          <article class="card card-wide card-privacy reveal">
+            <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg></div>
+            <div class="privacy-row">
+              <div>
+                <h3>Private by design</h3>
+                <p>No accounts, no analytics, no telemetry. Osprey talks to the sites you download from and the devices you pair, and nothing else. Passwords and tokens live in your Keychain.</p>
+              </div>
+              <p class="zero" aria-label="Zero bytes of telemetry"><span>0</span><small>bytes of telemetry</small></p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ TOUR ═══════════════ -->
+    <section class="section tour" id="tour" aria-labelledby="tour-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="label">A closer look</p>
+          <h2 id="tour-title">Designed like it was always part of your Mac.</h2>
+          <p class="lede">Every screen follows the system: light and dark, SF typography, translucent glass and a menu bar extra.</p>
+        </header>
+
+        <article class="dive reveal">
+          <div class="dive-copy">
+            <p class="label">Dashboard</p>
+            <h3>Your whole network, at a glance.</h3>
+            <p>Live download and upload throughput, the current speed mode, what’s active, queued and done today, and twelve weeks of activity, in one calm view.</p>
+            <ul class="ticks">
+              <li>Switch between Unlimited, Balanced and Quiet in one click</li>
+              <li>Recently finished files are a click away from Finder</li>
+              <li>A menu bar extra for speed, modes and paste-to-download</li>
+            </ul>
+          </div>
+          <div class="dive-media">
+            <figure class="window">
+              <picture>
+                <source srcset="assets/screens/dashboard-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/dashboard-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Osprey dashboard with throughput graph, speed mode picker, task counts and activity history.">
+              </picture>
+            </figure>
+            <figure class="window float float-menubar">
+              <picture>
+                <source srcset="assets/screens/menubar-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/menubar-light.webp" width="350" height="572" loading="lazy" decoding="async" alt="The Osprey menu bar extra showing current speed, active and queued counts, speed modes and a paste-a-link field.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+
+        <article class="dive dive-flip reveal">
+          <div class="dive-copy">
+            <p class="label">Downloads and Inspector</p>
+            <h3>Every transfer, fully in view.</h3>
+            <p>Filter by state, then open the inspector for speed, ETA, connections, source and destination. When something fails, Osprey says why and retries without throwing away what it already has.</p>
+            <ul class="ticks">
+              <li>Resumes after a restart, and checks the server’s file hasn’t changed first</li>
+              <li>Verifies checksums: MD5, SHA‑1, SHA‑256, SHA‑512 or BLAKE3</li>
+              <li>Paste links, a magnet link, or a .torrent or .metalink file to begin</li>
+            </ul>
+          </div>
+          <div class="dive-media">
+            <figure class="window">
+              <picture>
+                <source srcset="assets/screens/inspector-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/inspector-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Downloads list with filter chips, and the inspector open on a download at 62% showing speed, ETA, size, connections, source and destination.">
+              </picture>
+            </figure>
+            <figure class="window float float-add">
+              <picture>
+                <source srcset="assets/screens/add-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/add-light.webp" width="660" height="720" loading="lazy" decoding="async" alt="The Add Download sheet with a field for links, destination folder, queue, category and start options.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+
+        <article class="dive reveal">
+          <div class="dive-copy">
+            <p class="label">Torrents</p>
+            <h3>Torrents, without the clutter.</h3>
+            <p>Open a .torrent file or a magnet link and choose which files you want. Osprey handles the swarm and shows you peers, trackers and the piece map when you ask.</p>
+            <ul class="ticks">
+              <li>Stop seeding at a ratio or after a set time</li>
+              <li>DHT and tracker support, with private torrents kept private</li>
+              <li>Seeding never takes a download slot</li>
+            </ul>
+          </div>
+          <div class="dive-media">
+            <figure class="window">
+              <picture>
+                <source srcset="assets/screens/torrents-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/torrents-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Torrents view with one torrent downloading at 81%, 21.3 MB/s.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+
+        <article class="dive dive-flip reveal">
+          <div class="dive-copy">
+            <p class="label">Scheduler</p>
+            <h3>Let the night shift do the heavy lifting.</h3>
+            <p>Create download windows for nights, weekends and quiet hours, then attach them to a queue or to individual downloads. Actions can run when a window opens or closes.</p>
+            <ul class="ticks">
+              <li>Only run on power or on unmetered Wi‑Fi, if you like</li>
+              <li>Starting a download by hand always overrides its schedule</li>
+            </ul>
+          </div>
+          <div class="dive-media">
+            <figure class="window">
+              <picture>
+                <source srcset="assets/screens/scheduled-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/scheduled-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Scheduled view, inviting you to create a schedule and attach it to a queue or to individual downloads.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+
+        <article class="dive reveal">
+          <div class="dive-copy">
+            <p class="label">Site Grabber</p>
+            <h3>Point it at a page. Keep what matters.</h3>
+            <p>Osprey follows links as deep as you allow, gathers every downloadable file it finds, and lets you pick what to keep before anything is downloaded.</p>
+            <ul class="ticks">
+              <li>Link depth, same-site scope, page limits and parallel requests</li>
+              <li>Respects robots.txt and paces its requests to each host</li>
+              <li>Checks each file’s size and type up front</li>
+            </ul>
+          </div>
+          <div class="dive-media">
+            <figure class="window">
+              <picture>
+                <source srcset="assets/screens/grabber-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/grabber-light.webp" width="1280" height="800" loading="lazy" decoding="async" alt="The Site Grabber with crawl settings: start address, link depth, follow links on the same site, max pages, parallel requests and robots.txt.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+
+        <article class="dive dive-flip dive-settings reveal">
+          <div class="dive-copy">
+            <p class="label">Settings</p>
+            <h3>Make it yours, down to the folder.</h3>
+            <p>Sort files by type into their own folders, set speed modes and how much runs at once, and decide which devices can reach Osprey. Every option lives in one familiar window.</p>
+            <div class="seg-control" role="tablist" aria-label="Settings panes">
+              <button role="tab" type="button" id="tab-general" aria-controls="pane-settings" aria-selected="true" data-shot="settings-general" data-alt="Settings, General pane: open at login, show in the menu bar, keep the Mac awake while downloading, theme and language.">General</button>
+              <button role="tab" type="button" id="tab-categories" aria-controls="pane-settings" aria-selected="false" tabindex="-1" data-shot="settings-categories" data-alt="Settings, Categories pane: Documents, Images, Videos, Audio, Archives, Software, Torrents and Other, each with matching extensions and a folder.">Categories</button>
+              <button role="tab" type="button" id="tab-bandwidth" aria-controls="pane-settings" aria-selected="false" tabindex="-1" data-shot="settings-bandwidth" data-alt="Settings, Bandwidth pane: speed mode (Unlimited, Balanced, Quiet, Custom), custom limits and concurrency.">Bandwidth</button>
+              <button role="tab" type="button" id="tab-remote" aria-controls="pane-settings" aria-selected="false" tabindex="-1" data-shot="settings-remote" data-alt="Settings, Remote pane: allow remote control, listener address and port, require TLS, session expiry and lockout after failed attempts.">Remote</button>
+            </div>
+          </div>
+          <div class="dive-media">
+            <figure class="window settings-window" id="pane-settings" role="tabpanel" aria-labelledby="tab-general">
+              <picture>
+                <source srcset="assets/screens/settings-general-dark.webp" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/screens/settings-general-light.webp" width="1000" height="728" loading="lazy" decoding="async" alt="Settings, General pane: open at login, show in the menu bar, keep the Mac awake while downloading, theme and language.">
+              </picture>
+            </figure>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ═══════════════ EXTENSION ═══════════════ -->
+    <section class="section" id="extension" aria-labelledby="ext-title">
+      <div class="wrap split">
+        <div class="split-copy reveal">
+          <p class="label">Browser extension</p>
+          <h2 id="ext-title">Click a link. Osprey takes it from there.</h2>
+          <p class="lede">One extension for Chrome, Edge and Firefox passes downloads straight to Osprey, with the cookies and referrer the site expects.</p>
+          <ul class="browsers" aria-label="Supported browsers">
+            <li>Chrome</li><li>Edge</li><li>Firefox</li>
+          </ul>
+          <ul class="ticks">
+            <li>Takes over downloads that match your file types, size and site rules</li>
+            <li>“Download with Osprey” for links, images, media, selections, or every link on a page</li>
+            <li>Detects video, audio and HLS streams on the page and flags DRM streams it can’t save</li>
+            <li>Press <kbd>⌥</kbd><kbd>⇧</kbd><kbd>D</kbd> to send the current page</li>
+            <li>Talks only to Osprey on your Mac and never sees its access token</li>
+          </ul>
+          <p class="note">Store listings are on the way. Until then, build the extension from the repository and load it unpacked; the <a data-gh="tree/main/extensions/browser" href="https://github.com/OWNER/osprey/tree/main/extensions/browser">setup guide</a> covers each browser.</p>
+        </div>
+        <div class="split-media reveal">
+          <div class="ext-stage">
+            <figure class="ext-shot" data-optional>
+              <picture>
+                <source srcset="assets/extension/popup-dark.png" media="(prefers-color-scheme: dark)" data-dark>
+                <img src="assets/extension/popup-light.png" loading="lazy" decoding="async" alt="The Osprey browser extension popup, listing detected media and links on the page with download buttons." onerror="this.closest('[data-optional]').hidden=true;this.closest('.ext-stage').classList.add('no-shot')">
+              </picture>
+            </figure>
+            <div class="ext-fallback" aria-hidden="true">
+              <div class="ext-card">
+                <div class="ext-card-head"><img src="assets/favicon-64.png" alt="" width="22" height="22"><span>Osprey</span><em>Connected</em></div>
+                <p class="ext-sub">Detected on this page</p>
+                <div class="ext-row"><span class="ext-type">HLS</span><span class="ext-name">keynote-1080p.m3u8</span><span class="ext-go"><svg class="ic"><use href="#i-download"/></svg></span></div>
+                <div class="ext-row"><span class="ext-type">MP4</span><span class="ext-name">trailer.mp4 · 84 MB</span><span class="ext-go"><svg class="ic"><use href="#i-download"/></svg></span></div>
+                <div class="ext-row"><span class="ext-type">ZIP</span><span class="ext-name">press-kit.zip · 212 MB</span><span class="ext-go"><svg class="ic"><use href="#i-download"/></svg></span></div>
+                <div class="ext-row muted"><span class="ext-type">DRM</span><span class="ext-name">Protected stream</span><span class="ext-tag">Can’t save</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ REMOTE & HEADLESS ═══════════════ -->
+    <section class="section" id="remote" aria-labelledby="remote-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="label">Remote and headless</p>
+          <h2 id="remote-title">Run it anywhere. Drive it from everywhere.</h2>
+          <p class="lede">The engine behind the app also runs on its own, on a Linux box, a NAS or in Docker, with the same CLI, API and web app.</p>
+        </header>
+
+        <div class="remote-grid">
+          <div class="remote-cards">
+            <article class="card mini reveal">
+              <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-key"/></svg></div>
+              <div>
+                <h3>Pair in seconds</h3>
+                <p>Osprey shows a one-time code and a QR code carrying its certificate fingerprint. Codes expire after two minutes and work once.</p>
+                <p class="pair-code" aria-label="Example pairing code ABCD-EFGH"><span>ABCD</span><span>EFGH</span></p>
+              </div>
+            </article>
+            <article class="card mini reveal">
+              <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-remote"/></svg></div>
+              <div>
+                <h3>A web app built in</h3>
+                <p>Open the engine’s address in any browser for a light, fast remote UI. Each device gets its own token and permissions: read, add, control or admin.</p>
+              </div>
+            </article>
+            <article class="card mini reveal">
+              <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-terminal"/></svg></div>
+              <div>
+                <h3>A proper CLI</h3>
+                <p>Add, list, pause, watch, change modes and export history. JSON output and documented exit codes make it easy to script.</p>
+              </div>
+            </article>
+          </div>
+
+          <div class="term reveal" data-term>
+            <div class="term-bar">
+              <span class="lights" aria-hidden="true"><i></i><i></i><i></i></span>
+              <div class="term-tabs" role="tablist" aria-label="Examples">
+                <button role="tab" type="button" id="tt-cli" aria-controls="tp-cli" aria-selected="true">CLI</button>
+                <button role="tab" type="button" id="tt-server" aria-controls="tp-server" aria-selected="false" tabindex="-1">Headless</button>
+                <button role="tab" type="button" id="tt-docker" aria-controls="tp-docker" aria-selected="false" tabindex="-1">Docker</button>
+              </div>
+              <button class="copy-btn" type="button" aria-label="Copy commands" data-label="Copy commands">
+                <svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span class="copy-label" aria-live="polite">Copy</span>
+              </button>
+            </div>
+
+            <div class="term-pane" role="tabpanel" id="tp-cli" aria-labelledby="tt-cli" tabindex="0">
+<pre><code><span class="c"># Add a file with eight connections</span>
+<span class="p">osprey add https://example.com/file.zip --dir ~/Downloads --connections 8</span>
+
+<span class="c"># Add a magnet link without starting it</span>
+<span class="p">osprey add 'magnet:?xt=urn:btih:…' --paused</span>
+
+<span class="c"># Watch progress live, then ease off the network</span>
+<span class="p">osprey watch</span>
+<span class="p">osprey mode balanced</span>
+
+<span class="c"># Print a pairing code and QR code for a new device</span>
+<span class="p">osprey pair</span></code></pre>
+            </div>
+
+            <div class="term-pane" role="tabpanel" id="tp-server" aria-labelledby="tt-server" tabindex="0" hidden>
+<pre><code><span class="c"># Run the full engine with no app, plus the TLS remote listener</span>
+<span class="p">osprey server --remote 0.0.0.0:41780 --download-dir ~/Downloads</span>
+
+<span class="c"># From another shell on the same machine</span>
+<span class="p">osprey status</span>
+<span class="p">osprey list --json</span>
+
+<span class="c"># From a paired workstation</span>
+<span class="p">osprey --url https://nas.local:41780 --token "$OSPREY_TOKEN" list</span></code></pre>
+            </div>
+
+            <div class="term-pane" role="tabpanel" id="tp-docker" aria-labelledby="tt-docker" tabindex="0" hidden>
+<pre><code><span class="c"># docker/compose.yaml (excerpt)</span>
+<span class="k">services:</span>
+  <span class="k">osprey:</span>
+    <span class="k">build:</span>
+      <span class="k">context:</span> ..
+      <span class="k">dockerfile:</span> Dockerfile
+    <span class="k">container_name:</span> osprey
+    <span class="k">restart:</span> unless-stopped
+    <span class="k">ports:</span>
+      - <span class="s">"41780:41780"</span>
+    <span class="k">volumes:</span>
+      - osprey-data:/data
+      - osprey-downloads:/downloads
+    <span class="k">environment:</span>
+      <span class="k">OSPREY_DATA_DIR:</span> /data
+<span class="k">volumes:</span>
+  <span class="k">osprey-data:</span>
+  <span class="k">osprey-downloads:</span></code></pre>
+              <div class="term-foot">
+                <code><span class="p">docker compose -f docker/compose.yaml up -d --build</span></code>
+                <button class="copy-btn" type="button" aria-label="Copy command" data-label="Copy command">
+                  <svg class="ic" aria-hidden="true"><use href="#i-copy"/></svg><span class="copy-label" aria-live="polite">Copy</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p class="note center reveal">The Docker image is built from source; there’s no published image yet. It runs as a non-root user and serves the remote API and web app on port 41780.</p>
+      </div>
+    </section>
+
+    <!-- ═══════════════ SECURITY ═══════════════ -->
+    <section class="section security" id="security" aria-labelledby="sec-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="label">Security and privacy</p>
+          <h2 id="sec-title">Private by default. Careful by design.</h2>
+          <p class="lede">A download manager handles untrusted files, hostile servers and your passwords. Here’s what Osprey guarantees in code.</p>
+        </header>
+        <div class="sec-grid">
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-shield"/></svg>
+            <h3>Local-first, no telemetry</h3>
+            <p>No accounts and no analytics. Nothing leaves your Mac except requests to the sources you download from and, if you choose, to devices you pair.</p>
+          </article>
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-lock"/></svg>
+            <h3>Secrets stay in the Keychain</h3>
+            <p>Site logins and tokens are stored in the macOS Keychain. The database holds only names and token hashes, and every log line is redacted.</p>
+          </article>
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-folder"/></svg>
+            <h3>Fenced file writes</h3>
+            <p>Server-supplied names are sanitised and path tricks refused. Folders like ~/.ssh and LaunchAgents are off-limits, and finished files are quarantined by macOS.</p>
+          </article>
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-remote"/></svg>
+            <h3>Remote is off until you turn it on</h3>
+            <p>When enabled, connections use TLS with a certificate unique to your Mac. Device tokens are scoped, hashed, expiring and revocable, and failed pairing attempts lock out.</p>
+          </article>
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-hand"/></svg>
+            <h3>Code runs only with your consent</h3>
+            <p>Automations that run commands, shell or AppleScript need approval given in the Mac app. Remote devices and imported settings can’t grant it.</p>
+          </article>
+          <article class="sec reveal">
+            <svg class="ic" aria-hidden="true"><use href="#i-route"/></svg>
+            <h3>Safe on hostile networks</h3>
+            <p>A public site can’t redirect Osprey to a local or private address. TLS 1.2 is the minimum, and certificate exceptions are opt-in, per host.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ GALLERY ═══════════════ -->
+    <section class="section" id="gallery" aria-labelledby="gal-title">
+      <div class="wrap">
+        <header class="section-head reveal">
+          <p class="label">Gallery</p>
+          <h2 id="gal-title">Every screen, in light and dark.</h2>
+          <p class="lede">Select a screenshot to view it full size. Use the arrow keys to move between them.</p>
+        </header>
+        <ul class="gallery" id="gallery-grid"></ul>
+      </div>
+    </section>
+
+    <!-- ═══════════════ FAQ ═══════════════ -->
+    <section class="section" id="faq" aria-labelledby="faq-title">
+      <div class="wrap narrow">
+        <header class="section-head reveal">
+          <p class="label">FAQ</p>
+          <h2 id="faq-title">Good questions.</h2>
+        </header>
+        <div class="faq reveal">
+          <details>
+            <summary>What do I need to run Osprey?</summary>
+            <div><p>A Mac running macOS 14 Sonoma or later. The app is a universal build, so it runs natively on Apple silicon and Intel Macs.</p></div>
+          </details>
+          <details>
+            <summary>macOS says it “cannot verify the developer”. Is that expected?</summary>
+            <div>
+              <p>Yes. Version 0.1.0 is ad-hoc signed and not yet notarised by Apple, so Gatekeeper blocks it the first time. To open it:</p>
+              <ol>
+                <li>Drag Osprey to your Applications folder.</li>
+                <li>Control-click (or right-click) Osprey and choose <strong>Open</strong>.</li>
+                <li>Choose <strong>Open</strong> again in the dialog. macOS remembers your choice.</li>
+              </ol>
+              <p>If you prefer Terminal, <code>xattr -dr com.apple.quarantine /Applications/Osprey.app</code> does the same thing. Because each ad-hoc build has a new identity, macOS may ask for Keychain or automation permissions again after you update.</p>
+            </div>
+          </details>
+          <details>
+            <summary>Does Osprey collect any data?</summary>
+            <div><p>No. There are no accounts, analytics or telemetry. Osprey only connects to the addresses you ask it to download from, and to devices you pair yourself.</p></div>
+          </details>
+          <details>
+            <summary>Which browsers does the extension support?</summary>
+            <div><p>Chrome, Edge and Firefox. It isn’t in the browser stores yet, so for now you build it from the repository and load it unpacked. There’s no Safari version.</p></div>
+          </details>
+          <details>
+            <summary>Can I run it without a Mac?</summary>
+            <div><p>The Mac app needs macOS, but the engine, CLI and web app run headless on Linux or in Docker with <code>osprey server</code>. Pair your phone or laptop to control it remotely.</p></div>
+          </details>
+          <details>
+            <summary>Can it download protected streaming video?</summary>
+            <div><p>No. Osprey downloads HLS streams without DRM and refuses encrypted formats such as FairPlay and Widevine. Live streams and DASH aren’t supported yet.</p></div>
+          </details>
+          <details>
+            <summary>How do I update?</summary>
+            <div><p>Download the latest release from GitHub and replace the app in your Applications folder. Your downloads, queues and settings are kept.</p></div>
+          </details>
+          <details>
+            <summary>Is it open source?</summary>
+            <div><p>Yes. Osprey is available under your choice of the MIT or Apache 2.0 licence. The source, docs and issue tracker are on <a data-gh="repo" href="https://github.com/OWNER/osprey">GitHub</a>.</p></div>
+          </details>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══════════════ FINAL CTA ═══════════════ -->
+    <section class="section final" id="download" aria-labelledby="final-title">
+      <div class="wrap">
+        <div class="final-card reveal">
+          <svg class="final-wing" viewBox="0 0 600 420" aria-hidden="true"><g transform="translate(560 400)">
+            <use href="#feather" width="68" height="200" x="-34" y="-200" transform="rotate(-80)"/>
+            <use href="#feather" width="76" height="225" x="-38" y="-225" transform="rotate(-66)"/>
+            <use href="#feather" width="84" height="250" x="-42" y="-250" transform="rotate(-52)"/>
+            <use href="#feather" width="92" height="272" x="-46" y="-272" transform="rotate(-38)"/>
+            <use href="#feather" width="100" height="300" x="-50" y="-300" transform="rotate(-24)"/>
+          </g></svg>
+          <img class="final-icon" src="assets/icon-512.webp" alt="" width="512" height="512" loading="lazy">
+          <h2 id="final-title">Ready when you are.</h2>
+          <p class="lede">Free and open source. Universal for Apple silicon and Intel, macOS 14 or later.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary btn-lg" data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">
+              <svg class="ic" aria-hidden="true"><use href="#i-download"/></svg><span>Download Osprey 0.1.0</span>
+            </a>
+            <a class="btn btn-glass btn-lg" href="#remote">
+              <svg class="ic" aria-hidden="true"><use href="#i-terminal"/></svg><span>Run it headless</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div class="footer-brand">
+        <img src="assets/favicon-64.png" alt="" width="32" height="32">
+        <div>
+          <strong>Osprey</strong>
+          <span>A download manager for macOS.</span>
+        </div>
+      </div>
+      <nav aria-label="Footer">
+        <ul class="footer-links">
+          <li><a data-gh="releases" href="https://github.com/OWNER/osprey/releases/latest">Releases</a></li>
+          <li><a data-gh="repo" href="https://github.com/OWNER/osprey">Source</a></li>
+          <li><a data-gh="tree/main/docs" href="https://github.com/OWNER/osprey/tree/main/docs">Docs</a></li>
+          <li><a data-gh="blob/main/docs/cli.md" href="https://github.com/OWNER/osprey/blob/main/docs/cli.md">CLI reference</a></li>
+          <li><a data-gh="issues" href="https://github.com/OWNER/osprey/issues">Report an issue</a></li>
+        </ul>
+      </nav>
+      <p class="footer-fine">© <span id="year">2026</span> Osprey contributors · MIT or Apache 2.0 · macOS is a trademark of Apple Inc.</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-labelledby="lb-caption" hidden>
+    <div class="lb-backdrop" data-close></div>
+    <figure class="lb-figure">
+      <img id="lb-img" src="" alt="">
+      <figcaption id="lb-caption"></figcaption>
+    </figure>
+    <button class="lb-btn lb-close" type="button" aria-label="Close" data-close><svg class="ic" aria-hidden="true"><use href="#i-close"/></svg></button>
+    <button class="lb-btn lb-prev" type="button" aria-label="Previous screenshot"><svg class="ic" aria-hidden="true"><use href="#i-left"/></svg></button>
+    <button class="lb-btn lb-next" type="button" aria-label="Next screenshot"><svg class="ic" aria-hidden="true"><use href="#i-right"/></svg></button>
+    <p class="lb-count" id="lb-count" aria-live="polite"></p>
+  </div>
+</body>
+</html>
