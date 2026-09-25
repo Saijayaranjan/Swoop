@@ -15,12 +15,27 @@ use error::CliError;
 
 #[tokio::main]
 async fn main() {
-    let cli = Cli::parse();
+    let cli = Cli::parse_from(native_host_argv(std::env::args_os().collect()));
     resolve::apply_data_dir_override(&cli.data_dir);
 
     if let Err(e) = run(cli).await {
         eprintln!("swoop: {e}");
         std::process::exit(e.exit_code());
+    }
+}
+
+/// Browsers launch a native-messaging host with their own arguments rather than ours: Chromium
+/// passes the caller origin (`chrome-extension://<id>/`), Firefox passes the host manifest path
+/// and the extension id. When a manifest points straight at this binary, map that invocation to
+/// `swoop native-host`.
+fn native_host_argv(args: Vec<std::ffi::OsString>) -> Vec<std::ffi::OsString> {
+    let first = args.get(1).and_then(|a| a.to_str()).unwrap_or_default();
+    let launched_by_browser = first.starts_with("chrome-extension://")
+        || (first.ends_with(".json") && args.len() == 3 && std::path::Path::new(first).is_file());
+    if launched_by_browser {
+        vec![args[0].clone(), "native-host".into()]
+    } else {
+        args
     }
 }
 
@@ -73,5 +88,20 @@ async fn run(mut cli: Cli) -> Result<(), CliError> {
         Commands::Server(_) | Commands::NativeHost(_) => {
             unreachable!("handled above before the client was built")
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::native_host_argv;
+
+    #[test]
+    fn browser_launch_maps_to_native_host() {
+        let argv = |v: &[&str]| v.iter().map(Into::into).collect::<Vec<std::ffi::OsString>>();
+        assert_eq!(
+            native_host_argv(argv(&["swoop", "chrome-extension://abc/"])),
+            argv(&["swoop", "native-host"])
+        );
+        assert_eq!(native_host_argv(argv(&["swoop", "list"])), argv(&["swoop", "list"]));
     }
 }
