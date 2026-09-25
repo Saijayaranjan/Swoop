@@ -88,6 +88,42 @@ export interface TakePendingBulkLinksMessage {
   type: 'take-pending-bulk-links';
 }
 
+/** Options page: complete pairing with a remote Osprey using a one-time code. */
+export interface PairRemoteMessage {
+  type: 'pair-remote';
+  url: string;
+  code: string;
+}
+
+/** Options page: store a device token pasted by hand (instead of pairing with a code). */
+export interface SetRemoteTokenMessage {
+  type: 'set-remote-token';
+  url: string;
+  token: string;
+}
+
+/** Options page: forget the remote Osprey and return to the local native host. */
+export interface ForgetRemoteMessage {
+  type: 'forget-remote';
+}
+
+/** Content script: which in-page UI it may show. */
+export interface GetPageUiConfigMessage {
+  type: 'get-page-ui-config';
+}
+
+/** Content script: network-detected media for the sender's own tab. */
+export interface GetPageMediaMessage {
+  type: 'get-page-media';
+}
+
+/** Content script: a button pressed on an in-page download prompt. */
+export interface PromptActionMessage {
+  type: 'prompt-action';
+  promptId: string;
+  action: 'use-browser' | 'always-browser';
+}
+
 export type BackgroundRequestMessage =
   | ApiRequestMessage
   | GetDetectedMediaMessage
@@ -97,7 +133,23 @@ export type BackgroundRequestMessage =
   | LaunchAppMessage
   | QuickDownloadMessage
   | GetActiveTabIdMessage
-  | TakePendingBulkLinksMessage;
+  | TakePendingBulkLinksMessage
+  | PairRemoteMessage
+  | SetRemoteTokenMessage
+  | ForgetRemoteMessage
+  | GetPageUiConfigMessage
+  | GetPageMediaMessage
+  | PromptActionMessage;
+
+/** The only request types a content script (an untrusted page context) may send. Everything
+ *  else is accepted from the extension's own pages only (src/background/message-router.ts). */
+export const CONTENT_SCRIPT_MESSAGE_TYPES: ReadonlySet<BackgroundRequestMessage['type']> = new Set([
+  'get-page-ui-config',
+  'get-page-media',
+  'quick-download',
+  'launch-app',
+  'prompt-action',
+]);
 
 export interface BackgroundOkResponse<T = unknown> {
   ok: true;
@@ -116,6 +168,38 @@ export interface ConnectionStatus {
   connected: boolean;
   running: boolean;
   version: string | null;
+  /** Which transport answered; absent from older backgrounds, treat as `native`. */
+  mode?: 'native' | 'remote';
+}
+
+export interface PageUiConfig {
+  detectMedia: boolean;
+  mediaButton: boolean;
+}
+
+export interface PairRemoteResult {
+  deviceName: string | null;
+}
+
+// ---------------------------------------------------------------------------------------------
+// background -> content script (in-page prompt after an intercepted download)
+// ---------------------------------------------------------------------------------------------
+
+export type PagePromptVariant = 'sent' | 'not-running' | 'failed';
+
+export interface PagePrompt {
+  promptId: string;
+  variant: PagePromptVariant;
+  fileName: string;
+  host: string | null;
+  size: number | null;
+  /** The local app can be launched from the prompt (native connection only). */
+  canLaunch: boolean;
+}
+
+export interface ShowPagePromptMessage {
+  type: 'osprey-page-prompt';
+  prompt: PagePrompt;
 }
 
 export interface DetectedMediaForTab {

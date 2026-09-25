@@ -1,266 +1,795 @@
 {
+  "localeCode": {
+    "message": "hi"
+  },
   "extensionName": {
-    "message": "Osprey",
-    "description": "[fallback: needs translation] "
+    "message": "Osprey"
   },
   "extensionDescription": {
-    "message": "Send downloads, media and links straight to the Osprey download manager.",
-    "description": "[fallback: needs translation] "
+    "message": "डाउनलोड, मीडिया और लिंक सीधे Osprey डाउनलोड मैनेजर को भेजें।"
   },
   "commandSendPageUrl": {
-    "message": "Send the current page's URL to Osprey",
-    "description": "[fallback: needs translation] "
-  },
-  "tabDetectedMedia": {
-    "message": "Detected media",
-    "description": "[fallback: needs translation] "
-  },
-  "tabLinks": {
-    "message": "Links on page",
-    "description": "[fallback: needs translation] "
-  },
-  "tabDownloads": {
-    "message": "Downloads",
-    "description": "[fallback: needs translation] "
-  },
-  "tabSettings": {
-    "message": "Settings",
-    "description": "[fallback: needs translation] "
-  },
-  "optionsSubtitle": {
-    "message": "Browser integration settings",
-    "description": "[fallback: needs translation] "
-  },
-  "statusConnectedPrefix": {
-    "message": "Osprey",
-    "description": "[fallback: needs translation] "
-  },
-  "statusConnected": {
-    "message": "connected",
-    "description": "[fallback: needs translation] "
-  },
-  "statusNotRunning": {
-    "message": "Osprey not running",
-    "description": "[fallback: needs translation] "
-  },
-  "actionDownload": {
-    "message": "Download",
-    "description": "[fallback: needs translation] "
-  },
-  "actionQueue": {
-    "message": "Queue",
-    "description": "[fallback: needs translation] "
-  },
-  "actionCopyUrl": {
-    "message": "Copy URL",
-    "description": "[fallback: needs translation] "
-  },
-  "actionOpenSource": {
-    "message": "Open source",
-    "description": "[fallback: needs translation] "
-  },
-  "actionPause": {
-    "message": "Pause",
-    "description": "[fallback: needs translation] "
-  },
-  "actionResume": {
-    "message": "Resume",
-    "description": "[fallback: needs translation] "
-  },
-  "actionCancel": {
-    "message": "Cancel",
-    "description": "[fallback: needs translation] "
-  },
-  "actionLaunch": {
-    "message": "Launch",
-    "description": "[fallback: needs translation] "
-  },
-  "toastDownloadStarted": {
-    "message": "Download started",
-    "description": "[fallback: needs translation] "
-  },
-  "toastQueued": {
-    "message": "Queued",
-    "description": "[fallback: needs translation] "
-  },
-  "toastCopied": {
-    "message": "Copied",
-    "description": "[fallback: needs translation] "
-  },
-  "toastLaunching": {
-    "message": "Launching Osprey…",
-    "description": "[fallback: needs translation] "
-  },
-  "loading": {
-    "message": "Loading…",
-    "description": "[fallback: needs translation] "
-  },
-  "loadFailed": {
-    "message": "Could not load downloads.",
-    "description": "[fallback: needs translation] "
-  },
-  "scanFailed": {
-    "message": "Could not scan this page.",
-    "description": "[fallback: needs translation] "
-  },
-  "noActiveTab": {
-    "message": "No active tab.",
-    "description": "[fallback: needs translation] "
-  },
-  "noMediaDetected": {
-    "message": "No media detected on this page yet.",
-    "description": "[fallback: needs translation] "
-  },
-  "noLinksFound": {
-    "message": "No links found on this page.",
-    "description": "[fallback: needs translation] "
-  },
-  "noActiveDownloads": {
-    "message": "No active downloads.",
-    "description": "[fallback: needs translation] "
-  },
-  "notDownloadable": {
-    "message": "Not downloadable",
-    "description": "[fallback: needs translation] "
-  },
-  "likelyDownload": {
-    "message": "Likely download",
-    "description": "[fallback: needs translation] "
-  },
-  "quality": {
-    "message": "Quality",
-    "description": "[fallback: needs translation] "
-  },
-  "eta": {
-    "message": "ETA",
-    "description": "[fallback: needs translation] "
-  },
-  "remove": {
-    "message": "Remove",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindVideo": {
-    "message": "Video",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindAudio": {
-    "message": "Audio",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindImage": {
-    "message": "Image",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindHls": {
-    "message": "HLS",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindDash": {
-    "message": "DASH",
-    "description": "[fallback: needs translation] "
-  },
-  "mediaKindUnknown": {
-    "message": "Media",
-    "description": "[fallback: needs translation] "
+    "message": "मौजूदा पेज का URL Osprey को भेजें"
   },
   "menuDownloadLink": {
-    "message": "Download with Osprey",
-    "description": "[fallback: needs translation] "
+    "message": "Osprey से डाउनलोड करें"
   },
   "menuDownloadImage": {
-    "message": "Download image with Osprey",
-    "description": "[fallback: needs translation] "
+    "message": "इमेज Osprey से डाउनलोड करें"
   },
   "menuDownloadVideo": {
-    "message": "Download video with Osprey",
-    "description": "[fallback: needs translation] "
+    "message": "वीडियो Osprey से डाउनलोड करें"
   },
   "menuDownloadAudio": {
-    "message": "Download audio with Osprey",
-    "description": "[fallback: needs translation] "
+    "message": "ऑडियो Osprey से डाउनलोड करें"
   },
   "menuDownloadAllLinks": {
-    "message": "Download all links on page…",
-    "description": "[fallback: needs translation] "
+    "message": "पेज के सभी लिंक डाउनलोड करें…"
   },
   "menuDownloadSelectionLinks": {
-    "message": "Download links in selection",
-    "description": "[fallback: needs translation] "
+    "message": "चुने हुए हिस्से के लिंक डाउनलोड करें"
   },
   "notificationCompletedTitle": {
-    "message": "Download complete",
-    "description": "[fallback: needs translation] "
+    "message": "डाउनलोड पूरा हुआ"
   },
   "notificationFailedTitle": {
-    "message": "Download failed",
-    "description": "[fallback: needs translation] "
+    "message": "डाउनलोड विफल रहा"
   },
-  "settingInterceptDownloads": {
-    "message": "Intercept browser downloads",
-    "description": "[fallback: needs translation] "
+  "statusChecking": {
+    "message": "जाँच रहे हैं…"
   },
-  "settingMinSize": {
-    "message": "Minimum size to intercept (MB)",
-    "description": "[fallback: needs translation] "
+  "statusConnectedShort": {
+    "message": "जुड़ा है"
   },
-  "settingExtensions": {
-    "message": "File extensions to intercept",
-    "description": "[fallback: needs translation] "
+  "statusNotRunningShort": {
+    "message": "चल नहीं रहा"
   },
-  "settingExcludedDomains": {
-    "message": "Never intercept on these domains",
-    "description": "[fallback: needs translation] "
+  "statusOffline": {
+    "message": "ऑफ़लाइन"
   },
-  "settingExcludedPatterns": {
-    "message": "Never intercept matching URL patterns",
-    "description": "[fallback: needs translation] "
+  "statusRefused": {
+    "message": "पेयर नहीं है"
   },
-  "settingAlwaysBrowser": {
-    "message": "Always use the browser's own download on these sites",
-    "description": "[fallback: needs translation] "
+  "statusNotConnected": {
+    "message": "जुड़ा नहीं है"
   },
-  "settingDetectMedia": {
-    "message": "Detect playable media on pages",
-    "description": "[fallback: needs translation] "
+  "statusThisComputer": {
+    "message": "यह कंप्यूटर"
   },
-  "settingShowConfirmation": {
-    "message": "Show a confirmation toast when a download is sent",
-    "description": "[fallback: needs translation] "
+  "statusRemote": {
+    "message": "रिमोट"
   },
-  "settingNotifyComplete": {
-    "message": "Notify when a download completes",
-    "description": "[fallback: needs translation] "
+  "speedDownload": {
+    "message": "डाउनलोड"
   },
-  "settingNotifyFailure": {
-    "message": "Notify when a download fails",
-    "description": "[fallback: needs translation] "
+  "activeCount": {
+    "message": "$ARG1$ सक्रिय",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
   },
-  "addExtensionPlaceholder": {
-    "message": "Add extension, press Enter",
-    "description": "[fallback: needs translation] "
+  "speedSummary": {
+    "message": "$ARG1$ पर डाउनलोड, $ARG2$ पर अपलोड, $ARG3$ सक्रिय",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      },
+      "arg3": {
+        "content": "$3"
+      }
+    }
   },
-  "addDomainPlaceholder": {
-    "message": "example.com, press Enter",
-    "description": "[fallback: needs translation] "
+  "addLinkLabel": {
+    "message": "लिंक जोड़ें"
   },
-  "addPatternPlaceholder": {
-    "message": "https://*/ads/*, press Enter",
-    "description": "[fallback: needs translation] "
+  "addLinkPlaceholder": {
+    "message": "लिंक चिपकाएँ और Return दबाएँ"
   },
-  "urlPatternHint": {
-    "message": "Wildcards (*) allowed.",
-    "description": "[fallback: needs translation] "
+  "sectionOnThisPage": {
+    "message": "इस पेज पर"
   },
-  "saving": {
-    "message": "Saving…",
-    "description": "[fallback: needs translation] "
+  "tabDownloads": {
+    "message": "डाउनलोड"
+  },
+  "tabSettings": {
+    "message": "सेटिंग्स"
+  },
+  "showAll": {
+    "message": "सब दिखाएँ"
+  },
+  "showLess": {
+    "message": "कम दिखाएँ"
+  },
+  "sizeOfWord": {
+    "message": "/"
+  },
+  "emptyTitle": {
+    "message": "कुछ भी डाउनलोड नहीं हो रहा"
+  },
+  "emptyBody": {
+    "message": "ऊपर एक लिंक चिपकाएँ, या बस किसी डाउनलोड लिंक पर क्लिक करें — Osprey उसे ले लेगा।"
+  },
+  "captureDownloads": {
+    "message": "डाउनलोड कैप्चर करें"
+  },
+  "captureOnHint": {
+    "message": "मिलते-जुलते डाउनलोड Osprey को जाते हैं"
+  },
+  "captureOffHint": {
+    "message": "हर डाउनलोड ब्राउज़र में ही रहता है"
+  },
+  "linksOnPage": {
+    "message": "इस पेज के लिंक"
+  },
+  "selectAll": {
+    "message": "सभी चुनें"
+  },
+  "likelyDownloadsOnly": {
+    "message": "संभावित डाउनलोड"
+  },
+  "selectedCount": {
+    "message": "$ARG2$ में से $ARG1$ चुने गए",
+    "placeholders": {
+      "arg2": {
+        "content": "$2"
+      },
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "downloadCount": {
+    "message": "$ARG1$ डाउनलोड करें",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "noLinksFound": {
+    "message": "इस पेज पर कोई लिंक नहीं मिला।"
+  },
+  "noLikelyLinks": {
+    "message": "यहाँ कोई साफ़ डाउनलोड नहीं"
+  },
+  "noLikelyLinksBody": {
+    "message": "हर लिंक देखने के लिए “संभावित डाउनलोड” बंद करें।"
+  },
+  "scanFailed": {
+    "message": "इस पेज को स्कैन नहीं किया जा सका।"
+  },
+  "notDownloadable": {
+    "message": "डाउनलोड नहीं हो सकता"
+  },
+  "protectedShort": {
+    "message": "सुरक्षित"
+  },
+  "quality": {
+    "message": "क्वालिटी"
+  },
+  "flagSent": {
+    "message": "भेजा गया"
+  },
+  "actionDownload": {
+    "message": "डाउनलोड करें"
+  },
+  "actionDownloadWithOsprey": {
+    "message": "Osprey से डाउनलोड करें"
+  },
+  "actionQueue": {
+    "message": "कतार में जोड़ें"
+  },
+  "actionCopyUrl": {
+    "message": "URL कॉपी करें"
+  },
+  "actionPause": {
+    "message": "रोकें"
+  },
+  "actionResume": {
+    "message": "फिर शुरू करें"
+  },
+  "actionRetry": {
+    "message": "फिर कोशिश करें"
+  },
+  "actionCancel": {
+    "message": "रद्द करें"
+  },
+  "actionLaunch": {
+    "message": "खोलें"
+  },
+  "actionLaunchApp": {
+    "message": "Osprey खोलें"
+  },
+  "actionOpenApp": {
+    "message": "Osprey खोलें"
+  },
+  "actionShowInApp": {
+    "message": "Osprey में दिखाएँ"
+  },
+  "actionPaste": {
+    "message": "चिपकाएँ"
+  },
+  "actionBack": {
+    "message": "वापस"
+  },
+  "actionClose": {
+    "message": "बंद करें"
+  },
+  "actionDismiss": {
+    "message": "हटाएँ"
+  },
+  "actionTryAgain": {
+    "message": "फिर कोशिश करें"
+  },
+  "actionHowToFix": {
+    "message": "कैसे ठीक करें"
+  },
+  "actionConnectionSettings": {
+    "message": "कनेक्शन सेटिंग्स"
+  },
+  "actionUseBrowser": {
+    "message": "इसके बजाय ब्राउज़र इस्तेमाल करें"
+  },
+  "actionDownloadInBrowser": {
+    "message": "ब्राउज़र में डाउनलोड करें"
+  },
+  "actionAlwaysForSite": {
+    "message": "इस साइट के लिए हमेशा"
+  },
+  "actionAdd": {
+    "message": "जोड़ें"
+  },
+  "actionSave": {
+    "message": "सहेजें"
+  },
+  "actionPair": {
+    "message": "पेयर करें"
+  },
+  "actionForget": {
+    "message": "भूल जाएँ"
+  },
+  "actionTestConnection": {
+    "message": "कनेक्शन जाँचें"
+  },
+  "actionResetDefaults": {
+    "message": "डिफ़ॉल्ट पर लौटाएँ"
+  },
+  "actionChangeShortcuts": {
+    "message": "शॉर्टकट बदलें"
+  },
+  "actionDecrease": {
+    "message": "घटाएँ"
+  },
+  "actionIncrease": {
+    "message": "बढ़ाएँ"
+  },
+  "toastDownloadStarted": {
+    "message": "डाउनलोड शुरू हो गया"
+  },
+  "toastQueued": {
+    "message": "कतार में जोड़ा गया"
+  },
+  "toastCopied": {
+    "message": "कॉपी हो गया"
+  },
+  "toastLaunching": {
+    "message": "Osprey खुल रहा है…"
+  },
+  "toastLinksSent": {
+    "message": "$ARG1$ Osprey को भेजे गए",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPasteHint": {
+    "message": "चिपकाने के लिए ⌘V / Ctrl+V दबाएँ"
+  },
+  "toastInvalidLink": {
+    "message": "यह डाउनलोड लिंक जैसा नहीं लगता।"
+  },
+  "toastNotRunning": {
+    "message": "Osprey चल नहीं रहा है — उसे शुरू करके फिर कोशिश करें।"
+  },
+  "toastUnauthorized": {
+    "message": "Osprey ने इस ब्राउज़र को अस्वीकार कर दिया। सेटिंग्स में इसे फिर से पेयर करें।"
+  },
+  "toastSomethingWrong": {
+    "message": "कुछ गड़बड़ हो गई।"
+  },
+  "offlineNotRunningTitle": {
+    "message": "Osprey चल नहीं रहा है"
+  },
+  "offlineNotRunningBody": {
+    "message": "डाउनलोड भेजने और उनकी प्रगति यहाँ देखने के लिए Osprey शुरू करें।"
+  },
+  "offlineNoHostTitle": {
+    "message": "Osprey तक नहीं पहुँच सके"
+  },
+  "offlineNoHostBody": {
+    "message": "ब्राउज़र हेल्पर अभी सेट अप नहीं है। Osprey में सेटिंग्स → ब्राउज़र खोलें, इंस्टॉल चुनें और फिर कोशिश करें।"
+  },
+  "offlineRemoteTitle": {
+    "message": "आपके Osprey तक नहीं पहुँच सके"
+  },
+  "offlineRemoteBody": {
+    "message": "पक्का करें कि वह चालू है और पहुँच में है, और कनेक्शन सेटिंग्स में पता सही है।"
+  },
+  "offlineRefusedTitle": {
+    "message": "Osprey ने इस ब्राउज़र को अस्वीकार कर दिया"
+  },
+  "offlineRefusedBody": {
+    "message": "हो सकता है डिवाइस टोकन रद्द कर दिया गया हो। कनेक्शन सेटिंग्स में इस ब्राउज़र को फिर से पेयर करें।"
+  },
+  "mediaKindVideo": {
+    "message": "वीडियो"
+  },
+  "mediaKindAudio": {
+    "message": "ऑडियो"
+  },
+  "mediaKindImage": {
+    "message": "इमेज"
+  },
+  "mediaKindHls": {
+    "message": "HLS"
+  },
+  "mediaKindDash": {
+    "message": "DASH"
+  },
+  "mediaKindUnknown": {
+    "message": "मीडिया"
+  },
+  "state_pending": {
+    "message": "लंबित"
+  },
+  "state_queued": {
+    "message": "कतार में"
+  },
+  "state_scheduled": {
+    "message": "शेड्यूल्ड"
+  },
+  "state_resolving": {
+    "message": "पता लगा रहा है"
+  },
+  "state_connecting": {
+    "message": "कनेक्ट हो रहा है"
+  },
+  "state_downloading": {
+    "message": "डाउनलोड हो रहा है"
+  },
+  "state_paused": {
+    "message": "रुका हुआ"
+  },
+  "state_retrying": {
+    "message": "फिर कोशिश"
+  },
+  "state_verifying": {
+    "message": "जाँच रहा है"
+  },
+  "state_processing": {
+    "message": "प्रोसेस हो रहा है"
+  },
+  "state_completed": {
+    "message": "पूरा"
+  },
+  "state_failed": {
+    "message": "विफल"
+  },
+  "state_cancelled": {
+    "message": "रद्द"
+  },
+  "state_seeding": {
+    "message": "सीडिंग"
+  },
+  "pageSentTitle": {
+    "message": "Osprey को भेजा गया"
+  },
+  "pageKeptTitle": {
+    "message": "आपके ब्राउज़र में रखा गया"
+  },
+  "pageKeptBody": {
+    "message": "Osprey चल नहीं रहा है, इसलिए यह डाउनलोड ब्राउज़र में ही रहा।"
+  },
+  "pageFailedTitle": {
+    "message": "Osprey को नहीं भेज सके"
+  },
+  "pageFailedBody": {
+    "message": "ब्राउज़र की कॉपी पहले ही रोक दी गई थी। क्या इसके बजाय इसे ब्राउज़र में डाउनलोड करें?"
+  },
+  "pageUsingBrowser": {
+    "message": "आपके ब्राउज़र में डाउनलोड हो रहा है"
+  },
+  "pageAlwaysQuestion": {
+    "message": "क्या $ARG1$ से होने वाले डाउनलोड हमेशा ब्राउज़र संभाले?",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageGotIt": {
+    "message": "ठीक है"
+  },
+  "pageAlwaysDone": {
+    "message": "Osprey अब $ARG1$ को आपके ब्राउज़र पर छोड़ देगा। इसे Osprey की साइट सेटिंग्स में बदलें।",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageSomethingWrong": {
+    "message": "कुछ गड़बड़ हो गई"
+  },
+  "pageNotRunning": {
+    "message": "Osprey चल नहीं रहा है"
+  },
+  "pageMediaTitle": {
+    "message": "इस पेज पर मीडिया"
+  },
+  "pageMediaProtected": {
+    "message": "यह प्लेयर सुरक्षित मीडिया चलाता है, जिसे Osprey सहेज नहीं सकता।"
+  },
+  "pageMediaFoot": {
+    "message": "डाउनलोड Osprey में तुरंत शुरू हो जाते हैं।"
+  },
+  "sidebarSubtitle": {
+    "message": "ब्राउज़र एक्सटेंशन"
+  },
+  "skipToContent": {
+    "message": "सेटिंग्स पर जाएँ"
+  },
+  "optionsNavLabel": {
+    "message": "सेटिंग्स के हिस्से"
+  },
+  "navGroupDownloads": {
+    "message": "डाउनलोड"
+  },
+  "navGroupIntegration": {
+    "message": "इंटीग्रेशन"
   },
   "saved": {
-    "message": "Saved",
-    "description": "[fallback: needs translation] "
+    "message": "सहेजा गया"
   },
   "saveFailed": {
-    "message": "Save failed",
-    "description": "[fallback: needs translation] "
+    "message": "सहेजा नहीं जा सका"
+  },
+  "sectionCapture": {
+    "message": "कैप्चर"
+  },
+  "sectionCaptureSub": {
+    "message": "Osprey कौन-से ब्राउज़र डाउनलोड अपने हाथ में लेता है।"
+  },
+  "captureDownloadsHint": {
+    "message": "मिलते-जुलते डाउनलोड ब्राउज़र की अपनी डाउनलोड सूची के बजाय Osprey को भेजें।"
+  },
+  "settingShowConfirmationShort": {
+    "message": "पेज पर पुष्टि दिखाएँ"
+  },
+  "settingShowConfirmationHint": {
+    "message": "डाउनलोड भेजे जाने पर पेज पर एक छोटा नोट दिखाएँ, जिससे एक क्लिक में उसे ब्राउज़र में रखा जा सके।"
+  },
+  "groupRules": {
+    "message": "नियम"
+  },
+  "settingMinSizeShort": {
+    "message": "न्यूनतम आकार"
+  },
+  "settingMinSizeHint": {
+    "message": "इससे छोटी फ़ाइलें ब्राउज़र में ही रहती हैं। हर आकार कैप्चर करने के लिए 0 रखें।"
+  },
+  "settingExtensions": {
+    "message": "कैप्चर करने के लिए फ़ाइल प्रकार"
+  },
+  "settingExtensionsHint": {
+    "message": "सिर्फ़ इनमें से किसी पर ख़त्म होने वाले डाउनलोड कैप्चर होते हैं।"
+  },
+  "addExtensionPlaceholderShort": {
+    "message": "जैसे mkv"
+  },
+  "noFileTypes": {
+    "message": "कोई फ़ाइल प्रकार नहीं — कुछ भी कैप्चर नहीं होगा।"
+  },
+  "removeItem": {
+    "message": "$ARG1$ हटाएँ",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "removedItem": {
+    "message": "$ARG1$ हटाया गया",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "addedItem": {
+    "message": "$ARG1$ जोड़ा गया",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sectionSites": {
+    "message": "साइटें"
+  },
+  "sectionSitesSub": {
+    "message": "Osprey किन जगहों पर डाउनलोड ब्राउज़र के लिए छोड़ दे।"
+  },
+  "groupSiteLists": {
+    "message": "साइट सूचियाँ"
+  },
+  "settingExcludedDomainsShort": {
+    "message": "इनसे कभी कैप्चर न करें"
+  },
+  "settingExcludedDomainsHint": {
+    "message": "सबडोमेन भी शामिल हैं: example.com में dl.example.com भी आता है।"
+  },
+  "settingAlwaysBrowserShort": {
+    "message": "इनके लिए हमेशा ब्राउज़र इस्तेमाल करें"
+  },
+  "settingAlwaysBrowserHint": {
+    "message": "वे साइटें जिनके लिए आपने डाउनलोड प्रॉम्प्ट पर “हमेशा ब्राउज़र” चुना। फिर से कैप्चर करने के लिए किसी को हटाएँ।"
+  },
+  "noSites": {
+    "message": "अभी कोई साइट नहीं।"
+  },
+  "groupPatterns": {
+    "message": "URL पैटर्न"
+  },
+  "settingExcludedPatternsShort": {
+    "message": "ऐसे URL कभी कैप्चर न करें"
+  },
+  "urlPatternHintLong": {
+    "message": "पूरे डाउनलोड URL से मिलाया जाता है। वाइल्डकार्ड के लिए * इस्तेमाल करें।"
+  },
+  "noPatterns": {
+    "message": "अभी कोई पैटर्न नहीं।"
+  },
+  "sectionMedia": {
+    "message": "मीडिया"
+  },
+  "sectionMediaSub": {
+    "message": "आपके देखे गए पेजों पर वीडियो, ऑडियो और स्ट्रीम ढूँढना।"
+  },
+  "settingDetectMedia": {
+    "message": "पेजों पर मीडिया पहचानें"
+  },
+  "settingDetectMediaHint": {
+    "message": "पेज लोड होते समय वीडियो, ऑडियो और स्ट्रीम पहचानें, ताकि पॉपअप उन्हें दिखा सके।"
+  },
+  "settingMediaButton": {
+    "message": "प्लेयर पर डाउनलोड बटन दिखाएँ"
+  },
+  "settingMediaButtonHint": {
+    "message": "किसी वीडियो या ऑडियो प्लेयर पर पॉइंटर ले जाने पर Osprey का एक छोटा बटन दिखता है।"
+  },
+  "mediaProtectedNote": {
+    "message": "DRM से सुरक्षित स्ट्रीम और अस्थायी blob: पतों से चलने वाले प्लेयर सूची में दिखते हैं, पर डाउनलोड नहीं हो सकते।"
+  },
+  "sectionNotifications": {
+    "message": "सूचनाएँ"
+  },
+  "sectionNotificationsSub": {
+    "message": "पॉपअप बंद होने पर सिस्टम सूचनाएँ।"
+  },
+  "settingNotifyComplete": {
+    "message": "जब कोई डाउनलोड पूरा हो"
+  },
+  "settingNotifyFailure": {
+    "message": "जब कोई डाउनलोड विफल हो"
+  },
+  "sectionConnection": {
+    "message": "कनेक्शन"
+  },
+  "sectionConnectionSub": {
+    "message": "यह ब्राउज़र Osprey तक कैसे पहुँचता है।"
+  },
+  "connectTo": {
+    "message": "किससे जुड़ें"
+  },
+  "connectToHint": {
+    "message": "Osprey आमतौर पर इसी कंप्यूटर पर चलता है। किसी दूसरी जगह पेयर किए गए Osprey को डाउनलोड भेजने के लिए “दूसरा कंप्यूटर” चुनें।"
+  },
+  "modeThisComputer": {
+    "message": "यह कंप्यूटर"
+  },
+  "modeAnotherComputer": {
+    "message": "दूसरा कंप्यूटर"
+  },
+  "connectedToVersion": {
+    "message": "Osprey $ARG1$ से जुड़ा है",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "connectedNativeSub": {
+    "message": "इस कंप्यूटर पर ब्राउज़र हेल्पर के ज़रिए"
+  },
+  "connectedRemoteSub": {
+    "message": "$ARG1$ के साथ पेयर किया गया",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notRunningSub": {
+    "message": "ब्राउज़र हेल्पर इंस्टॉल है। जुड़ने के लिए Osprey शुरू करें।"
+  },
+  "noHostSub": {
+    "message": "इस ब्राउज़र के लिए ब्राउज़र हेल्पर अभी इंस्टॉल नहीं है।"
+  },
+  "refusedSub": {
+    "message": "डिवाइस टोकन अस्वीकार हो गया। नीचे फिर से पेयर करें।"
+  },
+  "groupSetUp": {
+    "message": "सेट अप"
+  },
+  "groupSetUpDesc": {
+    "message": "एक्सटेंशन एक छोटे हेल्पर के ज़रिए Osprey से बात करता है, जिसे ऐप इंस्टॉल करता है। किसी पते या पासवर्ड की ज़रूरत नहीं।"
+  },
+  "stepInstallApp": {
+    "message": "Osprey इंस्टॉल करें और उसे खोलें।"
+  },
+  "stepInstallHelper": {
+    "message": "Osprey में सेटिंग्स → ब्राउज़र खोलें और इस ब्राउज़र के लिए इंस्टॉल चुनें।"
+  },
+  "stepTest": {
+    "message": "यहाँ वापस आएँ और “कनेक्शन जाँचें” चुनें।"
+  },
+  "launchRowLabel": {
+    "message": "Osprey खुला नहीं है?"
+  },
+  "launchRowHint": {
+    "message": "इस कंप्यूटर पर ऐप शुरू करता है (macOS)।"
+  },
+  "groupRemote": {
+    "message": "रिमोट Osprey"
+  },
+  "remoteAddress": {
+    "message": "पता"
+  },
+  "remoteAddressHint": {
+    "message": "उस कंप्यूटर पर Osprey में सेटिंग्स → रिमोट में दिखाया जाता है।"
+  },
+  "pairingCode": {
+    "message": "पेयरिंग कोड"
+  },
+  "pairingCodeHint": {
+    "message": "वहाँ Osprey में “डिवाइस पेयर करें” चुनें। कोड एक बार, दो मिनट तक काम करते हैं।"
+  },
+  "useTokenInstead": {
+    "message": "इसके बजाय डिवाइस टोकन इस्तेमाल करें"
+  },
+  "deviceToken": {
+    "message": "डिवाइस टोकन"
+  },
+  "pairedLabel": {
+    "message": "पेयर किया गया"
+  },
+  "pairedHint": {
+    "message": "इस ब्राउज़र का डिवाइस टोकन सहेजा गया है। अनपेयर करने के लिए इसे भूल जाएँ।"
+  },
+  "remotePrivacyNote": {
+    "message": "कैप्चर किए गए डाउनलोड — उन्हें लाने के लिए ज़रूरी कुकीज़ समेत — HTTPS पर उस कंप्यूटर को भेजे जाते हैं।"
+  },
+  "errRemoteUrl": {
+    "message": "https:// पता डालें, जैसे https://192.168.1.20:41780।"
+  },
+  "errPairingCode": {
+    "message": "पेयरिंग कोड में 8 अक्षर और अंक होते हैं, जैसे ABCD-EFGH।"
+  },
+  "errToken": {
+    "message": "यह डिवाइस टोकन जैसा नहीं लगता।"
+  },
+  "errPairingRefused": {
+    "message": "यह कोड काम नहीं किया — कोड दो मिनट में समाप्त हो जाते हैं। नया कोड बनाकर फिर कोशिश करें।"
+  },
+  "errRateLimited": {
+    "message": "बहुत ज़्यादा कोशिशें हुईं। एक मिनट रुककर फिर कोशिश करें।"
+  },
+  "errUnreachable": {
+    "message": "उस पते तक नहीं पहुँच सके। अगर Osprey अपना सर्टिफ़िकेट इस्तेमाल करता है, तो पते को एक बार टैब में खोलकर स्वीकार करें।"
+  },
+  "sectionShortcuts": {
+    "message": "शॉर्टकट"
+  },
+  "sectionShortcutsSub": {
+    "message": "पेज भेजने और इधर-उधर जाने के लिए कीबोर्ड शॉर्टकट।"
+  },
+  "groupBrowserShortcuts": {
+    "message": "ब्राउज़र शॉर्टकट"
+  },
+  "shortcutNotSet": {
+    "message": "सेट नहीं है"
+  },
+  "shortcutChangeLabel": {
+    "message": "अपने हिसाब से बदलें"
+  },
+  "shortcutChangeHint": {
+    "message": "ब्राउज़र की शॉर्टकट सेटिंग्स में अपनी कुंजियाँ चुनें।"
+  },
+  "shortcutFirefoxHint": {
+    "message": "Firefox में: ऐड-ऑन और थीम → ⚙ → एक्सटेंशन शॉर्टकट प्रबंधित करें।"
+  },
+  "groupInPopup": {
+    "message": "पॉपअप में"
+  },
+  "shortcutPopupReturn": {
+    "message": "चिपकाया गया लिंक भेजें"
+  },
+  "shortcutPopupEsc": {
+    "message": "लिंक की सूची बंद करें"
+  },
+  "shortcutPopupSpace": {
+    "message": "स्विच या चुना हुआ लिंक बदलें"
+  },
+  "groupOnPages": {
+    "message": "वेब पेजों पर"
+  },
+  "shortcutPageEsc": {
+    "message": "Osprey का प्रॉम्प्ट या मीडिया पैनल हटाएँ"
+  },
+  "shortcutPageTab": {
+    "message": "फ़ोकस किए गए प्लेयर के मीडिया बटन तक पहुँचें"
+  },
+  "sectionAbout": {
+    "message": "परिचय"
+  },
+  "sectionAboutSub": {
+    "message": "वर्शन, निजता और चीज़ें कहाँ रहती हैं।"
+  },
+  "aboutTitle": {
+    "message": "$ARG1$ के लिए Osprey",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "वर्शन $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "groupVersions": {
+    "message": "वर्शन"
+  },
+  "aboutExtensionVersion": {
+    "message": "एक्सटेंशन"
+  },
+  "aboutAppVersion": {
+    "message": "Osprey ऐप"
+  },
+  "aboutBuild": {
+    "message": "बिल्ड"
+  },
+  "groupPrivacy": {
+    "message": "निजता"
+  },
+  "privacyLocal": {
+    "message": "डाउनलोड, कुकीज़ और पेज की जानकारी सिर्फ़ Osprey को जाती है — इस कंप्यूटर पर, या जिसे आपने पेयर किया है।"
+  },
+  "privacyNoTracking": {
+    "message": "कोई एनालिटिक्स, ट्रैकिंग या रिमोट कोड नहीं।"
+  },
+  "privacyStorage": {
+    "message": "सेटिंग्स इस ब्राउज़र के एक्सटेंशन स्टोरेज में रहती हैं, वेब पेजों की पहुँच से बाहर।"
   }
 }

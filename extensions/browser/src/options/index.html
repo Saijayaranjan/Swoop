@@ -3,18 +3,46 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Osprey Settings</title>
     <link rel="stylesheet" href="options.css" />
   </head>
   <body>
-    <header class="page-header">
-      <img src="../icons/icon48.png" alt="" width="32" height="32" />
-      <div>
-        <h1 data-i18n="extensionName">Osprey</h1>
-        <p class="subtitle" data-i18n="optionsSubtitle">Browser integration settings</p>
-      </div>
-    </header>
-    <main id="settings-root" class="settings-root" aria-label="Osprey settings"></main>
+    <a class="skip" href="#panel" data-i18n="skipToContent">Skip to settings</a>
+    <div class="layout">
+      <aside class="sidebar">
+        <div class="side-brand">
+          <span id="brand-mark"></span>
+          <div>
+            <div class="side-title" data-i18n="extensionName">Osprey</div>
+            <div class="side-sub" data-i18n="sidebarSubtitle">Browser extension</div>
+          </div>
+        </div>
+        <nav class="nav" id="nav" aria-label="Settings sections" data-i18n-aria="optionsNavLabel">
+          <p class="label nav-group" data-i18n="navGroupDownloads">Downloads</p>
+          <a href="#capture" data-section="capture"><span class="nav-icon"><span data-icon="capture"></span></span><span data-i18n="sectionCapture">Capture</span></a>
+          <a href="#sites" data-section="sites"><span class="nav-icon"><span data-icon="globe"></span></span><span data-i18n="sectionSites">Sites</span></a>
+          <a href="#media" data-section="media"><span class="nav-icon"><span data-icon="media"></span></span><span data-i18n="sectionMedia">Media</span></a>
+          <a href="#notifications" data-section="notifications"><span class="nav-icon"><span data-icon="bell"></span></span><span data-i18n="sectionNotifications">Notifications</span></a>
+          <p class="label nav-group" data-i18n="navGroupIntegration">Integration</p>
+          <a href="#connection" data-section="connection"><span class="nav-icon"><span data-icon="plug"></span></span><span data-i18n="sectionConnection">Connection</span><span class="nav-dot" id="nav-connection-dot" aria-hidden="true"></span></a>
+          <a href="#shortcuts" data-section="shortcuts"><span class="nav-icon"><span data-icon="keyboard"></span></span><span data-i18n="sectionShortcuts">Shortcuts</span></a>
+          <a href="#about" data-section="about"><span class="nav-icon"><span data-icon="info"></span></span><span data-i18n="sectionAbout">About</span></a>
+        </nav>
+      </aside>
+
+      <main class="panel" id="panel" tabindex="-1" aria-labelledby="section-title">
+        <header class="panel-head">
+          <span class="head-icon" id="section-icon" aria-hidden="true"></span>
+          <div class="head-text">
+            <h1 id="section-title">Capture</h1>
+            <p id="section-sub"></p>
+          </div>
+          <span class="save-status" id="save-status" role="status" aria-live="polite"></span>
+        </header>
+        <div class="panel-body" id="section-body"></div>
+      </main>
+    </div>
     <script type="module" src="index.js"></script>
   </body>
 </html>

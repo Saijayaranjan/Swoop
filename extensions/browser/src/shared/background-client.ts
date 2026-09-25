@@ -12,8 +12,20 @@ import type {
   CandidateLink,
   ConnectionStatus,
   DetectedMediaForTab,
+  PageUiConfig,
+  PairRemoteResult,
 } from './messages.ts';
 import type { NewTaskRequest } from './types.ts';
+
+/** An error returned by the background, keeping the API/host error kind when there is one. */
+export class BackgroundError extends Error {
+  readonly kind: string | undefined;
+  constructor(message: string, kind?: string) {
+    super(message);
+    this.name = 'BackgroundError';
+    this.kind = kind;
+  }
+}
 
 async function send<T>(message: BackgroundRequestMessage): Promise<T> {
   const response = (await browser.runtime.sendMessage(message)) as BackgroundResponse<T> | undefined;
@@ -21,7 +33,7 @@ async function send<T>(message: BackgroundRequestMessage): Promise<T> {
     throw new Error('No response from background — try reopening the popup.');
   }
   if (!response.ok) {
-    throw new Error(response.error);
+    throw new BackgroundError(response.error, response.errorKind);
   }
   return response.data;
 }
@@ -60,4 +72,28 @@ export function getActiveTabId(): Promise<number | null> {
 
 export function takePendingBulkLinks(): Promise<CandidateLink[]> {
   return send<CandidateLink[]>({ type: 'take-pending-bulk-links' });
+}
+
+export function pairRemote(url: string, code: string): Promise<PairRemoteResult> {
+  return send<PairRemoteResult>({ type: 'pair-remote', url, code });
+}
+
+export function setRemoteToken(url: string, token: string): Promise<null> {
+  return send<null>({ type: 'set-remote-token', url, token });
+}
+
+export function forgetRemote(): Promise<null> {
+  return send<null>({ type: 'forget-remote' });
+}
+
+export function getPageUiConfig(): Promise<PageUiConfig> {
+  return send<PageUiConfig>({ type: 'get-page-ui-config' });
+}
+
+export function getPageMedia(): Promise<DetectedMediaForTab> {
+  return send<DetectedMediaForTab>({ type: 'get-page-media' });
+}
+
+export function promptAction(promptId: string, action: 'use-browser' | 'always-browser'): Promise<null> {
+  return send<null>({ type: 'prompt-action', promptId, action });
 }

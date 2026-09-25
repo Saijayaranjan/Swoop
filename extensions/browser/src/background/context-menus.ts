@@ -2,8 +2,8 @@
  * Context menus (docs/api/extension.md "Context menus"): link, image, video, audio, page
  * ("Download all links on page…"), and selection ("links in selection"). Single-target clicks
  * (link/image/video/audio) go straight to `POST /tasks`; the two bulk actions gather candidate
- * links from the content script and open the popup's Links tab pre-loaded with them (see
- * `pendingBulkLinks` in `state-bulk.ts` and `src/popup/tabs/links.ts`).
+ * links from the content script and open the popup's links picker pre-loaded with them (see
+ * `pendingBulkLinks` in `state-bulk.ts` and `src/popup/links.ts`).
  */
 
 import browser from 'webextension-polyfill';

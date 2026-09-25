@@ -391,6 +391,10 @@ export function defaultBrowserSettings(): BrowserSettings {
   };
 }
 
+/** How the extension reaches Osprey: the local native-messaging host (default) or a paired
+ *  remote Osprey over HTTPS with a device token. */
+export type ConnectionMode = 'native' | 'remote';
+
 /** Extension-only settings, layered on top of the mirrored `BrowserSettings`. */
 export interface ExtensionSettings extends BrowserSettings {
   /** Per-site "always use browser" (never intercept) — a superset of `excluded_domains`
@@ -398,6 +402,12 @@ export interface ExtensionSettings extends BrowserSettings {
   always_browser_domains: string[];
   notify_on_complete: boolean;
   notify_on_failure: boolean;
+  /** Show the small in-page download button over playing video/audio (needs `detect_media`). */
+  media_button: boolean;
+  connection_mode: ConnectionMode;
+  /** Base URL of a paired remote Osprey (`https://host:41780`). The device token is stored
+   *  separately (src/shared/remote.ts) so it never travels with the settings object. */
+  remote_url: string;
 }
 
 export function defaultExtensionSettings(): ExtensionSettings {
@@ -406,5 +416,8 @@ export function defaultExtensionSettings(): ExtensionSettings {
     always_browser_domains: [],
     notify_on_complete: true,
     notify_on_failure: true,
+    media_button: true,
+    connection_mode: 'native',
+    remote_url: '',
   };
 }

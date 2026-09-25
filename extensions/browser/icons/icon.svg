@@ -1,6 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
-  <circle cx="64" cy="64" r="56" fill="#2f6fed"/>
-  <rect x="58" y="33" width="12" height="38" fill="#ffffff"/>
-  <path d="M64 92 L90 66 L38 66 Z" fill="#ffffff"/>
-  <rect x="26" y="102" width="76" height="9" fill="#ffffff"/>
+  <defs>
+    <linearGradient id="tile" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#409eff"/>
+      <stop offset="1" stop-color="#295ced"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="33" fill="url(#tile)"/>
+  <g transform="translate(15.36 36.7) scale(0.9728)">
+    <path fill="#fff" d="M50 40C56 30 61 15 71 13C81 11 92 16 99 24L90 26.5L94 31L84 30L87 35L77 32.5C67 33 58 42 52 52ZM50 40C44 30 39 15 29 13C19 11 8 16 1 24L10 26.5L6 31L16 30L13 35L23 32.5C33 33 42 42 48 52ZM50 34C53 38 55 45 54 50L50 62L46 50C45 45 47 38 50 34Z"/>
+  </g>
 </svg>

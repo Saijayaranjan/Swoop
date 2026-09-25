@@ -8,7 +8,35 @@ The extension never talks to the Osprey HTTP API directly. It speaks
 [Native Messaging](../../docs/api/native-messaging.md) to the `osprey native-host` binary
 (`chrome.runtime.connectNative("app.osprey.bridge")`), which is a stateless relay onto the local
 REST API (`docs/api/rest.md`) and event stream (`docs/api/websocket.md`). The extension never sees
-the local API token.
+the local API token. Optionally, it can instead be paired with Osprey running on another computer
+(see [Remote connection](#remote-connection)).
+
+## What you see
+
+- **Popup** (`src/popup/`): the Osprey mark with a live connection pill (Connected / Not running
+  with a one-click Launch / Offline), a speed card (download speed set large, upload and active
+  count as chips, fed by `global_stats`), an "add link" field with a paste button (http, https,
+  ftp and magnet links), media found on the current page, and active plus recent downloads with
+  file-type tiles, slim status-coloured progress bars, speed/ETA and pause/resume/retry/cancel/show
+  actions. The footer holds the **Capture downloads** switch (`intercept_downloads`), a links
+  picker for the current page, Open Osprey and Settings. When Osprey can't be used, a small
+  illustrated card explains why and offers the fix (launch the app, install the browser helper, or
+  check the remote connection).
+- **Options** (`src/options/`): a sidebar of sections — Capture, Sites, Media, Notifications,
+  Connection, Shortcuts, About — each a set of grouped cards. The section lives in the URL hash so
+  the popup can deep-link (`options/index.html#connection`). Changes save immediately.
+- **In-page UI** (`src/content/page-ui.ts`), rendered in a closed shadow root so page CSS can't
+  reach it: a small prompt after a download is captured ("Sent to Osprey" with Open Osprey and
+  **Use browser instead**, then an offer to always leave that site to the browser), a "Kept in
+  your browser" note when Osprey isn't running, and a sticky warning if the hand-off failed after
+  the browser's copy was cancelled. Prompts never take focus, pause their timer while hovered or
+  focused, and close with Esc. When enabled, a **Download** button appears over video/audio players
+  (point at the player, or focus it and press Tab) and opens a panel of the page's media.
+
+All three share the tokens in `src/shared-ui/tokens.css` (soft sky/indigo wash, frosted cards, one
+system-blue accent, green/orange/red/grey status colours) and follow `prefers-color-scheme`,
+`prefers-reduced-motion` and `prefers-contrast`. Icons and illustrations are built with
+`createElementNS` from data (`src/shared-ui/icons.ts`, `brand.ts`) rather than parsed markup.
 
 ## Building
 
@@ -23,9 +51,11 @@ npm run lint             # tsc --noEmit (strict)
 npm test                  # node:test, pure modules only
 ```
 
-`npm run build` also (re)generates `icons/*.png` the first time, from `scripts/generate-icons.mjs`
-— a small pure-Node PNG encoder (zlib deflate + hand-rolled CRC32, no image library) that draws a
-filled circle with the Osprey accent colour and a simple download glyph at 16/32/48/128px.
+`npm run build` also (re)generates `icons/*.png` when they are missing, from
+`scripts/generate-icons.mjs` — a small pure-Node PNG encoder (zlib deflate + hand-rolled CRC32, no
+image library) that rasterises the Osprey mark (the wing glyph on a blue tile, with supersampled
+anti-aliasing) at 16/32/48/128px. `npm run icons` regenerates them on demand. The popup and options
+stylesheets are bundled by esbuild so they can `@import` the shared tokens.
 
 ## Loading it unpacked
 
@@ -98,11 +128,12 @@ session.
   entries per tab, and clears a tab's entries on top-frame navigation.
 - **Page-level** (`src/content/index.ts`): scans `<a href>`, `<video>`/`<audio>`/`<source>`,
   `<img>` (large only, ≥300px in either dimension) and `link[rel~="alternate"]` playlist links, on
-  demand only (`{type:"scan"}` / `{type:"scan-selection"}` — the content script never runs
-  unprompted and never injects any UI into the page).
-- The popup's **Detected media** tab merges both sources, deduped by URL, and enriches any
+  demand only (`{type:"scan"}` / `{type:"scan-selection"}`). Separately, the content script shows
+  the in-page UI described above; it asks the background for its settings (`get-page-ui-config`)
+  only once a player is pointed at or focused, so pages without media never message it.
+- The popup's **On this page** section merges both sources, deduped by URL, and enriches any
   `.m3u8` entries with real variants/resolution/estimated size via `POST /api/v1/media/detect`
-  once, when the tab is opened.
+  once, when the popup opens.
 - **DRM**: `navigator.requestMediaKeySystemAccess` calls cannot be observed from a content script,
   so instead we flag `<video>`/`<audio>` elements whose resolved `src` is a `blob:` URL (the
   universal pattern behind MSE/EME playback) and elements that fire the `encrypted` event, both as
@@ -136,12 +167,31 @@ in-flight download.
 | `host_permissions: ["<all_urls>"]` | Required by `webRequest.onHeadersReceived` to observe response headers on arbitrary sites for media detection, and by the content script to scan any page. No page content is ever sent anywhere except a same-machine native-messaging relay. |
 | `commands` | `Alt+Shift+D` — send the current page URL to Osprey. |
 
+## Remote connection
+
+Options → **Connection** → *Another computer* pairs the extension with an Osprey whose remote
+listener is on (docs/api/rest.md): enter its `https://` address and a one-time pairing code from
+that Osprey (`POST /api/v1/pair`), or paste a device token. The token is stored under its own
+`storage.local` key, never in the settings object, and where the browser supports it (Chrome/Edge)
+`storage.local` is restricted to trusted contexts; content scripts never read storage themselves. Requests then go over HTTPS with the bearer
+token (`src/background/remote-client.ts`) and live events over the WebSocket stream; plain `http:`
+is refused except for loopback addresses. Captured downloads, including their cookies, are sent to
+that computer. *This computer* (the default) switches back to native messaging.
+
+## Message hardening
+
+Content scripts run inside arbitrary pages, so the background only accepts a small set of request
+types from them (`CONTENT_SCRIPT_MESSAGE_TYPES` in `src/shared/messages.ts`: page UI config, the
+sender tab's detected media, quick download, launch, and in-page prompt actions). Raw API requests,
+pairing and everything else are accepted from the extension's own pages only.
+
 ## Privacy
 
 Nothing the extension sees — page content, detected media, cookies, download URLs — leaves the
-machine. The only outbound channel is native messaging to the locally-installed `osprey
-native-host` process, which itself only relays to the local Osprey API over a Unix socket / loopback
-TCP. The extension stores only its own settings and site exclusions (`browser.storage.local`) and a
+machine, unless you pair it with a remote Osprey (above), in which case it goes only to that
+Osprey over HTTPS. Otherwise the only outbound channel is native messaging to the locally-installed
+`osprey native-host` process, which itself only relays to the local Osprey API over a Unix socket /
+loopback TCP. The extension stores only its own settings and site exclusions (`browser.storage.local`) and a
 small amount of session-scoped resilience state (`browser.storage.session`, cleared on browser
 restart). There is no analytics, telemetry, or remote code — every script shipped is bundled from
 this repository at build time (`npm run build`).
@@ -149,10 +199,11 @@ this repository at build time (`npm run build`).
 ## Internationalisation
 
 All user-visible strings live in `_locales/<lang>/messages.json`, read exclusively through
-`src/shared/i18n.ts`. `en` is authoritative; `hi` and `ta` are scaffolds — identical keys, English
-fallback text, each message's `description` prefixed `[fallback: needs translation]` — generated
-from one source of truth by `scripts/build-locales.mjs` so the three locales can never drift out of
-key-sync.
+`src/shared/i18n.ts`. English is authoritative; Hindi (`hi`) and Tamil (`ta`) are full translations.
+All three are generated from one source of truth by `scripts/build-locales.mjs` (`npm run locales`)
+so they can never drift out of key-sync: a key without a translation falls back to English with its
+`description` marked `[fallback: needs translation]`. Substitutions are written `$1` in the source
+and emitted as named placeholders.
 
 ## Tests
 
@@ -161,7 +212,8 @@ strips types natively — no ts-node, no build step). Coverage focuses on pure, 
 modules: interception decisions and exclusion matching (`url-utils`), media classification
 (`media-classify`), cookie header building (`cookie-utils`), settings persistence against a fake
 `storage.local`-shaped object (`settings`), and native-messaging request/response correlation,
-timeouts, and event fan-out against a fake transport (`api-client`, `native-protocol`).
+timeouts, and event fan-out against a fake transport (`api-client`, `native-protocol`), byte and
+speed formatting (`format`), and remote URL / pairing-code validation (`remote`).
 
 ## Known limitations
 
@@ -181,9 +233,14 @@ timeouts, and event fan-out against a fake transport (`api-client`, `native-prot
 - **`action.openPopup()` for bulk link picking**: "Download all links on page…" and "…in
   selection" try `browser.action.openPopup()` (Chrome 99+ / Firefox 118+) and fall back to opening
   the popup HTML in a normal tab when it's unavailable or rejected (it requires a very recent user
-  gesture in some engines); either way the gathered links land in `storage.session` for the Links
-  tab to pick up.
+  gesture in some engines); either way the gathered links land in `storage.session` for the popup's
+  links picker to pick up.
 - **HLS variant estimated sizes** depend entirely on what `POST /api/v1/media/detect` returns;
   the extension does not parse playlists itself.
-- **hi/ta locales are untranslated scaffolds**, not real translations — see Internationalisation
-  above.
+- **Paste button**: reading the clipboard needs a permission the extension doesn't request, so
+  when the browser refuses, the popup focuses the field and asks for ⌘V / Ctrl+V instead.
+- **In-page prompts target the active tab**: the `downloads` API doesn't say which tab started a
+  download, so the prompt appears in the focused window's active tab (nothing is shown on pages
+  without a content script, such as the browser's own pages).
+- **Remote Osprey with its own certificate**: the browser must trust the remote listener's TLS
+  certificate; open the address in a tab once and accept it before pairing.

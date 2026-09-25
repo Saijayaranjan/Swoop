@@ -3,73 +3,139 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
     <title>Osprey</title>
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
-    <header class="topbar">
-      <div class="brand">
-        <img src="../icons/icon32.png" alt="" width="20" height="20" />
-        <span data-i18n="extensionName">Osprey</span>
+    <div class="popup" id="popup">
+      <header class="top">
+        <div class="brand">
+          <span id="brand-mark"></span>
+          <span class="brand-name" data-i18n="extensionName">Osprey</span>
+        </div>
+        <div id="status" class="status-pill is-checking" role="status" aria-live="polite">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="status-text" data-i18n="statusChecking">Checking…</span>
+        </div>
+      </header>
+
+      <section class="speed card" id="speed" aria-labelledby="speed-label">
+        <div class="speed-main">
+          <div class="speed-figure">
+            <span class="speed-arrow" aria-hidden="true"><span data-icon="arrowDown"></span></span>
+            <span class="numeral speed-value" id="speed-down">0</span>
+            <span class="speed-unit" id="speed-down-unit">KB/s</span>
+          </div>
+          <p class="label" id="speed-label" data-i18n="speedDownload">Download</p>
+        </div>
+        <div class="speed-chips">
+          <span class="chip-stat" id="speed-up-chip">
+            <span data-icon="arrowUp" class="up"></span>
+            <span class="numeral" id="speed-up">0 KB/s</span>
+          </span>
+          <span class="chip-stat" id="active-chip">
+            <span class="pulse" aria-hidden="true"></span>
+            <span id="active-count">0 active</span>
+          </span>
+        </div>
+      </section>
+
+      <form class="add-link" id="add-link" novalidate>
+        <label class="sr-only" for="add-link-input" data-i18n="addLinkLabel">Add a link</label>
+        <span data-icon="link" class="add-link-icon"></span>
+        <input
+          id="add-link-input"
+          class="add-link-input"
+          type="text"
+          inputmode="url"
+          autocomplete="off"
+          spellcheck="false"
+          placeholder="Paste a link and press Return"
+          data-i18n-placeholder="addLinkPlaceholder"
+        />
+        <button type="button" class="icon-btn" id="paste-btn" aria-label="Paste" title="Paste" data-i18n-aria="actionPaste" data-i18n-title="actionPaste">
+          <span data-icon="paste"></span>
+        </button>
+        <button type="submit" class="icon-btn filled" id="add-btn" aria-label="Download" title="Download" data-i18n-aria="actionDownload" data-i18n-title="actionDownload" hidden>
+          <span data-icon="arrowDown"></span>
+        </button>
+      </form>
+
+      <div class="scroll" id="scroll">
+        <div id="offline" class="state-card card" hidden></div>
+
+        <section id="media-section" class="section" aria-labelledby="media-heading" hidden>
+          <div class="section-head">
+            <h2 class="label" id="media-heading" data-i18n="sectionOnThisPage">On this page</h2>
+            <span class="count-pill" id="media-count"></span>
+            <button type="button" class="more-btn" id="media-more" aria-controls="media-list" hidden></button>
+          </div>
+          <ul class="list card" id="media-list"></ul>
+        </section>
+
+        <section id="downloads-section" class="section" aria-labelledby="downloads-heading">
+          <div class="section-head">
+            <h2 class="label" id="downloads-heading" data-i18n="tabDownloads">Downloads</h2>
+            <span class="count-pill" id="downloads-count" hidden></span>
+          </div>
+          <ul class="list card" id="downloads-list" hidden></ul>
+          <div id="downloads-empty" class="empty" hidden></div>
+        </section>
       </div>
-      <div id="status" class="status" role="status" aria-live="polite"></div>
-    </header>
 
-    <div role="tablist" aria-label="Osprey" class="tabs">
-      <button
-        type="button"
-        role="tab"
-        id="tab-media"
-        aria-controls="panel-media"
-        aria-selected="true"
-        tabindex="0"
-        data-i18n="tabDetectedMedia"
-      >
-        Detected media
-      </button>
-      <button
-        type="button"
-        role="tab"
-        id="tab-links"
-        aria-controls="panel-links"
-        aria-selected="false"
-        tabindex="-1"
-        data-i18n="tabLinks"
-      >
-        Links on page
-      </button>
-      <button
-        type="button"
-        role="tab"
-        id="tab-downloads"
-        aria-controls="panel-downloads"
-        aria-selected="false"
-        tabindex="-1"
-        data-i18n="tabDownloads"
-      >
-        Downloads
-      </button>
-      <button
-        type="button"
-        role="tab"
-        id="tab-settings"
-        aria-controls="panel-settings"
-        aria-selected="false"
-        tabindex="-1"
-        data-i18n="tabSettings"
-      >
-        Settings
-      </button>
+      <footer class="foot">
+        <label class="capture" for="capture-toggle">
+          <input type="checkbox" class="switch" id="capture-toggle" role="switch" aria-labelledby="capture-title" aria-describedby="capture-sub" />
+          <span class="capture-text">
+            <span class="capture-title" id="capture-title" data-i18n="captureDownloads">Capture downloads</span>
+            <span class="capture-sub" id="capture-sub" data-i18n="captureOnHint">Matching downloads go to Osprey</span>
+          </span>
+        </label>
+        <div class="foot-actions">
+          <button type="button" class="icon-btn" id="links-btn" aria-label="Links on this page" title="Links on this page" data-i18n-aria="linksOnPage" data-i18n-title="linksOnPage">
+            <span data-icon="link"></span>
+          </button>
+          <button type="button" class="icon-btn" id="open-app-btn" aria-label="Open Osprey" title="Open Osprey" data-i18n-aria="actionOpenApp" data-i18n-title="actionOpenApp">
+            <span data-icon="open"></span>
+          </button>
+          <button type="button" class="icon-btn" id="settings-btn" aria-label="Settings" title="Settings" data-i18n-aria="tabSettings" data-i18n-title="tabSettings">
+            <span data-icon="settings"></span>
+          </button>
+        </div>
+      </footer>
+
+      <section class="sheet" id="links-view" aria-labelledby="links-title" hidden>
+        <header class="sheet-head">
+          <button type="button" class="icon-btn" id="links-back" aria-label="Back" title="Back" data-i18n-aria="actionBack" data-i18n-title="actionBack">
+            <span data-icon="chevronLeft"></span>
+          </button>
+          <h2 class="sheet-title" id="links-title" data-i18n="linksOnPage">Links on this page</h2>
+          <span class="count-pill" id="links-count"></span>
+        </header>
+        <div class="sheet-tools">
+          <label class="check-row">
+            <input type="checkbox" id="links-all" />
+            <span data-i18n="selectAll">Select all</span>
+          </label>
+          <label class="filter-chip">
+            <input type="checkbox" id="links-likely" />
+            <span data-i18n="likelyDownloadsOnly">Likely downloads</span>
+          </label>
+        </div>
+        <div class="sheet-body" id="links-body"></div>
+        <footer class="sheet-foot">
+          <span class="sheet-foot-note" id="links-selected" aria-live="polite"></span>
+          <button type="button" class="btn" id="links-queue" data-i18n="actionQueue">Queue</button>
+          <button type="button" class="btn primary" id="links-download">
+            <span data-icon="arrowDown"></span>
+            <span id="links-download-label" data-i18n="actionDownload">Download</span>
+          </button>
+        </footer>
+      </section>
+
+      <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
     </div>
-
-    <main>
-      <section role="tabpanel" id="panel-media" aria-labelledby="tab-media" class="panel"></section>
-      <section role="tabpanel" id="panel-links" aria-labelledby="tab-links" class="panel" hidden></section>
-      <section role="tabpanel" id="panel-downloads" aria-labelledby="tab-downloads" class="panel" hidden></section>
-      <section role="tabpanel" id="panel-settings" aria-labelledby="tab-settings" class="panel" hidden></section>
-    </main>
-
-    <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
 
     <script type="module" src="index.js"></script>
   </body>

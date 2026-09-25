@@ -1,6 +1,6 @@
 /**
  * One-shot handoff of candidate links from a "Download all links on page…" / "…in selection"
- * context-menu action to the popup's Links tab, via `storage.session` (survives the popup opening
+ * context-menu action to the popup's links picker, via `storage.session` (survives the popup opening
  * in a fresh script context, cleared once the popup consumes it).
  */
 

@@ -19,6 +19,7 @@ import { registerPopupPort } from './popup-port.ts';
 import { handleEventForBadge, updateBadge } from './badge.ts';
 import { handleEventForNotifications } from './notifications.ts';
 import { loadSessionState } from './state.ts';
+import { REMOTE_TOKEN_KEY, normalizeRemoteUrl } from '../shared/remote.ts';
 import type { OspreyEvent } from '../shared/types.ts';
 
 const NATIVE_EVENTS = [
@@ -42,7 +43,13 @@ registerDownloadInterception({ nativePort, settingsStore });
 registerContextMenuHandlers(nativePort);
 registerCommands(nativePort);
 registerMessageRouter({ nativePort, mediaDetector, settingsStore });
-registerPopupPort(nativePort);
+// High-volume `progress` events are only worth their cost while a popup is watching.
+registerPopupPort(nativePort, {
+  onOpenCountChange(count) {
+    const events = count > 0 ? [...NATIVE_EVENTS, 'progress'] : NATIVE_EVENTS;
+    nativePort.subscribe(events).catch(() => {});
+  },
+});
 
 browser.runtime.onInstalled.addListener(() => {
   createContextMenus();
@@ -59,6 +66,42 @@ nativePort.onEvent((rawEvent) => {
   }
 });
 
+// Keep extension storage (settings and the remote device token) out of reach of content scripts,
+// which run inside web pages. They get the little they need via messages instead. Chrome/Edge
+// only; Firefox has no per-area access levels.
+try {
+  const localArea = (globalThis as { chrome?: { storage?: { local?: {
+    setAccessLevel?: (options: { accessLevel: string }) => Promise<void> | void;
+  } } } }).chrome?.storage?.local;
+  void Promise.resolve(localArea?.setAccessLevel?.({ accessLevel: 'TRUSTED_CONTEXTS' })).catch(() => {});
+} catch {
+  // Not supported here: content scripts still never touch storage themselves.
+}
+
+/** Point the connection at the local native host or the paired remote Osprey, per settings. */
+async function configureConnection(): Promise<void> {
+  const settings = await settingsStore.get();
+  if (settings.connection_mode !== 'remote') {
+    nativePort.useRemote(null);
+    return;
+  }
+  const stored = await browser.storage.local.get(REMOTE_TOKEN_KEY);
+  const token = stored[REMOTE_TOKEN_KEY];
+  const baseUrl = normalizeRemoteUrl(settings.remote_url);
+  if (typeof token === 'string' && token.length > 0 && baseUrl) {
+    nativePort.useRemote({ baseUrl, token });
+  } else {
+    nativePort.useRemote(null);
+  }
+}
+
+settingsStore.onChange(() => {
+  void configureConnection();
+});
+browser.storage.onChanged.addListener((changes, area) => {
+  if (area === 'local' && REMOTE_TOKEN_KEY in changes) void configureConnection();
+});
+
 // --- Async startup work --------------------------------------------------------------------
 
 void (async () => {
@@ -66,6 +109,8 @@ void (async () => {
   // `global_stats` tick after a service-worker restart.
   const session = await loadSessionState();
   await updateBadge(session.badgeCount);
+
+  await configureConnection().catch(() => {});
 
   // Keep retrying (with backoff) as long as the extension is alive: this is also what keeps an
   // MV3 service worker from being suspended while Osprey is actively reporting progress.

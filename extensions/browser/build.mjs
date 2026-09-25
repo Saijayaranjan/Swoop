@@ -5,7 +5,8 @@
  * For each target this:
  *   1. bundles the TypeScript entry points with esbuild,
  *   2. merges `manifests/base.json` with `manifests/<target>.json` into `dist/<target>/manifest.json`,
- *   3. copies static assets (icons, popup/options HTML+CSS, `_locales`).
+ *   3. bundles the popup/options stylesheets (which `@import` the shared design tokens in
+ *      src/shared-ui/tokens.css) and copies static assets (icons, HTML, `_locales`).
  *
  * Usage: `node build.mjs chrome firefox edge [--watch]`
  */
@@ -60,11 +61,9 @@ function copyStaticAssets(target) {
 
   mkdirSync(path.join(distDir, 'popup'), { recursive: true });
   cpSync(path.join(ROOT, 'src', 'popup', 'index.html'), path.join(distDir, 'popup', 'index.html'));
-  cpSync(path.join(ROOT, 'src', 'popup', 'popup.css'), path.join(distDir, 'popup', 'popup.css'));
 
   mkdirSync(path.join(distDir, 'options'), { recursive: true });
   cpSync(path.join(ROOT, 'src', 'options', 'index.html'), path.join(distDir, 'options', 'index.html'));
-  cpSync(path.join(ROOT, 'src', 'options', 'options.css'), path.join(distDir, 'options', 'options.css'));
 
   cpSync(path.join(ROOT, '_locales'), path.join(distDir, '_locales'), { recursive: true });
 }
@@ -110,6 +109,20 @@ function bundleConfigsFor(target) {
       outfile: path.join(outDir, 'options', 'index.js'),
       format: 'esm',
       platform: 'browser',
+    },
+    {
+      bundle: true,
+      logLevel: 'info',
+      target: ['chrome116', 'firefox121'],
+      entryPoints: [path.join(ROOT, 'src', 'popup', 'popup.css')],
+      outfile: path.join(outDir, 'popup', 'popup.css'),
+    },
+    {
+      bundle: true,
+      logLevel: 'info',
+      target: ['chrome116', 'firefox121'],
+      entryPoints: [path.join(ROOT, 'src', 'options', 'options.css')],
+      outfile: path.join(outDir, 'options', 'options.css'),
     },
   ];
 }

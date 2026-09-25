@@ -1,10 +1,7 @@
 #!/usr/bin/env node
 // Generates the extension's PNG icons at build time using only Node's built-in `zlib` module —
-// no third-party image library. Draws a filled circle in the Osprey accent colour on a
-// transparent background, anti-aliased at the edge, for each required icon size.
-//
-// This keeps `icons/*.png` out of source control (see icons/README noted in build.mjs) while
-// still producing real, valid PNGs that Chrome/Firefox/Edge can load as action/toolbar icons.
+// no third-party image library. Draws the Osprey mark — the wing glyph on a blue tile, the same
+// artwork as the desktop app and src/shared-ui/brand.ts — with supersampled anti-aliasing.
 
 import { deflateSync } from 'node:zlib';
 import { writeFileSync, mkdirSync } from 'node:fs';
@@ -14,8 +11,14 @@ import path from 'node:path';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ICONS_DIR = path.join(__dirname, '..', 'icons');
 
-/** Osprey accent colour (brand blue). */
-const ACCENT = { r: 0x2f, g: 0x6f, b: 0xed };
+/** Tile gradient, top-left to bottom-right (matches `.mark` in src/shared-ui/tokens.css). */
+const TILE_FROM = { r: 0x40, g: 0x9e, b: 0xff };
+const TILE_TO = { r: 0x29, g: 0x5c, b: 0xed };
+/** The wing glyph on a 100×64 grid (kept in sync with WING_PATH in src/shared-ui/brand.ts). */
+const WING_PATH =
+  'M50 40C56 30 61 15 71 13C81 11 92 16 99 24L90 26.5L94 31L84 30L87 35L77 32.5C67 33 58 42 52 52Z' +
+  'M50 40C44 30 39 15 29 13C19 11 8 16 1 24L10 26.5L6 31L16 30L13 35L23 32.5C33 33 42 42 48 52Z' +
+  'M50 34C53 38 55 45 54 50L50 62L46 50C45 45 47 38 50 34Z';
 const SIZES = [16, 32, 48, 128];
 
 // --- Minimal PNG encoder -------------------------------------------------------------------
@@ -80,78 +83,99 @@ function encodePng(width, height, rgba) {
 
 // --- Drawing ---------------------------------------------------------------------------------
 
-/** Filled circle with a soft anti-aliased edge, centred, ~88% of the canvas diameter. */
+/** Parses the absolute M/C/L/Z path above into closed polygons, flattening each curve. */
+function wingPolygons() {
+  const tokens = WING_PATH.match(/[MCLZ]|-?\d*\.?\d+/g) ?? [];
+  const polygons = [];
+  let current = [];
+  let i = 0;
+  const num = () => Number(tokens[i++]);
+  while (i < tokens.length) {
+    const cmd = tokens[i++];
+    if (cmd === 'M') {
+      current = [[num(), num()]];
+    } else if (cmd === 'L') {
+      current.push([num(), num()]);
+    } else if (cmd === 'C') {
+      const [x0, y0] = current[current.length - 1];
+      const x1 = num(), y1 = num(), x2 = num(), y2 = num(), x3 = num(), y3 = num();
+      for (let s = 1; s <= 24; s++) {
+        const t = s / 24;
+        const u = 1 - t;
+        current.push([
+          u * u * u * x0 + 3 * u * u * t * x1 + 3 * u * t * t * x2 + t * t * t * x3,
+          u * u * u * y0 + 3 * u * u * t * y1 + 3 * u * t * t * y2 + t * t * t * y3,
+        ]);
+      }
+    } else if (cmd === 'Z') {
+      polygons.push(current);
+    }
+  }
+  return polygons;
+}
+
+function insidePolygon(poly, x, y) {
+  let winding = 0;
+  for (let k = 0, j = poly.length - 1; k < poly.length; j = k++) {
+    const [xi, yi] = poly[k];
+    const [xj, yj] = poly[j];
+    if (yj <= y) {
+      if (yi > y && (xi - xj) * (y - yj) - (x - xj) * (yi - yj) > 0) winding += 1;
+    } else if (yi <= y && (xi - xj) * (y - yj) - (x - xj) * (yi - yj) < 0) {
+      winding -= 1;
+    }
+  }
+  return winding !== 0;
+}
+
+function insideRoundedRect(x, y, size, radius) {
+  const cx = Math.min(Math.max(x, radius), size - radius);
+  const cy = Math.min(Math.max(y, radius), size - radius);
+  return (x - cx) ** 2 + (y - cy) ** 2 <= radius * radius;
+}
+
+/** The mark: a full-bleed rounded tile with the white wing glyph centred on it. */
 function drawIcon(size) {
   const rgba = Buffer.alloc(size * size * 4);
-  const cx = (size - 1) / 2;
-  const cy = (size - 1) / 2;
-  const r = size * 0.44;
-  const featherStart = r - 1;
+  const polygons = wingPolygons();
+  const radius = size * 0.26;
+  const glyphW = size * 0.76;
+  const glyphH = glyphW * 0.64;
+  const gx = (size - glyphW) / 2;
+  const gy = (size - glyphH) / 2 + size * 0.03;
+  const samples = size <= 32 ? 8 : 4;
 
   for (let y = 0; y < size; y++) {
     for (let x = 0; x < size; x++) {
-      const dx = x - cx;
-      const dy = y - cy;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-      let alpha = 0;
-      if (dist <= featherStart) {
-        alpha = 255;
-      } else if (dist <= r) {
-        alpha = Math.round(255 * (1 - (dist - featherStart) / (r - featherStart)));
+      let tile = 0;
+      let glyph = 0;
+      for (let sy = 0; sy < samples; sy++) {
+        for (let sx = 0; sx < samples; sx++) {
+          const px = x + (sx + 0.5) / samples;
+          const py = y + (sy + 0.5) / samples;
+          if (!insideRoundedRect(px, py, size, radius)) continue;
+          tile += 1;
+          const ux = ((px - gx) / glyphW) * 100;
+          const uy = ((py - gy) / glyphH) * 64;
+          if (ux >= 0 && ux <= 100 && uy >= 0 && uy <= 64 && polygons.some((p) => insidePolygon(p, ux, uy))) glyph += 1;
+        }
       }
+      const total = samples * samples;
+      const t = (x + y) / (2 * size);
+      const base = {
+        r: TILE_FROM.r + (TILE_TO.r - TILE_FROM.r) * t,
+        g: TILE_FROM.g + (TILE_TO.g - TILE_FROM.g) * t,
+        b: TILE_FROM.b + (TILE_TO.b - TILE_FROM.b) * t,
+      };
+      const g = tile > 0 ? glyph / tile : 0;
       const i = (y * size + x) * 4;
-      rgba[i] = ACCENT.r;
-      rgba[i + 1] = ACCENT.g;
-      rgba[i + 2] = ACCENT.b;
-      rgba[i + 3] = alpha;
+      rgba[i] = Math.round(base.r + (255 - base.r) * g);
+      rgba[i + 1] = Math.round(base.g + (255 - base.g) * g);
+      rgba[i + 2] = Math.round(base.b + (255 - base.b) * g);
+      rgba[i + 3] = Math.round((255 * tile) / total);
     }
   }
-
-  // A simple downward "arrow into a tray" glyph in white, scaled to the icon — evokes a
-  // download manager without needing any vector/image library.
-  const glyphColor = { r: 255, g: 255, b: 255 };
-  const stemWidth = Math.max(1, Math.round(size * 0.09));
-  const stemTop = size * 0.26;
-  const stemBottom = size * 0.56;
-  const stemCx = cx;
-  for (let y = Math.round(stemTop); y <= Math.round(stemBottom); y++) {
-    for (let x = Math.round(stemCx - stemWidth / 2); x <= Math.round(stemCx + stemWidth / 2); x++) {
-      setPixelIfInside(rgba, size, x, y, glyphColor, 255);
-    }
-  }
-  // Arrow head (triangle) under the stem.
-  const headHalf = size * 0.2;
-  const headTop = stemBottom;
-  const headBottom = size * 0.72;
-  for (let y = Math.round(headTop); y <= Math.round(headBottom); y++) {
-    const t = (y - headTop) / (headBottom - headTop);
-    const half = headHalf * (1 - t);
-    for (let x = Math.round(stemCx - half); x <= Math.round(stemCx + half); x++) {
-      setPixelIfInside(rgba, size, x, y, glyphColor, 255);
-    }
-  }
-  // Base tray line.
-  const trayY = Math.round(size * 0.8);
-  const trayHalf = size * 0.3;
-  const trayThickness = Math.max(1, Math.round(size * 0.07));
-  for (let y = trayY; y < trayY + trayThickness; y++) {
-    for (let x = Math.round(stemCx - trayHalf); x <= Math.round(stemCx + trayHalf); x++) {
-      setPixelIfInside(rgba, size, x, y, glyphColor, 255);
-    }
-  }
-
   return rgba;
-}
-
-function setPixelIfInside(rgba, size, x, y, color, alpha) {
-  if (x < 0 || y < 0 || x >= size || y >= size) return;
-  const i = (y * size + x) * 4;
-  const existingAlpha = rgba[i + 3] ?? 0;
-  if (existingAlpha === 0) return; // stay within the circle background
-  rgba[i] = color.r;
-  rgba[i + 1] = color.g;
-  rgba[i + 2] = color.b;
-  rgba[i + 3] = alpha;
 }
 
 function main() {

@@ -1,4 +1,7 @@
 {
+  "localeCode": {
+    "message": "en"
+  },
   "extensionName": {
     "message": "Osprey"
   },
@@ -7,120 +10,6 @@
   },
   "commandSendPageUrl": {
     "message": "Send the current page's URL to Osprey"
-  },
-  "tabDetectedMedia": {
-    "message": "Detected media"
-  },
-  "tabLinks": {
-    "message": "Links on page"
-  },
-  "tabDownloads": {
-    "message": "Downloads"
-  },
-  "tabSettings": {
-    "message": "Settings"
-  },
-  "optionsSubtitle": {
-    "message": "Browser integration settings"
-  },
-  "statusConnectedPrefix": {
-    "message": "Osprey"
-  },
-  "statusConnected": {
-    "message": "connected"
-  },
-  "statusNotRunning": {
-    "message": "Osprey not running"
-  },
-  "actionDownload": {
-    "message": "Download"
-  },
-  "actionQueue": {
-    "message": "Queue"
-  },
-  "actionCopyUrl": {
-    "message": "Copy URL"
-  },
-  "actionOpenSource": {
-    "message": "Open source"
-  },
-  "actionPause": {
-    "message": "Pause"
-  },
-  "actionResume": {
-    "message": "Resume"
-  },
-  "actionCancel": {
-    "message": "Cancel"
-  },
-  "actionLaunch": {
-    "message": "Launch"
-  },
-  "toastDownloadStarted": {
-    "message": "Download started"
-  },
-  "toastQueued": {
-    "message": "Queued"
-  },
-  "toastCopied": {
-    "message": "Copied"
-  },
-  "toastLaunching": {
-    "message": "Launching Osprey…"
-  },
-  "loading": {
-    "message": "Loading…"
-  },
-  "loadFailed": {
-    "message": "Could not load downloads."
-  },
-  "scanFailed": {
-    "message": "Could not scan this page."
-  },
-  "noActiveTab": {
-    "message": "No active tab."
-  },
-  "noMediaDetected": {
-    "message": "No media detected on this page yet."
-  },
-  "noLinksFound": {
-    "message": "No links found on this page."
-  },
-  "noActiveDownloads": {
-    "message": "No active downloads."
-  },
-  "notDownloadable": {
-    "message": "Not downloadable"
-  },
-  "likelyDownload": {
-    "message": "Likely download"
-  },
-  "quality": {
-    "message": "Quality"
-  },
-  "eta": {
-    "message": "ETA"
-  },
-  "remove": {
-    "message": "Remove"
-  },
-  "mediaKindVideo": {
-    "message": "Video"
-  },
-  "mediaKindAudio": {
-    "message": "Audio"
-  },
-  "mediaKindImage": {
-    "message": "Image"
-  },
-  "mediaKindHls": {
-    "message": "HLS"
-  },
-  "mediaKindDash": {
-    "message": "DASH"
-  },
-  "mediaKindUnknown": {
-    "message": "Media"
   },
   "menuDownloadLink": {
     "message": "Download with Osprey"
@@ -146,55 +35,761 @@
   "notificationFailedTitle": {
     "message": "Download failed"
   },
-  "settingInterceptDownloads": {
-    "message": "Intercept browser downloads"
+  "statusChecking": {
+    "message": "Checking…"
   },
-  "settingMinSize": {
-    "message": "Minimum size to intercept (MB)"
+  "statusConnectedShort": {
+    "message": "Connected"
   },
-  "settingExtensions": {
-    "message": "File extensions to intercept"
+  "statusNotRunningShort": {
+    "message": "Not running"
   },
-  "settingExcludedDomains": {
-    "message": "Never intercept on these domains"
+  "statusOffline": {
+    "message": "Offline"
   },
-  "settingExcludedPatterns": {
-    "message": "Never intercept matching URL patterns"
+  "statusRefused": {
+    "message": "Not paired"
   },
-  "settingAlwaysBrowser": {
-    "message": "Always use the browser's own download on these sites"
+  "statusNotConnected": {
+    "message": "Not connected"
   },
-  "settingDetectMedia": {
-    "message": "Detect playable media on pages"
+  "statusThisComputer": {
+    "message": "this computer"
   },
-  "settingShowConfirmation": {
-    "message": "Show a confirmation toast when a download is sent"
+  "statusRemote": {
+    "message": "remote"
   },
-  "settingNotifyComplete": {
-    "message": "Notify when a download completes"
+  "speedDownload": {
+    "message": "Download"
   },
-  "settingNotifyFailure": {
-    "message": "Notify when a download fails"
+  "activeCount": {
+    "message": "$ARG1$ active",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
   },
-  "addExtensionPlaceholder": {
-    "message": "Add extension, press Enter"
+  "speedSummary": {
+    "message": "Downloading at $ARG1$, uploading at $ARG2$, $ARG3$ active",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      },
+      "arg3": {
+        "content": "$3"
+      }
+    }
   },
-  "addDomainPlaceholder": {
-    "message": "example.com, press Enter"
+  "addLinkLabel": {
+    "message": "Add a link"
   },
-  "addPatternPlaceholder": {
-    "message": "https://*/ads/*, press Enter"
+  "addLinkPlaceholder": {
+    "message": "Paste a link and press Return"
   },
-  "urlPatternHint": {
-    "message": "Wildcards (*) allowed."
+  "sectionOnThisPage": {
+    "message": "On this page"
   },
-  "saving": {
-    "message": "Saving…"
+  "tabDownloads": {
+    "message": "Downloads"
+  },
+  "tabSettings": {
+    "message": "Settings"
+  },
+  "showAll": {
+    "message": "Show all"
+  },
+  "showLess": {
+    "message": "Show less"
+  },
+  "sizeOfWord": {
+    "message": "of"
+  },
+  "emptyTitle": {
+    "message": "Nothing downloading"
+  },
+  "emptyBody": {
+    "message": "Paste a link above, or just click a download link — Osprey will pick it up."
+  },
+  "captureDownloads": {
+    "message": "Capture downloads"
+  },
+  "captureOnHint": {
+    "message": "Matching downloads go to Osprey"
+  },
+  "captureOffHint": {
+    "message": "Your browser keeps every download"
+  },
+  "linksOnPage": {
+    "message": "Links on this page"
+  },
+  "selectAll": {
+    "message": "Select all"
+  },
+  "likelyDownloadsOnly": {
+    "message": "Likely downloads"
+  },
+  "selectedCount": {
+    "message": "$ARG1$ of $ARG2$ selected",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      },
+      "arg2": {
+        "content": "$2"
+      }
+    }
+  },
+  "downloadCount": {
+    "message": "Download $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "noLinksFound": {
+    "message": "No links found on this page."
+  },
+  "noLikelyLinks": {
+    "message": "No obvious downloads here"
+  },
+  "noLikelyLinksBody": {
+    "message": "Turn off “Likely downloads” to see every link."
+  },
+  "scanFailed": {
+    "message": "Could not scan this page."
+  },
+  "notDownloadable": {
+    "message": "Not downloadable"
+  },
+  "protectedShort": {
+    "message": "Protected"
+  },
+  "quality": {
+    "message": "Quality"
+  },
+  "flagSent": {
+    "message": "Sent"
+  },
+  "actionDownload": {
+    "message": "Download"
+  },
+  "actionDownloadWithOsprey": {
+    "message": "Download with Osprey"
+  },
+  "actionQueue": {
+    "message": "Queue"
+  },
+  "actionCopyUrl": {
+    "message": "Copy URL"
+  },
+  "actionPause": {
+    "message": "Pause"
+  },
+  "actionResume": {
+    "message": "Resume"
+  },
+  "actionRetry": {
+    "message": "Retry"
+  },
+  "actionCancel": {
+    "message": "Cancel"
+  },
+  "actionLaunch": {
+    "message": "Launch"
+  },
+  "actionLaunchApp": {
+    "message": "Launch Osprey"
+  },
+  "actionOpenApp": {
+    "message": "Open Osprey"
+  },
+  "actionShowInApp": {
+    "message": "Show in Osprey"
+  },
+  "actionPaste": {
+    "message": "Paste"
+  },
+  "actionBack": {
+    "message": "Back"
+  },
+  "actionClose": {
+    "message": "Close"
+  },
+  "actionDismiss": {
+    "message": "Dismiss"
+  },
+  "actionTryAgain": {
+    "message": "Try again"
+  },
+  "actionHowToFix": {
+    "message": "How to fix"
+  },
+  "actionConnectionSettings": {
+    "message": "Connection settings"
+  },
+  "actionUseBrowser": {
+    "message": "Use browser instead"
+  },
+  "actionDownloadInBrowser": {
+    "message": "Download in browser"
+  },
+  "actionAlwaysForSite": {
+    "message": "Always for this site"
+  },
+  "actionAdd": {
+    "message": "Add"
+  },
+  "actionSave": {
+    "message": "Save"
+  },
+  "actionPair": {
+    "message": "Pair"
+  },
+  "actionForget": {
+    "message": "Forget"
+  },
+  "actionTestConnection": {
+    "message": "Test connection"
+  },
+  "actionResetDefaults": {
+    "message": "Reset to defaults"
+  },
+  "actionChangeShortcuts": {
+    "message": "Change shortcuts"
+  },
+  "actionDecrease": {
+    "message": "Decrease"
+  },
+  "actionIncrease": {
+    "message": "Increase"
+  },
+  "toastDownloadStarted": {
+    "message": "Download started"
+  },
+  "toastQueued": {
+    "message": "Queued"
+  },
+  "toastCopied": {
+    "message": "Copied"
+  },
+  "toastLaunching": {
+    "message": "Launching Osprey…"
+  },
+  "toastLinksSent": {
+    "message": "Sent $ARG1$ to Osprey",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "toastPasteHint": {
+    "message": "Press ⌘V / Ctrl+V to paste"
+  },
+  "toastInvalidLink": {
+    "message": "That doesn’t look like a download link."
+  },
+  "toastNotRunning": {
+    "message": "Osprey isn’t running — start it and try again."
+  },
+  "toastUnauthorized": {
+    "message": "Osprey refused this browser. Pair it again in Settings."
+  },
+  "toastSomethingWrong": {
+    "message": "Something went wrong."
+  },
+  "offlineNotRunningTitle": {
+    "message": "Osprey isn’t running"
+  },
+  "offlineNotRunningBody": {
+    "message": "Start Osprey to send downloads to it and follow their progress here."
+  },
+  "offlineNoHostTitle": {
+    "message": "Can’t reach Osprey"
+  },
+  "offlineNoHostBody": {
+    "message": "The browser helper isn’t set up yet. In Osprey, open Settings → Browser and choose Install, then try again."
+  },
+  "offlineRemoteTitle": {
+    "message": "Can’t reach your Osprey"
+  },
+  "offlineRemoteBody": {
+    "message": "Make sure it’s switched on and reachable, and that the address in Connection settings is right."
+  },
+  "offlineRefusedTitle": {
+    "message": "Osprey refused this browser"
+  },
+  "offlineRefusedBody": {
+    "message": "The device token may have been revoked. Pair this browser again in Connection settings."
+  },
+  "mediaKindVideo": {
+    "message": "Video"
+  },
+  "mediaKindAudio": {
+    "message": "Audio"
+  },
+  "mediaKindImage": {
+    "message": "Image"
+  },
+  "mediaKindHls": {
+    "message": "HLS"
+  },
+  "mediaKindDash": {
+    "message": "DASH"
+  },
+  "mediaKindUnknown": {
+    "message": "Media"
+  },
+  "state_pending": {
+    "message": "Pending"
+  },
+  "state_queued": {
+    "message": "Queued"
+  },
+  "state_scheduled": {
+    "message": "Scheduled"
+  },
+  "state_resolving": {
+    "message": "Resolving"
+  },
+  "state_connecting": {
+    "message": "Connecting"
+  },
+  "state_downloading": {
+    "message": "Downloading"
+  },
+  "state_paused": {
+    "message": "Paused"
+  },
+  "state_retrying": {
+    "message": "Retrying"
+  },
+  "state_verifying": {
+    "message": "Verifying"
+  },
+  "state_processing": {
+    "message": "Processing"
+  },
+  "state_completed": {
+    "message": "Done"
+  },
+  "state_failed": {
+    "message": "Failed"
+  },
+  "state_cancelled": {
+    "message": "Cancelled"
+  },
+  "state_seeding": {
+    "message": "Seeding"
+  },
+  "pageSentTitle": {
+    "message": "Sent to Osprey"
+  },
+  "pageKeptTitle": {
+    "message": "Kept in your browser"
+  },
+  "pageKeptBody": {
+    "message": "Osprey isn’t running, so this download stayed in the browser."
+  },
+  "pageFailedTitle": {
+    "message": "Couldn’t send to Osprey"
+  },
+  "pageFailedBody": {
+    "message": "The browser’s copy was already stopped. Download it in the browser instead?"
+  },
+  "pageUsingBrowser": {
+    "message": "Downloading in your browser"
+  },
+  "pageAlwaysQuestion": {
+    "message": "Always let the browser handle downloads from $ARG1$?",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageGotIt": {
+    "message": "Got it"
+  },
+  "pageAlwaysDone": {
+    "message": "Osprey will leave $ARG1$ to your browser. Change this in Osprey’s Sites settings.",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "pageSomethingWrong": {
+    "message": "Something went wrong"
+  },
+  "pageNotRunning": {
+    "message": "Osprey isn’t running"
+  },
+  "pageMediaTitle": {
+    "message": "Media on this page"
+  },
+  "pageMediaProtected": {
+    "message": "This player streams protected media, which Osprey can’t save."
+  },
+  "pageMediaFoot": {
+    "message": "Downloads start in Osprey right away."
+  },
+  "sidebarSubtitle": {
+    "message": "Browser extension"
+  },
+  "skipToContent": {
+    "message": "Skip to settings"
+  },
+  "optionsNavLabel": {
+    "message": "Settings sections"
+  },
+  "navGroupDownloads": {
+    "message": "Downloads"
+  },
+  "navGroupIntegration": {
+    "message": "Integration"
   },
   "saved": {
     "message": "Saved"
   },
   "saveFailed": {
     "message": "Save failed"
+  },
+  "sectionCapture": {
+    "message": "Capture"
+  },
+  "sectionCaptureSub": {
+    "message": "Which browser downloads Osprey takes over."
+  },
+  "captureDownloadsHint": {
+    "message": "Send matching downloads to Osprey instead of the browser’s own download list."
+  },
+  "settingShowConfirmationShort": {
+    "message": "Confirm on the page"
+  },
+  "settingShowConfirmationHint": {
+    "message": "Show a small note on the page when a download is sent, with a one-click way to keep it in the browser."
+  },
+  "groupRules": {
+    "message": "Rules"
+  },
+  "settingMinSizeShort": {
+    "message": "Minimum size"
+  },
+  "settingMinSizeHint": {
+    "message": "Smaller files stay in the browser. Use 0 to capture every size."
+  },
+  "settingExtensions": {
+    "message": "File types to capture"
+  },
+  "settingExtensionsHint": {
+    "message": "Only downloads ending in one of these are captured."
+  },
+  "addExtensionPlaceholderShort": {
+    "message": "e.g. mkv"
+  },
+  "noFileTypes": {
+    "message": "No file types — nothing will be captured."
+  },
+  "removeItem": {
+    "message": "Remove $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "removedItem": {
+    "message": "Removed $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "addedItem": {
+    "message": "Added $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "sectionSites": {
+    "message": "Sites"
+  },
+  "sectionSitesSub": {
+    "message": "Where Osprey should leave downloads to the browser."
+  },
+  "groupSiteLists": {
+    "message": "Site lists"
+  },
+  "settingExcludedDomainsShort": {
+    "message": "Never capture from"
+  },
+  "settingExcludedDomainsHint": {
+    "message": "Includes subdomains: example.com also covers dl.example.com."
+  },
+  "settingAlwaysBrowserShort": {
+    "message": "Always use the browser for"
+  },
+  "settingAlwaysBrowserHint": {
+    "message": "Sites you picked “Always use the browser” for on a download prompt. Remove one to capture from it again."
+  },
+  "noSites": {
+    "message": "No sites yet."
+  },
+  "groupPatterns": {
+    "message": "URL patterns"
+  },
+  "settingExcludedPatternsShort": {
+    "message": "Never capture URLs like"
+  },
+  "urlPatternHintLong": {
+    "message": "Matched against the whole download URL. Use * as a wildcard."
+  },
+  "noPatterns": {
+    "message": "No patterns yet."
+  },
+  "sectionMedia": {
+    "message": "Media"
+  },
+  "sectionMediaSub": {
+    "message": "Finding video, audio and streams on the pages you visit."
+  },
+  "settingDetectMedia": {
+    "message": "Detect media on pages"
+  },
+  "settingDetectMediaHint": {
+    "message": "Notice videos, audio and streams as pages load, so the popup can list them."
+  },
+  "settingMediaButton": {
+    "message": "Show a download button on players"
+  },
+  "settingMediaButtonHint": {
+    "message": "A small Osprey button appears when you point at a video or audio player."
+  },
+  "mediaProtectedNote": {
+    "message": "Streams protected by DRM, and players that stream from temporary blob: addresses, are listed but can’t be downloaded."
+  },
+  "sectionNotifications": {
+    "message": "Notifications"
+  },
+  "sectionNotificationsSub": {
+    "message": "System notifications while the popup is closed."
+  },
+  "settingNotifyComplete": {
+    "message": "When a download completes"
+  },
+  "settingNotifyFailure": {
+    "message": "When a download fails"
+  },
+  "sectionConnection": {
+    "message": "Connection"
+  },
+  "sectionConnectionSub": {
+    "message": "How this browser reaches Osprey."
+  },
+  "connectTo": {
+    "message": "Connect to"
+  },
+  "connectToHint": {
+    "message": "Osprey usually runs on this computer. Pick “Another computer” to send downloads to a paired Osprey elsewhere."
+  },
+  "modeThisComputer": {
+    "message": "This computer"
+  },
+  "modeAnotherComputer": {
+    "message": "Another computer"
+  },
+  "connectedToVersion": {
+    "message": "Connected to Osprey $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "connectedNativeSub": {
+    "message": "Through the browser helper on this computer"
+  },
+  "connectedRemoteSub": {
+    "message": "Paired with $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "notRunningSub": {
+    "message": "The browser helper is installed. Start Osprey to connect."
+  },
+  "noHostSub": {
+    "message": "The browser helper isn’t installed for this browser yet."
+  },
+  "refusedSub": {
+    "message": "The device token was rejected. Pair again below."
+  },
+  "groupSetUp": {
+    "message": "Set up"
+  },
+  "groupSetUpDesc": {
+    "message": "The extension talks to Osprey through a small helper that the app installs. No address or password needed."
+  },
+  "stepInstallApp": {
+    "message": "Install Osprey and open it."
+  },
+  "stepInstallHelper": {
+    "message": "In Osprey, open Settings → Browser and choose Install for this browser."
+  },
+  "stepTest": {
+    "message": "Come back here and choose Test connection."
+  },
+  "launchRowLabel": {
+    "message": "Osprey isn’t open?"
+  },
+  "launchRowHint": {
+    "message": "Starts the app on this computer (macOS)."
+  },
+  "groupRemote": {
+    "message": "Remote Osprey"
+  },
+  "remoteAddress": {
+    "message": "Address"
+  },
+  "remoteAddressHint": {
+    "message": "Shown in Osprey on that computer under Settings → Remote."
+  },
+  "pairingCode": {
+    "message": "Pairing code"
+  },
+  "pairingCodeHint": {
+    "message": "In Osprey there, choose Pair a device. Codes work once, for two minutes."
+  },
+  "useTokenInstead": {
+    "message": "Use a device token instead"
+  },
+  "deviceToken": {
+    "message": "Device token"
+  },
+  "pairedLabel": {
+    "message": "Paired"
+  },
+  "pairedHint": {
+    "message": "A device token for this browser is saved. Forget it to unpair."
+  },
+  "remotePrivacyNote": {
+    "message": "Captured downloads — including the cookies needed to fetch them — are sent to that computer over HTTPS."
+  },
+  "errRemoteUrl": {
+    "message": "Enter an https:// address, like https://192.168.1.20:41780."
+  },
+  "errPairingCode": {
+    "message": "Pairing codes have 8 letters and numbers, like ABCD-EFGH."
+  },
+  "errToken": {
+    "message": "That doesn’t look like a device token."
+  },
+  "errPairingRefused": {
+    "message": "That code didn’t work — codes expire after two minutes. Create a new one and try again."
+  },
+  "errRateLimited": {
+    "message": "Too many attempts. Wait a minute, then try again."
+  },
+  "errUnreachable": {
+    "message": "Couldn’t reach that address. If Osprey uses its own certificate, open the address in a tab once and accept it."
+  },
+  "sectionShortcuts": {
+    "message": "Shortcuts"
+  },
+  "sectionShortcutsSub": {
+    "message": "Keyboard shortcuts for sending pages and moving around."
+  },
+  "groupBrowserShortcuts": {
+    "message": "Browser shortcuts"
+  },
+  "shortcutNotSet": {
+    "message": "Not set"
+  },
+  "shortcutChangeLabel": {
+    "message": "Customise"
+  },
+  "shortcutChangeHint": {
+    "message": "Pick your own keys in the browser’s shortcut settings."
+  },
+  "shortcutFirefoxHint": {
+    "message": "In Firefox: Add-ons and themes → ⚙ → Manage Extension Shortcuts."
+  },
+  "groupInPopup": {
+    "message": "In the popup"
+  },
+  "shortcutPopupReturn": {
+    "message": "Send the link you pasted"
+  },
+  "shortcutPopupEsc": {
+    "message": "Close the links list"
+  },
+  "shortcutPopupSpace": {
+    "message": "Toggle a switch or a selected link"
+  },
+  "groupOnPages": {
+    "message": "On web pages"
+  },
+  "shortcutPageEsc": {
+    "message": "Dismiss an Osprey prompt or media panel"
+  },
+  "shortcutPageTab": {
+    "message": "Reach the media button of a focused player"
+  },
+  "sectionAbout": {
+    "message": "About"
+  },
+  "sectionAboutSub": {
+    "message": "Version, privacy and where things live."
+  },
+  "aboutTitle": {
+    "message": "Osprey for $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "versionLabel": {
+    "message": "Version $ARG1$",
+    "placeholders": {
+      "arg1": {
+        "content": "$1"
+      }
+    }
+  },
+  "groupVersions": {
+    "message": "Versions"
+  },
+  "aboutExtensionVersion": {
+    "message": "Extension"
+  },
+  "aboutAppVersion": {
+    "message": "Osprey app"
+  },
+  "aboutBuild": {
+    "message": "Build"
+  },
+  "groupPrivacy": {
+    "message": "Privacy"
+  },
+  "privacyLocal": {
+    "message": "Downloads, cookies and page details go only to Osprey — on this computer, or the one you paired."
+  },
+  "privacyNoTracking": {
+    "message": "No analytics, tracking or remote code."
+  },
+  "privacyStorage": {
+    "message": "Settings are kept in this browser’s extension storage, out of reach of web pages."
   }
 }

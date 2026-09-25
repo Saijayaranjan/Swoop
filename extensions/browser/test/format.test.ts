@@ -45,3 +45,16 @@ test('truncateMiddle keeps the string intact under the limit', () => {
   assert.equal(truncated.length, 12);
   assert.ok(truncated.includes('…'));
 });
+
+test('splitSpeed separates the number from its unit', async () => {
+  const { splitSpeed } = await import('../src/shared/format.ts');
+  assert.deepEqual(splitSpeed(1536), { value: '1.5', unit: 'KB/s' });
+  assert.deepEqual(splitSpeed(0), { value: '0', unit: 'KB/s' });
+});
+
+test('formatProgressSize uses three significant digits and shares the unit', async () => {
+  const { formatProgressSize } = await import('../src/shared/format.ts');
+  const GB = 1024 ** 3;
+  assert.equal(formatProgressSize(1.43 * GB, 2.31 * GB), '1.43 of 2.31 GB');
+  assert.equal(formatProgressSize(578 * 1024 ** 2, 3.4 * GB), '578 MB of 3.4 GB');
+});
