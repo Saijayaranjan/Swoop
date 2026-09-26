@@ -4,6 +4,11 @@
   "private": true,
   "description": "Official browser extension for Swoop, a production-grade download manager.",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saijayaranjan/Swoop.git",
+    "directory": "extensions/browser"
+  },
   "scripts": {
     "build": "node build.mjs chrome firefox edge",
     "build:chrome": "node build.mjs chrome",

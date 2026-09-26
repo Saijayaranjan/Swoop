@@ -1,10 +1,10 @@
 /* ═══════════════════════════════════════════════════════════════════
-   SITE CONFIG: change `owner` to your GitHub user or organisation.
+   SITE CONFIG: the GitHub owner and repository behind every link.
    Every element with a data-gh attribute gets its href from this.
    ═══════════════════════════════════════════════════════════════════ */
 const CONFIG = {
-  owner: 'OWNER',
-  repo: 'swoop',
+  owner: 'Saijayaranjan',
+  repo: 'Swoop',
 };
 
 (function () {

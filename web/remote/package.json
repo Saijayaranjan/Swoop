@@ -4,6 +4,11 @@
   "private": true,
   "description": "Swoop remote-control web UI, embedded into the server binary and served at /",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Saijayaranjan/Swoop.git",
+    "directory": "web/remote"
+  },
   "engines": {
     "node": ">=23.6"
   },
