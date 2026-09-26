@@ -325,21 +325,29 @@ pub struct ServerArgs {
 
 #[derive(clap::Args, Debug)]
 pub struct NativeHostArgs {
-    /// Install the native-messaging host manifest for a browser instead of running the relay.
+    /// Install the native-messaging host manifest for a browser (or `all` detected browsers)
+    /// instead of running the relay.
     #[arg(long, value_name = "BROWSER")]
     pub install_manifest: Option<BrowserArg>,
-    /// The published extension id, required with `--install-manifest`.
+    /// Also allow this extension id. Swoop's own fixed ids are always allowed.
     #[arg(long, value_name = "ID")]
     pub extension_id: Option<String>,
 }
 
-#[derive(Clone, Copy, Debug, clap::ValueEnum)]
-#[value(rename_all = "lowercase")]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, clap::ValueEnum)]
+#[value(rename_all = "kebab-case")]
 pub enum BrowserArg {
+    /// Every browser installed for this user.
+    All,
     Chrome,
+    ChromeBeta,
+    ChromeCanary,
     Chromium,
-    Edge,
     Brave,
+    Edge,
+    Vivaldi,
+    Arc,
+    Opera,
     Firefox,
 }
 

@@ -118,7 +118,7 @@ export function initStatus(
         title = tr('offlineNoHostTitle', 'Can’t reach Swoop');
         body = tr(
           'offlineNoHostBody',
-          'The browser helper isn’t set up yet. In Swoop, open Settings → Browser and choose Install, then try again.',
+          'Open the Swoop app once and it connects automatically, then try again.',
         );
         actions.push(textButton(tr('actionTryAgain', 'Try again'), () => void refresh(), 'btn primary', 'retry'));
         actions.push(textButton(tr('actionHowToFix', 'How to fix'), () => openOptions('connection'), 'btn'));

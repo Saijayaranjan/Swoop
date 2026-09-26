@@ -80,7 +80,7 @@ function heroFor(status: ConnectionStatus | null, mode: Mode, remoteUrl: string)
   }
   return status.connected
     ? { color: 'is-orange', iconName: 'power', title: tr('offlineNotRunningTitle', 'Swoop isn’t running'), sub: tr('notRunningSub', 'The browser helper is installed. Start Swoop to connect.') }
-    : { color: 'is-red', iconName: 'plug', title: tr('offlineNoHostTitle', 'Can’t reach Swoop'), sub: tr('noHostSub', 'The browser helper isn’t installed for this browser yet.') };
+    : { color: 'is-red', iconName: 'plug', title: tr('offlineNoHostTitle', 'Can’t reach Swoop'), sub: tr('noHostSub', 'Open the Swoop app once and it connects to this browser automatically.') };
 }
 
 export function connectionSection(onStatus: (status: ConnectionStatus | null) => void): SectionDef {
@@ -168,14 +168,13 @@ export function connectionSection(onStatus: (status: ConnectionStatus | null) =>
           ...group(
             [
               h('ol', { class: 'steps' }, [
-                h('li', { text: tr('stepInstallApp', 'Install Swoop and open it.') }),
-                h('li', { text: tr('stepInstallHelper', 'In Swoop, open Settings → Browser and choose Install for this browser.') }),
+                h('li', { text: tr('stepInstallApp', 'Install Swoop and open it once. It connects to this browser automatically.') }),
                 h('li', { text: tr('stepTest', 'Come back here and choose Test connection.') }),
               ]),
               valueRow(tr('launchRowLabel', 'Swoop isn’t open?'), launch, tr('launchRowHint', 'Starts the app on this computer (macOS).')),
             ],
             tr('groupSetUp', 'Set up'),
-            tr('groupSetUpDesc', 'The extension talks to Swoop through a small helper that the app installs. No address or password needed.'),
+            tr('groupSetUpDesc', 'The extension talks to Swoop through a small helper that the app sets up by itself. No address, password or ID needed.'),
           ),
         );
         return out;

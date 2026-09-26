@@ -20,6 +20,16 @@ pub const MAX_MESSAGE_BYTES: u32 = 1024 * 1024;
 const HOST_NAME: &str = "app.swoop.bridge";
 const BUNDLE_ID: &str = "app.swoop.desktop";
 
+/// The Chromium extension id every host manifest allows. Chrome derives it from the public `key`
+/// in extensions/browser/manifests/{chrome,edge}.json, so an unpacked build has this id in every
+/// browser and on every machine (the macOS app's `NativeMessagingInstaller.chromiumExtensionId`
+/// must match).
+pub const CHROMIUM_EXTENSION_ID: &str = "hbfgocpejejjhpigpanikchicoplcfjb";
+/// Ids assigned by an extension store, if the published build ever carries a different key.
+const CHROMIUM_STORE_EXTENSION_IDS: &[&str] = &[];
+/// Firefox's fixed gecko id, from extensions/browser/manifests/firefox.json.
+pub const FIREFOX_EXTENSION_ID: &str = "swoop@swoop.app";
+
 /// The only `/api/v1/` groups the extension uses (adding/controlling downloads and media
 /// detection). Everything else — settings, devices, automations, rules, queues, updates,
 /// import/export, archives, plugins — is refused: the relay authenticates with the local
@@ -120,14 +130,27 @@ fn method_allowed(m: &str) -> bool {
 
 pub async fn run(cli: &crate::cli::Cli, args: NativeHostArgs) -> CliResult<()> {
     if let Some(browser) = args.install_manifest {
-        let extension_id = args.extension_id.ok_or_else(|| {
-            CliError::Usage("--install-manifest requires --extension-id".to_owned())
-        })?;
-        let path = install_manifest(browser, &extension_id)?;
-        eprintln!(
-            "installed native messaging host manifest at {}",
-            path.display()
-        );
+        let exe = std::env::current_exe()?;
+        let browsers: Vec<BrowserArg> = if browser == BrowserArg::All {
+            ALL_BROWSERS
+                .iter()
+                .copied()
+                .filter(|b| browser_dirs(*b).is_some_and(|(marker, _)| marker.exists()))
+                .collect()
+        } else {
+            vec![browser]
+        };
+        if browsers.is_empty() {
+            eprintln!("no supported browsers found");
+        }
+        for b in browsers {
+            let path = install_manifest(b, args.extension_id.as_deref(), &exe)?;
+            eprintln!(
+                "{}: native messaging host manifest at {}",
+                browser_name(b),
+                path.display()
+            );
+        }
         return Ok(());
     }
 
@@ -384,65 +407,132 @@ fn launch_app() -> bool {
 // `--install-manifest`
 // ---------------------------------------------------------------------------------------------
 
-fn install_manifest(browser: BrowserArg, extension_id: &str) -> CliResult<PathBuf> {
-    let exe = std::env::current_exe()?;
-    let manifest = build_manifest_json(browser, extension_id, &exe);
-    let path = manifest_path(browser)?;
-    if let Some(parent) = path.parent() {
-        std::fs::create_dir_all(parent)?;
+const ALL_BROWSERS: &[BrowserArg] = &[
+    BrowserArg::Chrome,
+    BrowserArg::ChromeBeta,
+    BrowserArg::ChromeCanary,
+    BrowserArg::Chromium,
+    BrowserArg::Brave,
+    BrowserArg::Edge,
+    BrowserArg::Vivaldi,
+    BrowserArg::Arc,
+    BrowserArg::Opera,
+    BrowserArg::Firefox,
+];
+
+fn browser_name(browser: BrowserArg) -> String {
+    use clap::ValueEnum;
+    browser
+        .to_possible_value()
+        .map(|v| v.get_name().to_owned())
+        .unwrap_or_default()
+}
+
+/// `(a file whose presence means the browser has been used, its native-messaging-hosts folder)`,
+/// or `None` when the browser has no such location on this platform. The marker is a file inside
+/// the profile folder rather than the folder itself, because other tools create bare
+/// `NativeMessagingHosts` folders for browsers that aren't installed.
+fn browser_dirs(browser: BrowserArg) -> Option<(PathBuf, PathBuf)> {
+    use BrowserArg::*;
+    let home = directories::BaseDirs::new()?.home_dir().to_path_buf();
+    if cfg!(target_os = "macos") {
+        let support = home.join("Library/Application Support");
+        let (profile, hosts) = match browser {
+            All => return None,
+            Chrome => ("Google/Chrome", "Google/Chrome"),
+            ChromeBeta => ("Google/Chrome Beta", "Google/Chrome Beta"),
+            ChromeCanary => ("Google/Chrome Canary", "Google/Chrome Canary"),
+            Chromium => ("Chromium", "Chromium"),
+            Brave => ("BraveSoftware/Brave-Browser", "BraveSoftware/Brave-Browser"),
+            Edge => ("Microsoft Edge", "Microsoft Edge"),
+            Vivaldi => ("Vivaldi", "Vivaldi"),
+            Arc => ("Arc/User Data", "Arc/User Data"),
+            // Opera reads Chrome's host folder.
+            Opera => ("com.operasoftware.Opera", "Google/Chrome"),
+            Firefox => ("Mozilla", "Mozilla"),
+        };
+        let marker = if browser == Firefox {
+            support.join("Firefox/profiles.ini")
+        } else {
+            support.join(profile).join("Local State")
+        };
+        Some((marker, support.join(hosts).join("NativeMessagingHosts")))
+    } else if cfg!(target_os = "linux") {
+        let (profile, hosts) = match browser {
+            All | Arc => return None,
+            Chrome => (".config/google-chrome", ".config/google-chrome"),
+            ChromeBeta => (".config/google-chrome-beta", ".config/google-chrome-beta"),
+            ChromeCanary => (
+                ".config/google-chrome-unstable",
+                ".config/google-chrome-unstable",
+            ),
+            Chromium => (".config/chromium", ".config/chromium"),
+            Brave => (
+                ".config/BraveSoftware/Brave-Browser",
+                ".config/BraveSoftware/Brave-Browser",
+            ),
+            Edge => (".config/microsoft-edge", ".config/microsoft-edge"),
+            Vivaldi => (".config/vivaldi", ".config/vivaldi"),
+            Opera => (".config/opera", ".config/google-chrome"),
+            Firefox => {
+                return Some((
+                    home.join(".mozilla/firefox/profiles.ini"),
+                    home.join(".mozilla/native-messaging-hosts"),
+                ))
+            }
+        };
+        Some((
+            home.join(profile).join("Local State"),
+            home.join(hosts).join("NativeMessagingHosts"),
+        ))
+    } else {
+        None
     }
-    std::fs::write(&path, serde_json::to_string_pretty(&manifest)?)?;
+}
+
+/// Writes the host manifest for `browser`, pointing at `exe`, and returns its path. The file is
+/// left untouched when it already has these contents.
+fn install_manifest(browser: BrowserArg, extra_id: Option<&str>, exe: &Path) -> CliResult<PathBuf> {
+    let (_, hosts) = browser_dirs(browser).ok_or_else(|| {
+        CliError::Usage(format!(
+            "no native messaging host location for {} on this platform",
+            browser_name(browser)
+        ))
+    })?;
+    let manifest = build_manifest_json(browser, extra_id, exe);
+    let contents = serde_json::to_string_pretty(&manifest)? + "\n";
+    let path = hosts.join(format!("{HOST_NAME}.json"));
+    if std::fs::read_to_string(&path).ok().as_deref() != Some(contents.as_str()) {
+        std::fs::create_dir_all(&hosts)?;
+        std::fs::write(&path, contents)?;
+    }
     Ok(path)
 }
 
-fn build_manifest_json(browser: BrowserArg, extension_id: &str, exe: &Path) -> Value {
+/// The `app.swoop.bridge` manifest: Swoop's own extension ids, plus `extra_id` if given.
+fn build_manifest_json(browser: BrowserArg, extra_id: Option<&str>, exe: &Path) -> Value {
     let mut m = serde_json::json!({
         "name": HOST_NAME,
         "description": "Swoop native messaging host",
         "path": exe.to_string_lossy(),
         "type": "stdio",
     });
-    match browser {
-        BrowserArg::Firefox => {
-            m["allowed_extensions"] = serde_json::json!([extension_id]);
-        }
-        _ => {
-            m["allowed_origins"] =
-                serde_json::json!([format!("chrome-extension://{extension_id}/")]);
-        }
+    if browser == BrowserArg::Firefox {
+        let ids: Vec<&str> = std::iter::once(FIREFOX_EXTENSION_ID)
+            .chain(extra_id.filter(|id| *id != FIREFOX_EXTENSION_ID))
+            .collect();
+        m["allowed_extensions"] = serde_json::json!(ids);
+    } else {
+        let mut ids = vec![CHROMIUM_EXTENSION_ID];
+        ids.extend_from_slice(CHROMIUM_STORE_EXTENSION_IDS);
+        ids.extend(extra_id.filter(|id| !ids.contains(id)));
+        let origins: Vec<String> = ids
+            .iter()
+            .map(|id| format!("chrome-extension://{id}/"))
+            .collect();
+        m["allowed_origins"] = serde_json::json!(origins);
     }
     m
-}
-
-fn manifest_path(browser: BrowserArg) -> CliResult<PathBuf> {
-    let home = directories::BaseDirs::new()
-        .ok_or_else(|| CliError::Other(anyhow::anyhow!("cannot determine the home directory")))?
-        .home_dir()
-        .to_path_buf();
-    let rel: &str = if cfg!(target_os = "macos") {
-        match browser {
-            BrowserArg::Chrome => "Library/Application Support/Google/Chrome/NativeMessagingHosts",
-            BrowserArg::Chromium => "Library/Application Support/Chromium/NativeMessagingHosts",
-            BrowserArg::Edge => "Library/Application Support/Microsoft Edge/NativeMessagingHosts",
-            BrowserArg::Brave => {
-                "Library/Application Support/BraveSoftware/Brave-Browser/NativeMessagingHosts"
-            }
-            BrowserArg::Firefox => "Library/Application Support/Mozilla/NativeMessagingHosts",
-        }
-    } else if cfg!(target_os = "linux") {
-        match browser {
-            BrowserArg::Chrome => ".config/google-chrome/NativeMessagingHosts",
-            BrowserArg::Chromium => ".config/chromium/NativeMessagingHosts",
-            BrowserArg::Edge => ".config/microsoft-edge/NativeMessagingHosts",
-            BrowserArg::Brave => ".config/BraveSoftware/Brave-Browser/NativeMessagingHosts",
-            BrowserArg::Firefox => ".mozilla/native-messaging-hosts",
-        }
-    } else {
-        return Err(CliError::Usage(
-            "native-host manifest install is only supported on macOS and Linux".to_owned(),
-        ));
-    };
-    Ok(home.join(rel).join(format!("{HOST_NAME}.json")))
 }
 
 #[cfg(test)]
@@ -508,5 +598,25 @@ mod tests {
         assert!(!path_allowed("/api/v1/tasks/%2e%2e/settings"));
         assert!(path_allowed("/api/v1/tasks/rows?smart=active"));
         assert!(path_allowed("/api/v1/media/detect"));
+    }
+
+    #[test]
+    fn manifest_allows_swoops_own_extension_ids() {
+        let exe = Path::new("/Applications/Swoop.app/Contents/Helpers/swoop");
+        let chrome = build_manifest_json(BrowserArg::Brave, None, exe);
+        assert_eq!(chrome["name"], HOST_NAME);
+        assert_eq!(chrome["path"], exe.to_str().unwrap());
+        assert_eq!(
+            chrome["allowed_origins"],
+            serde_json::json!([format!("chrome-extension://{CHROMIUM_EXTENSION_ID}/")])
+        );
+        assert!(chrome.get("allowed_extensions").is_none());
+
+        let firefox = build_manifest_json(BrowserArg::Firefox, None, exe);
+        assert_eq!(
+            firefox["allowed_extensions"],
+            serde_json::json!(["swoop@swoop.app"])
+        );
+        assert!(firefox.get("allowed_origins").is_none());
     }
 }

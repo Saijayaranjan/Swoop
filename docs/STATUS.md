@@ -35,7 +35,7 @@ in `swoop-cli` and `swoop-server`. It is not enforced in CI.
 | Rules | **Complete** | Deterministic add-time rules (category, directory, queue, options, tags) plus completion actions: move, Finder tags, reveal, and run automation. There's a dry-run endpoint. |
 | Automation | **Complete** | Actions: move, copy, rename, notify, webhook, command, shell, sandboxed script, emit event, tag, and platform actions (open, reveal, Finder tag, AppleScript). Code-running actions need a consent hash that only the desktop UI can write. Editing an action invalidates its consent. Details are under the security model. |
 | Site grabber | **Complete** | A bounded, robots-aware crawler (streaming `lol_html`, scope, depth, page and concurrency limits, per-host politeness). Files are classified by extension or MIME and can be probed with HEAD. Discovered files can be added as tasks. |
-| Browser extensions + native bridge | **Partial** | An MV3 extension for Chrome, Edge and Firefox: download interception with size, extension and domain rules, context menus, a popup with live rows, media detection, and bulk link collection. The native host relays to the local socket. Missing: store publication. Chromium users must paste the extension ID when installing the host manifest. No Safari build. |
+| Browser extensions + native bridge | **Partial** | An MV3 extension for Chrome, Edge and Firefox: download interception with size, extension and domain rules, context menus, a popup with live rows, media detection, and bulk link collection. The native host relays to the local socket. The extension has a fixed ID and the app registers the native host with every installed browser on launch, so there is no setup step. Missing: store publication. No Safari build. |
 | Remote control | **Complete** | REST API plus WebSocket events, an embedded Preact web UI, pairing with one-time codes, scoped device tokens, TLS with a persisted self-signed certificate and its fingerprint, rate limiting, lockout and an audit log. |
 | Headless server | **Complete** | `swoop server` (or `swoop --headless`) runs the full engine with a Unix socket, optional loopback TCP and an optional remote listener. Credentials fall back to a mode-0600 file when no keychain is available. |
 | CLI | **Complete** | add, list, status, pause, resume, retry, restart, cancel, remove, pause-all, resume-all, watch, queue, limit, mode, history, export, import, pair, devices, diagnostics, server and native-host. Exit codes are documented in `docs/cli.md`. |
@@ -124,7 +124,7 @@ What the documentation claims (`docs/security/`) and what the code actually enfo
   - Remote devices may only save inside the download folder or configured queue folders.
   - "Remove with files" deletes only a completed task's promoted file, strictly inside its folder.
 - **Network.** A public origin can't redirect to a loopback, private or link-local target. Webhooks resolve DNS and refuse private targets, and plain http is allowed only to localhost. Header names and values are validated, and hop-by-hop and `Range` headers can't be overridden. TLS 1.2 is the minimum. Certificate exceptions are per host and opt-in.
-- **Native messaging.** The browser pins the host manifest to the extension ID. The host relays only `/api/v1/tasks…` and `/api/v1/media…`, with a fixed set of methods, and rejects ambiguous paths. Messages are capped at 1 MiB.
+- **Native messaging.** The host manifest allows only Swoop's fixed extension IDs. The host relays only `/api/v1/tasks…` and `/api/v1/media…`, with a fixed set of methods, and rejects ambiguous paths. Messages are capped at 1 MiB.
 - **Automation.** Command, shell and AppleScript actions need a consent record whose BLAKE3 hash matches the resolved action. Only the desktop UI writes consent records (there's no REST route for it). Remote callers can't create or link code-running automations, and imports never carry consent. Commands run with an absolute program path and argv; variables are passed as environment variables. The sandboxed script language has no I/O and is capped by length, token count, steps and time.
 - **Updates.** The Ed25519 signature over the declared SHA-256 is checked before download. The archive is hashed while it downloads and staged under a temporary name. Downgrades are refused, and https is required. The key comes from `SWOOP_UPDATE_PUBLIC_KEY`.
 - **Secrets.** Credentials live in the OS keychain, with a 0600 file fallback on headless Linux. Log lines are redacted.
@@ -169,15 +169,15 @@ cargo run -p swoop-cli -- pair        # prints a pairing code for a remote devic
 
 # Browser extension (load dist/chrome or dist/firefox unpacked)
 (cd extensions/browser && npm install && npm run build)
-swoop native-host --install-manifest chrome --extension-id <32-letter id>
 
 # macOS app (Rust static lib → UniFFI bindings → SwiftPM → Swoop.app, ad-hoc signed)
 scripts/build-macos.sh --debug        # or --release [--universal] [--dmg]
 open build/Swoop.app
 ```
 
-The app can also install the native-messaging manifests itself from Settings. It writes a small
-launcher script that execs `Swoop.app/Contents/Helpers/swoop native-host`.
+On every launch the app writes the native-messaging host manifest for each installed browser,
+pointing at `Swoop.app/Contents/Helpers/swoop`, so the extension connects on its own. Without the
+app, `swoop native-host --install-manifest all` does the same.
 
 Docker: `docker compose -f docker/compose.yaml up -d --build`. This exposes the TLS remote
 listener on 41780 and stores data and downloads in named volumes.
@@ -199,7 +199,7 @@ Signing and notarisation caveats (there's no Developer ID):
 - Notarisation (`notarytool`) and stapling need an Apple Developer ID Application certificate. With one: set `SWOOP_SIGN_IDENTITY`, then run `xcrun notarytool submit build/Swoop-<v>.dmg --wait` and `xcrun stapler staple`. None of this is scripted yet.
 - An ad-hoc identity changes with every build. Keychain items and privacy grants (for example the automation/AppleScript prompts) may be requested again after an update.
 - For in-app updates, generate an Ed25519 key pair and build with `SWOOP_UPDATE_PUBLIC_KEY=<hex public key>`. Then sign `sha256(dmg)` with the private key and publish an `appcast.json` in the format documented in `crates/swoop-update/src/lib.rs`. Without the key, update checks are disabled.
-- Chromium users need the extension's store ID in the native-host manifest. Firefox uses the fixed gecko ID `swoop@swoop.app`.
+- The extension's IDs are fixed: `hbfgocpejejjhpigpanikchicoplcfjb` for Chromium browsers (from the public `key` in the manifest) and `swoop@swoop.app` for Firefox. The signing private key is kept outside the repository; a store-assigned ID, if the store ever needs a different key, goes next to the constants in `native_host.rs` and `NativeMessaging.swift`.
 
 ## Suggested future work
 

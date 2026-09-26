@@ -63,7 +63,10 @@ stylesheets are bundled by esbuild so they can `@import` the shared tokens.
 1. `npm run build:chrome` (or `build:edge` — the two manifests are identical).
 2. Open `chrome://extensions` (or the equivalent), enable **Developer mode**.
 3. **Load unpacked** → select `extensions/browser/dist/chrome` (or `dist/edge`).
-4. Note the extension id Chrome assigns — you'll need it for the native host manifest below.
+4. Open the Swoop app once. It connects to the browser automatically.
+
+The Chromium manifests carry a public `key`, so the unpacked extension always gets the id
+`hbfgocpejejjhpigpanikchicoplcfjb`, whatever folder it is loaded from.
 
 ### Firefox
 
@@ -74,23 +77,19 @@ stylesheets are bundled by esbuild so they can `@import` the shared tokens.
    development, sign it via `web-ext sign` or use a Developer Edition/Nightly build with
    `xpinstall.signatures.required` set to `false`.)
 
-## Installing the native messaging host (development)
+## Connecting to Swoop
 
-In production the desktop app installs the native-messaging host manifest for you (**Settings →
-Browser integration → Install**). For local development against an unpacked extension, whose id is
-not the one pinned in the published host manifest's `allowed_extensions`, install it manually and
-point it at your dev extension id:
+Nothing to configure. Each time the Swoop app launches it writes the `app.swoop.bridge`
+native-messaging host manifest for every browser it finds (see `docs/api/native-messaging.md`
+for the folders and the fixed extension ids). Without the app, for example against a
+`cargo run` build, do the same from the command line:
 
 ```sh
-swoop native-host --install-manifest chrome --extension-id <your-dev-extension-id>
-swoop native-host --install-manifest firefox --extension-id swoop@swoop.app
+swoop native-host --install-manifest all
 ```
 
-This writes `app.swoop.bridge.json` to the per-browser native-messaging-hosts directory (see
-`docs/api/native-messaging.md` for the exact paths) with `allowed_origins`/`allowed_extensions`
-pinned to the id you pass. Without this step the extension's popup will show "Swoop not running"
-even if the desktop app is open, because the browser refuses to start the host process for an
-unrecognised extension id.
+If the popup shows "Can't reach Swoop" while the app is open, choose **Reconnect browsers** in
+Swoop's Settings → Browser, then restart the browser.
 
 ## How interception works, per browser
 

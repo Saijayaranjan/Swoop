@@ -116,3 +116,39 @@ struct DocumentTests {
         #expect(doc["plugins.x.a"]?.int == 1)
     }
 }
+
+@Suite("Browser integration")
+struct NativeMessagingTests {
+    @Test func registersDetectedBrowsersOnly() throws {
+        let fm = FileManager.default
+        let root = fm.temporaryDirectory.appendingPathComponent("swoop-nm-\(UUID().uuidString)")
+        defer { try? fm.removeItem(at: root) }
+        // Chromium only has a bare hosts folder (as other tools leave behind): not detected.
+        for dir in ["BraveSoftware/Brave-Browser", "Firefox", "Chromium/NativeMessagingHosts", "Swoop/native-host"] {
+            try fm.createDirectory(at: root.appendingPathComponent(dir), withIntermediateDirectories: true)
+        }
+        try Data().write(to: root.appendingPathComponent("BraveSoftware/Brave-Browser/Local State"))
+        try Data().write(to: root.appendingPathComponent("Firefox/profiles.ini"))
+        let helper = root.appendingPathComponent("swoop-helper")
+        try Data().write(to: helper)
+        try fm.setAttributes([.posixPermissions: 0o755], ofItemAtPath: helper.path)
+
+        #expect(NativeMessagingInstaller.registerAll(appSupport: root, helper: helper).isEmpty)
+
+        let brave = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent(
+            "BraveSoftware/Brave-Browser/NativeMessagingHosts/app.swoop.bridge.json"))) as? [String: Any]
+        #expect(brave?["path"] as? String == helper.path)
+        #expect(brave?["allowed_origins"] as? [String] == ["chrome-extension://\(NativeMessagingInstaller.chromiumExtensionId)/"])
+        let firefox = try JSONSerialization.jsonObject(with: Data(contentsOf: root.appendingPathComponent(
+            "Mozilla/NativeMessagingHosts/app.swoop.bridge.json"))) as? [String: Any]
+        #expect(firefox?["allowed_extensions"] as? [String] == ["swoop@swoop.app"])
+        #expect(!fm.fileExists(atPath: root.appendingPathComponent("Google/Chrome").path))
+        #expect(!fm.fileExists(atPath: root.appendingPathComponent("Chromium/NativeMessagingHosts/app.swoop.bridge.json").path))
+        #expect(!fm.fileExists(atPath: root.appendingPathComponent("Swoop/native-host").path))
+
+        let status = NativeMessagingInstaller.status(appSupport: root, helper: helper)
+        #expect(status.map(\.browser) == [.brave, .firefox])
+        let allConnected = status.allSatisfy { $0.connected }
+        #expect(allConnected)
+    }
+}

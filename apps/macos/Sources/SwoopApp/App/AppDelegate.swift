@@ -55,6 +55,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         model.observe { [weak self] event in self?.handlePlatformEvent(event) }
 
+        // Connect the browser extension: refresh the native-messaging host manifests off the
+        // main thread on every launch (this also follows the app when it moves).
+        Task.detached(priority: .utility) { NativeMessagingInstaller.registerAll() }
+
         Task {
             await model.start()
             AppearanceApplier.apply(model.settings.string("appearance.theme", default: "system"))

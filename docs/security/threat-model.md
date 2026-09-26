@@ -41,4 +41,4 @@
 ## Out of scope
 - A compromised local user account (the engine runs as the user).
 - Physical access to an unlocked machine.
-- Malicious browser extensions with `nativeMessaging` for our host id (the host manifest pins the published extension ids; a modified browser can bypass this — mitigated by the host refusing sensitive routes).
+- Malicious browser extensions with `nativeMessaging` for our host id (the host manifest allows only Swoop's fixed extension ids; a modified browser can bypass this — mitigated by the host refusing sensitive routes).

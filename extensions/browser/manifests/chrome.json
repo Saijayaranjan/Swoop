@@ -1,4 +1,5 @@
 {
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAtTTDTer71XuHzeaJ4AS3gh79zDfU5cOtS1OLGLSHdriXxRMniUk5hjKqdiQK5MYjZiqN76Af0QssCrPeJGdu+uewaGTkFjC1gcrWNgs4XpNuBC7BWKU3HQuAY6lDaWnkL2w7onGbL0Ql3eCEMca9FwBM9+ot060F34o56QN+9+ATgNgTJgSGy5tlstEXZDQInlAMr7bmqGTZfBGFF0u75qScjjj+37O3j2artMYBUSDYUKffJK3HUYEAUnjSdwEpbKyEoFQVGhGltTJnM4Hmi5ITHqeiw4xjVVdXeX8hKuFPdJ58TCzYtUCHOf2v1JXGy8MRrSsu1yiVqK8/BV+nYQIDAQAB",
   "background": {
     "service_worker": "background/index.js",
     "type": "module"

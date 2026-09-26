@@ -1,5 +1,10 @@
 # Browser extension behaviour
 
+- **Connecting**: automatic. The extension has a fixed id (see
+  [native-messaging.md](native-messaging.md#host-registration)) and the Swoop app registers the
+  native host with every installed browser each time it opens, so the user only has to open Swoop
+  once.
+
 - **Interception**: `chrome.downloads.onDeterminingFilename` / `onCreated` — when enabled and the
   item matches (`settings.browser`: extension list, min size when known, not excluded domain /
   URL pattern), cancel the browser download and `POST /tasks` with `origin: "browser"`,

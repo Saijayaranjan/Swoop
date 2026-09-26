@@ -544,35 +544,36 @@ struct TorrentsPane: View {
 struct BrowserPane: View {
     let b: SettingsBindings
     @Environment(AppModel.self) private var model
-    @AppStorage("chromiumExtensionId") private var extensionId = ""
     @ViewState private var status: [NativeMessagingInstaller.Status] = NativeMessagingInstaller.status()
     @ViewState private var errors: [NativeMessagingInstaller.Browser: String] = [:]
+    @ViewState private var working = false
 
     var body: some View {
         Form {
-            Section("Browser integration") {
+            Section {
+                if status.isEmpty {
+                    Text("No supported browsers found.").foregroundStyle(.secondary)
+                }
                 ForEach(status) { s in
                     HStack {
-                        Image(systemName: s.manifestInstalled ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(s.manifestInstalled ? Theme.success : .secondary)
-                        VStack(alignment: .leading, spacing: 1) {
-                            Text(s.browser.name)
-                            if let e = errors[s.browser] { Text(e).font(.caption).foregroundStyle(Theme.danger) }
-                            else if !s.browserInstalled { Text("Not installed").font(.caption).foregroundStyle(.secondary) }
-                        }
+                        Text(s.browser.name)
                         Spacer()
-                        if s.manifestInstalled {
-                            Button("Remove") { NativeMessagingInstaller.uninstall([s.browser]); refresh() }
+                        if let e = errors[s.browser] {
+                            Text(e).font(.caption).foregroundStyle(Theme.danger).lineLimit(2)
+                        } else if s.connected {
+                            Label("Connected", systemImage: "checkmark.circle.fill")
+                                .foregroundStyle(Theme.success)
                         } else {
-                            Button("Install") { install([s.browser]) }
+                            Label("Not connected", systemImage: "circle").foregroundStyle(.secondary)
                         }
                     }
                 }
-                TextField("Chromium extension ID", text: $extensionId, prompt: Text("From chrome://extensions"))
-                    .font(.body.monospaced())
-                Text("Chrome, Edge, Brave, Arc and Vivaldi need the ID of the Swoop extension you installed. Firefox is recognised automatically.")
+                Button("Reconnect Browsers") { reconnect() }.disabled(working)
+            } header: {
+                Text("Browser integration")
+            } footer: {
+                Text("Swoop connects the browser extension automatically each time it opens.")
                     .font(.caption).foregroundStyle(.secondary)
-                Button("Install for All Browsers") { install(status.filter(\.browserInstalled).map(\.browser)) }
             }
             Section("Catching downloads") {
                 Toggle("Take over downloads from the browser", isOn: b.bool("browser.intercept_downloads", true))
@@ -583,15 +584,19 @@ struct BrowserPane: View {
                 Toggle("Confirm before downloading", isOn: b.bool("browser.show_confirmation", true))
             }
         }
+        .onAppear { status = NativeMessagingInstaller.status() }
     }
 
-    private func install(_ browsers: [NativeMessagingInstaller.Browser]) {
-        errors = NativeMessagingInstaller.install(browsers, chromiumExtensionId: extensionId)
-        refresh()
-        if errors.isEmpty { model.toast(.success, "Browser integration installed") }
+    private func reconnect() {
+        working = true
+        Task {
+            let result = await Task.detached(priority: .userInitiated) { NativeMessagingInstaller.registerAll() }.value
+            errors = result
+            status = NativeMessagingInstaller.status()
+            working = false
+            if result.isEmpty { model.toast(.success, "Browsers connected") }
+        }
     }
-
-    private func refresh() { status = NativeMessagingInstaller.status() }
 }
 
 struct NotificationsPane: View {

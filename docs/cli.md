@@ -137,7 +137,7 @@ checkpoints flushed, socket removed).
 
 ```
 swoop native-host
-swoop native-host --install-manifest chrome|chromium|edge|brave|firefox --extension-id ID
+swoop native-host --install-manifest all|chrome|chrome-beta|chrome-canary|chromium|brave|edge|vivaldi|arc|opera|firefox [--extension-id ID]
 ```
 
 `swoop native-host` (no flags) is what the browser launches via Chrome/Firefox's native
@@ -147,7 +147,10 @@ token itself, refuses any path outside `/api/v1/` and the sensitive groups (`set
 `devices`, `automations`, `import`, `export`, `archives`, `plugins`), and forwards WebSocket
 events to subscribed requests. `--install-manifest` writes the native-messaging host manifest
 (`app.swoop.bridge.json`) to the right per-browser directory on macOS or Linux, pointing at the
-current executable.
+current executable and allowing Swoop's fixed extension ids; `all` does this for every installed
+browser, as the macOS app does on each launch. `--extension-id` additionally
+allows another id (a self-built extension with its own key). You don't normally need this command:
+the app keeps the manifests up to date.
 
 ## Docker
 

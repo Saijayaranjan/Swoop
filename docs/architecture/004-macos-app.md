@@ -68,7 +68,7 @@ FFI's `store_credential`), login item (`SMAppService.mainApp`), power assertion
 and the setting is on), environment probe (`NWPathMonitor` for availability/expensive/constrained,
 `IOPSCopyPowerSourcesInfo` for AC/battery, VPN via `utun` interfaces in `getifaddrs`, Wi-Fi SSID
 omitted unless location permission is granted) → `update_environment`, sleep/quit actions on
-`ReadyForSleep`, native-messaging manifest installation for Chrome/Chromium/Edge/Brave/Arc/Firefox,
+`ReadyForSleep`, native-messaging host registration with every installed browser on each launch,
 `LSFileQuarantineEnabled` in Info.plist, Sparkle-free updater install/relaunch, system appearance.
 
 ## Design language ("quiet instrument")

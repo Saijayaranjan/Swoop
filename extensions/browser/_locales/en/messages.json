@@ -313,7 +313,7 @@
     "message": "Can’t reach Swoop"
   },
   "offlineNoHostBody": {
-    "message": "The browser helper isn’t set up yet. In Swoop, open Settings → Browser and choose Install, then try again."
+    "message": "Open the Swoop app once and it connects automatically, then try again."
   },
   "offlineRemoteTitle": {
     "message": "Can’t reach your Swoop"
@@ -630,7 +630,7 @@
     "message": "The browser helper is installed. Start Swoop to connect."
   },
   "noHostSub": {
-    "message": "The browser helper isn’t installed for this browser yet."
+    "message": "Open the Swoop app once and it connects to this browser automatically."
   },
   "refusedSub": {
     "message": "The device token was rejected. Pair again below."
@@ -639,13 +639,10 @@
     "message": "Set up"
   },
   "groupSetUpDesc": {
-    "message": "The extension talks to Swoop through a small helper that the app installs. No address or password needed."
+    "message": "The extension talks to Swoop through a small helper that the app sets up by itself. No address, password or ID needed."
   },
   "stepInstallApp": {
-    "message": "Install Swoop and open it."
-  },
-  "stepInstallHelper": {
-    "message": "In Swoop, open Settings → Browser and choose Install for this browser."
+    "message": "Install Swoop and open it once. It connects to this browser automatically."
   },
   "stepTest": {
     "message": "Come back here and choose Test connection."
