@@ -47,7 +47,6 @@ const CONFIG = {
   function applyTheme() {
     syncPictures();
     syncToggle();
-    if (lightbox.isOpen()) lightbox.render();
   }
   if (toggle) {
     toggle.addEventListener('click', function () {
@@ -217,115 +216,6 @@ const CONFIG = {
       });
     });
   });
-
-  /* ── Gallery and lightbox ─────────────────────────────────────── */
-  const SHOTS = [
-    ['dashboard', 'Dashboard', 1280, 800],
-    ['downloads', 'Downloads', 1280, 800],
-    ['inspector', 'Download inspector', 1280, 800],
-    ['queue', 'A queue', 1280, 800],
-    ['torrents', 'Torrents', 1280, 800],
-    ['scheduled', 'Scheduled', 1280, 800],
-    ['history', 'History', 1280, 800],
-    ['grabber', 'Site Grabber', 1280, 800],
-    ['downloads-empty', 'Ready for a first download', 1280, 800],
-    ['add', 'Add Download', 660, 720],
-    ['menubar', 'Menu bar extra', 350, 572],
-    ['about', 'About Swoop', 380, 548],
-    ['settings-general', 'Settings: General', 1000, 728],
-    ['settings-categories', 'Settings: Categories', 1000, 728],
-    ['settings-bandwidth', 'Settings: Bandwidth', 1000, 728],
-    ['settings-remote', 'Settings: Remote', 1000, 728],
-  ];
-
-  const grid = document.getElementById('gallery-grid');
-  if (grid) {
-    const frag = document.createDocumentFragment();
-    SHOTS.forEach(function (s, i) {
-      const li = document.createElement('li');
-      li.className = 'reveal in';
-      li.innerHTML =
-        '<button class="tile" type="button" aria-label="View larger: ' + s[1] + '">' +
-          '<span class="tile-media"><picture>' +
-            '<source srcset="assets/thumbs/' + s[0] + '-dark.webp" media="(prefers-color-scheme: dark)" data-dark>' +
-            '<img src="assets/thumbs/' + s[0] + '-light.webp" alt="" loading="lazy" decoding="async" width="' + Math.min(640, s[2]) + '" height="' + Math.round(Math.min(640, s[2]) * s[3] / s[2]) + '">' +
-          '</picture></span>' +
-          '<span class="tile-cap"><span>' + s[1] + '</span><svg class="ic" aria-hidden="true"><use href="#i-expand"/></svg></span>' +
-        '</button>';
-      li.querySelector('button').addEventListener('click', function () { lightbox.open(i, this); });
-      frag.appendChild(li);
-    });
-    grid.appendChild(frag);
-  }
-
-  const lightbox = (function () {
-    const el = document.getElementById('lightbox');
-    const img = document.getElementById('lb-img');
-    const cap = document.getElementById('lb-caption');
-    const count = document.getElementById('lb-count');
-    const closeBtn = el.querySelector('.lb-close');
-    let index = 0;
-    let opener = null;
-    let touchX = null;
-
-    function render() {
-      const s = SHOTS[index];
-      img.src = 'assets/screens/' + s[0] + '-' + effectiveTheme() + '.webp';
-      img.width = s[2];
-      img.height = s[3];
-      img.alt = 'Swoop screenshot: ' + s[1];
-      cap.textContent = s[1];
-      count.textContent = (index + 1) + ' of ' + SHOTS.length;
-      // Preload neighbours.
-      [index - 1, index + 1].forEach(function (n) {
-        const t = SHOTS[(n + SHOTS.length) % SHOTS.length];
-        const p = new Image();
-        p.src = 'assets/screens/' + t[0] + '-' + effectiveTheme() + '.webp';
-      });
-    }
-    function go(delta) { index = (index + delta + SHOTS.length) % SHOTS.length; render(); }
-    function open(i, from) {
-      index = i;
-      opener = from || document.activeElement;
-      render();
-      el.hidden = false;
-      root.style.overflow = 'hidden';
-      closeBtn.focus();
-    }
-    function close() {
-      el.hidden = true;
-      root.style.overflow = '';
-      if (opener && opener.focus) opener.focus();
-    }
-    function isOpen() { return !el.hidden; }
-
-    el.querySelectorAll('[data-close]').forEach(function (c) { c.addEventListener('click', close); });
-    el.querySelector('.lb-prev').addEventListener('click', function () { go(-1); });
-    el.querySelector('.lb-next').addEventListener('click', function () { go(1); });
-    document.addEventListener('keydown', function (e) {
-      if (!isOpen()) return;
-      if (e.key === 'Escape') { e.preventDefault(); close(); }
-      else if (e.key === 'ArrowRight') { e.preventDefault(); go(1); }
-      else if (e.key === 'ArrowLeft') { e.preventDefault(); go(-1); }
-      else if (e.key === 'Tab') {
-        // Keep focus inside the dialog.
-        const focusables = Array.prototype.slice.call(el.querySelectorAll('button'));
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-        else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-      }
-    });
-    el.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
-    el.addEventListener('touchend', function (e) {
-      if (touchX === null) return;
-      const dx = e.changedTouches[0].clientX - touchX;
-      if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
-      touchX = null;
-    });
-
-    return { open: open, close: close, render: render, isOpen: isOpen };
-  })();
 
   /* ── Misc ─────────────────────────────────────────────────────── */
   const year = document.getElementById('year');
