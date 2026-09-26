@@ -196,17 +196,8 @@
             <div class="card-icon"><svg class="ic" aria-hidden="true"><use href="#i-bolt"/></svg></div>
             <h3>Adaptive segmented acceleration</h3>
             <p>Each file is split into segments that steal work from one another. Swoop keeps an extra connection only when it earns at least a 15% gain, backs off the moment a server answers 429, 503 or Retry-After, and splits slow tails at the end so the last few percent don’t crawl.</p>
-            <div class="segbar" aria-hidden="true">
-              <div class="seg"><i style="--d:2.6s"></i></div>
-              <div class="seg"><i style="--d:3.4s"></i></div>
-              <div class="seg"><i style="--d:2.9s"></i></div>
-              <div class="seg"><i style="--d:4.1s"></i></div>
-              <div class="seg"><i style="--d:3.1s"></i></div>
-              <div class="seg"><i style="--d:3.8s"></i></div>
-              <div class="seg"><i style="--d:2.7s"></i></div>
-              <div class="seg"><i style="--d:3.5s"></i></div>
-            </div>
-            <p class="segbar-meta" aria-hidden="true"><span>8 connections</span><span>work-stealing</span></p>
+            <div class="segbar" aria-hidden="true"><div class="segbar-track" data-segbar></div></div>
+            <p class="segbar-meta" aria-hidden="true"><span data-segbar-conns>8 connections</span><span data-segbar-state>100%</span></p>
           </article>
 
           <article class="card reveal">

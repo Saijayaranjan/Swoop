@@ -217,6 +217,123 @@ const CONFIG = {
     });
   });
 
+  /* ── Segmented download demo ──────────────────────────────────── */
+  // One file split across eight connections. Each connection fills its own range; when one
+  // finishes early it takes the back half of the largest range still in flight.
+  const segTrack = document.querySelector('[data-segbar]');
+  if (segTrack && !reduceMotion.matches && 'requestAnimationFrame' in window) {
+    const stateEl = document.querySelector('[data-segbar-state]');
+    const connsEl = document.querySelector('[data-segbar-conns]');
+    const N = 8;
+    const RATES = [1.3, 0.62, 1.05, 0.5, 1.2, 0.85, 0.95, 0.72];
+    const BASE = 0.03; // file fraction per second at rate 1
+    let conns = [];
+    let fills = [];
+    let heads = [];
+    let phase = 'run';
+    let phaseAt = 0;
+    let last = 0;
+    let visible = false;
+    let raf = 0;
+
+    function reset() {
+      segTrack.textContent = '';
+      segTrack.classList.add('live');
+      segTrack.classList.remove('done', 'fade');
+      conns = []; fills = []; heads = [];
+      for (let i = 0; i < N; i++) {
+        conns.push({ start: i / N, pos: i / N, end: (i + 1) / N, rate: RATES[i], busy: true });
+      }
+      phase = 'run';
+      if (stateEl) { stateEl.textContent = '0%'; stateEl.classList.remove('ok'); }
+      if (connsEl) connsEl.textContent = N + ' connections';
+    }
+
+    function el(cls) {
+      const d = document.createElement('i');
+      d.className = cls;
+      segTrack.appendChild(d);
+      return d;
+    }
+
+    function flash(at) {
+      const f = el('flash');
+      f.style.left = (at * 100) + '%';
+      f.addEventListener('animationend', function () { f.remove(); });
+    }
+
+    function steal(c) {
+      let victim = null;
+      conns.forEach(function (o) {
+        if (o.busy && o !== c && (!victim || o.end - o.pos > victim.end - victim.pos)) victim = o;
+      });
+      if (!victim || victim.end - victim.pos < 0.02) { c.busy = false; return; }
+      const mid = victim.pos + (victim.end - victim.pos) / 2;
+      conns.push({ start: mid, pos: mid, end: victim.end, rate: c.rate, busy: true, from: c });
+      victim.end = mid;
+      c.busy = false;
+      c.handedOff = true;
+      flash(mid);
+    }
+
+    function render() {
+      while (fills.length < conns.length) fills.push(el('fill'));
+      while (heads.length < conns.length) heads.push(el('head'));
+      let done = 0;
+      let active = 0;
+      conns.forEach(function (c, i) {
+        fills[i].style.left = (c.start * 100) + '%';
+        fills[i].style.width = c.pos > c.start ? 'calc(' + ((c.pos - c.start) * 100) + '% + 1px)' : '0';
+        heads[i].style.left = (c.pos * 100) + '%';
+        heads[i].classList.toggle('idle', !c.busy);
+        done += c.pos - c.start;
+        if (c.busy) active++;
+      });
+      if (stateEl && phase === 'run') stateEl.textContent = Math.min(99, Math.floor(done * 100)) + '%';
+      if (connsEl && phase === 'run') connsEl.textContent = active + (active === 1 ? ' connection' : ' connections') + (conns.length > N ? ' · work-stealing' : '');
+      return done;
+    }
+
+    function tick(now) {
+      raf = 0;
+      if (!visible) return;
+      const dt = Math.min(0.05, last ? (now - last) / 1000 : 0);
+      last = now;
+      if (phase === 'run') {
+        const t = now / 1000;
+        conns.slice().forEach(function (c, i) {
+          if (!c.busy) return;
+          const wobble = 1 + 0.18 * Math.sin(t * 1.7 + i * 1.3);
+          c.pos = Math.min(c.end, c.pos + BASE * c.rate * wobble * dt);
+          if (c.pos >= c.end - 1e-6) { c.pos = c.end; steal(c); }
+        });
+        const done = render();
+        if (done >= 0.9999 || conns.every(function (c) { return !c.busy; })) {
+          phase = 'done';
+          phaseAt = now;
+          segTrack.classList.add('done');
+          if (stateEl) { stateEl.textContent = 'Verified ✓'; stateEl.classList.add('ok'); }
+          if (connsEl) connsEl.textContent = 'Downloaded with ' + conns.length + ' segments';
+        }
+      } else if (phase === 'done' && now - phaseAt > 1800) {
+        phase = 'fade';
+        phaseAt = now;
+        segTrack.classList.add('fade');
+      } else if (phase === 'fade' && now - phaseAt > 550) {
+        reset();
+      }
+      raf = requestAnimationFrame(tick);
+    }
+
+    reset();
+    render();
+    const seen = new IntersectionObserver(function (entries) {
+      visible = entries[0].isIntersecting;
+      if (visible && !raf) { last = 0; raf = requestAnimationFrame(tick); }
+    });
+    seen.observe(segTrack);
+  }
+
   /* ── Misc ─────────────────────────────────────────────────────── */
   const year = document.getElementById('year');
   if (year) year.textContent = String(new Date().getFullYear());
