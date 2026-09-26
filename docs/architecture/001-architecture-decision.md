@@ -50,7 +50,7 @@ consistency of *engine behaviour* (identical core) and beats B on every UX/nativ
 | macOS UI | SwiftUI (macOS 14+) over AppKit where needed (`NSTableView`-backed `Table`, `NSMenu`, `QLPreviewPanel`, `NSWorkspace`) | Native menus, inspector, menu-bar extra, accessibility, Retina, appearance | — |
 | Extension | WebExtension MV3 (TypeScript, esbuild) | One codebase for Chrome/Chromium/Edge/Firefox with per-browser manifest | — |
 | Remote web UI | Preact + TypeScript (MIT), embedded into the server binary with `rust-embed` | 4 KB runtime; serves phones/tablets/NAS | — |
-| Updates | Own updater: JSON appcast, **Ed25519**-signed archives, downloaded by Swoop's own engine, verified before install, previous bundle retained for rollback | Sparkle needs Xcode-style framework embedding that this host cannot do; own updater dogfoods the engine | Sparkle |
+| Updates | Own updater: GitHub Releases feed, **Ed25519**-signed DMGs, verified before mounting and install, swapped by a detached helper with rollback to the previous bundle | Sparkle needs Xcode-style framework embedding that this host cannot do | Sparkle |
 
 ## 4. Shared vs platform-specific
 

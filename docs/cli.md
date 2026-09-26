@@ -133,6 +133,26 @@ and sends tokens in clear text otherwise. Logs go to stderr; control verbosity w
 `--log-level` or `RUST_LOG`. `SIGINT`/`SIGTERM` trigger a graceful shutdown (transfers paused,
 checkpoints flushed, socket removed).
 
+## Updates
+
+```
+swoop update check [--beta] [--json]
+```
+
+Asks GitHub Releases whether a newer Swoop exists and prints the answer; `--beta` includes
+prereleases. It never downloads or installs anything: on a Mac the app installs updates, and a
+headless host is upgraded by hand. `--json` prints the full result, whose `status` is one of
+`available`, `up_to_date`, `no_releases`, `offline`, `rate_limited` or `error`; only `available`
+needs attention, and "no releases yet" or offline are not errors (exit code 0).
+
+`swoop server` checks the same way a minute after it starts and then daily (when
+`updates.check_automatically` is on): it logs the result and raises an "update available"
+notification, but never updates itself.
+
+Hidden subcommands serve release tooling and the app's installer: `swoop update keygen`,
+`swoop update sign --key <file> <dmg>`, `swoop update verify <dmg>` and `swoop update apply`
+(see `CONTRIBUTING.md` → Releasing).
+
 ## Browser native-messaging host
 
 ```

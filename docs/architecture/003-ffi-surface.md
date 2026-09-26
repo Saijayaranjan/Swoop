@@ -86,6 +86,8 @@ async fn archive_list(path) -> FfiArchiveListing ; archive_extract(path, entries
 async fn export_json(tasks, history) -> String ; import_json(json, FfiImportOptions) -> FfiImportReport
 // updates / plugins / logs
 async fn check_for_updates() -> FfiUpdateInfo ; download_update() -> String(path)
+async fn check_app_update(manual) -> FfiUpdateInfo ; fn update_progress() -> FfiUpdateProgress
+async fn stage_update(bundle_path) -> String(staged bundle) ; fn releases_page_url() -> String
 async fn plugins() ; set_plugin_enabled ; uninstall_plugin
 async fn recent_logs(limit, level?) -> Vec<String>
 // platform inputs

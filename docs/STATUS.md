@@ -45,7 +45,7 @@ in `swoop-cli` and `swoop-server`. It is not enforced in CI.
 | Security | **Complete** (see the model below) | Recently hardened: remote save-path confinement, the native-host allowlist, safe remove-with-files and staged update downloads. |
 | Accessibility | **Partial** | SwiftUI views carry about 22 `accessibilityLabel`s and a few values and elements. The web UI has 28 ARIA attributes. There's no VoiceOver or keyboard-only audit and no contrast audit. |
 | i18n | **Partial** | English, Hindi and Tamil. The extension is fully translated (66 of 66 keys). The web UI has 44 of 256 keys translated in hi/ta, with fallback to English. The macOS `Localizable.strings` has about 109 of 208 lines in hi/ta. The Rust side returns stable keys plus English fallbacks. |
-| Updates | **Partial** | The Ed25519 signature over the SHA-256 is verified before download. The archive is hashed and its size checked, and it's staged under a temporary name. Downgrades are refused, and https is required. Missing: the verified DMG isn't installed automatically (it's handed to the app or user). The signing key has to be supplied through `SWOOP_UPDATE_PUBLIC_KEY`; without it, update checks return "unavailable". There's no published feed yet. |
+| Updates | **Complete** | Updates now install. The app checks GitHub Releases (`Saijayaranjan/Swoop`) 10 s after launch and every 24 h, downloads the DMG in the background, verifies its Ed25519 signature with the compiled-in release key, then asks (or, with automatic install on, installs on quit). "Install and Relaunch" re-verifies, mounts read-only, validates the bundle (id, newer version, `codesign --verify --deep --strict`), stages it next to the app, quits cleanly, and a detached `swoop update apply` helper swaps the bundles, strips quarantine and relaunches, rolling back on failure. Settings → Updates has the toggles (check, auto-install, beta), Check Now and last-checked time; **Swoop → Check for Updates…** and a status-bar chip complete it. The CLI (`swoop update check [--json]`) and headless servers only report. Releases are cut with `scripts/release.sh` (see CONTRIBUTING.md → Releasing). |
 | Import/export | **Complete** | A JSON bundle containing settings, queues, categories, rules, schedules, automations and recipes, plus tasks and history optionally. IDs are regenerated on conflict unless overwrite is set. Automations are imported without consent. Available through REST, the CLI and the app. |
 | Plugins | **Partial** | Manifest discovery, enable/disable, a permission grant model, and REST and app surfaces. Plugin code execution (an out-of-process host) isn't implemented. |
 | Archive extraction | **Partial** | Listing and selective extraction of ZIP, TAR, TAR.GZ/TGZ and GZ, with no zip-slip, no symlinks and no absolute paths. Local callers only. RAR and 7z are only recognised by their magic bytes; they aren't extracted. |
@@ -126,13 +126,13 @@ What the documentation claims (`docs/security/`) and what the code actually enfo
 - **Network.** A public origin can't redirect to a loopback, private or link-local target. Webhooks resolve DNS and refuse private targets, and plain http is allowed only to localhost. Header names and values are validated, and hop-by-hop and `Range` headers can't be overridden. TLS 1.2 is the minimum. Certificate exceptions are per host and opt-in.
 - **Native messaging.** The host manifest allows only Swoop's fixed extension IDs. The host relays only `/api/v1/tasks…` and `/api/v1/media…`, with a fixed set of methods, and rejects ambiguous paths. Messages are capped at 1 MiB.
 - **Automation.** Command, shell and AppleScript actions need a consent record whose BLAKE3 hash matches the resolved action. Only the desktop UI writes consent records (there's no REST route for it). Remote callers can't create or link code-running automations, and imports never carry consent. Commands run with an absolute program path and argv; variables are passed as environment variables. The sandboxed script language has no I/O and is capped by length, token count, steps and time.
-- **Updates.** The Ed25519 signature over the declared SHA-256 is checked before download. The archive is hashed while it downloads and staged under a temporary name. Downgrades are refused, and https is required. The key comes from `SWOOP_UPDATE_PUBLIC_KEY`.
+- **Updates.** Releases come from GitHub (drafts never, prereleases only on opt-in). The DMG is fetched over HTTPS only, redirects included, and its Ed25519 signature over the SHA-256 is verified with the compiled-in release key before it's kept and again before it's mounted. The mounted app must be exactly one `Swoop.app` with bundle id `app.swoop.desktop`, a strictly newer version matching the tag, and a valid code signature. Any failure refuses the update and cleans up. The feed URL override (`SWOOP_UPDATE_FEED_URL`) exists only in debug builds. Details: `docs/security/security-model.md` §7.
 - **Secrets.** Credentials live in the OS keychain, with a 0600 file fallback on headless Linux. Log lines are redacted.
 - **Differences from the older docs, now corrected in `docs/security/`.**
   - Loopback TCP is on by default in the app.
   - On cross-origin redirects, only reqwest's sensitive headers (`Authorization`, `Cookie`, `Proxy-Authorization`) are dropped, not all custom headers.
   - The `docs/security/dependencies.md` licence report doesn't exist.
-  - The update key isn't compiled in unless it's set at build time.
+  - The update key is compiled in (`swoop_update::DEFAULT_PUBLIC_KEY_HEX`); `SWOOP_UPDATE_PUBLIC_KEY` can replace it at build time only.
 
 ## Known limitations
 
@@ -143,7 +143,7 @@ What the documentation claims (`docs/security/`) and what the code actually enfo
 - **Torrents:** see the BitTorrent row above (no PEX or encryption switches, no per-file priority, no uTP listen).
 - **Plugins:** manifest and permission model only; no code execution.
 - **Archives:** RAR and 7z aren't extracted.
-- **Updates:** there's no automatic installer, no published feed and no bundled key.
+- **Updates:** the app must live in a folder the user can write to (normally /Applications) to update itself; otherwise it says so. Because builds are ad-hoc signed, Gatekeeper and privacy prompts may reappear after an update. GitHub's unauthenticated API limit is 60 requests an hour per IP; a rate-limited check is quiet and retried later. The repository must be public for unauthenticated checks to see releases.
 - **Platforms:** the desktop app is macOS 14+ only. Linux and Docker run only the headless server and CLI. There's no Windows front end.
 - **Translations:** the web and macOS translations for Hindi and Tamil are partial.
 - **Tests:** the macOS app has only a small Swift test target (9 tests).
@@ -198,12 +198,12 @@ Signing and notarisation caveats (there's no Developer ID):
 - An ad-hoc signature isn't trusted by Gatekeeper. A DMG downloaded from the internet is quarantined and blocked ("cannot be opened because the developer cannot be verified"). Users must right-click > Open, or run `xattr -dr com.apple.quarantine /Applications/Swoop.app`.
 - Notarisation (`notarytool`) and stapling need an Apple Developer ID Application certificate. With one: set `SWOOP_SIGN_IDENTITY`, then run `xcrun notarytool submit build/Swoop-<v>.dmg --wait` and `xcrun stapler staple`. None of this is scripted yet.
 - An ad-hoc identity changes with every build. Keychain items and privacy grants (for example the automation/AppleScript prompts) may be requested again after an update.
-- For in-app updates, generate an Ed25519 key pair and build with `SWOOP_UPDATE_PUBLIC_KEY=<hex public key>`. Then sign `sha256(dmg)` with the private key and publish an `appcast.json` in the format documented in `crates/swoop-update/src/lib.rs`. Without the key, update checks are disabled.
+- In-app updates are published with `scripts/release.sh <version>`, which builds, signs the DMG with the release key and prints the `gh release create` command. See **Releasing** in `CONTRIBUTING.md`, including why the private key must be backed up.
 - The extension's IDs are fixed: `hbfgocpejejjhpigpanikchicoplcfjb` for Chromium browsers (from the public `key` in the manifest) and `swoop@swoop.app` for Firefox. The signing private key is kept outside the repository; a store-assigned ID, if the store ever needs a different key, goes next to the constants in `native_host.rs` and `NativeMessaging.swift`.
 
 ## Suggested future work
 
-1. Developer ID signing, notarisation and stapling in the release script, plus a published, signed update feed and an installer step for verified updates.
+1. Developer ID signing, notarisation and stapling in the release script.
 2. Expanding multi-file metalinks into one task per file, and separate HLS audio renditions, muxed with ffmpeg.
 3. A DASH (non-DRM) downloader.
 4. An out-of-process plugin runtime on top of the existing permission model.

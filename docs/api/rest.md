@@ -149,10 +149,15 @@ POST /api/v1/archives/list       R {"path":"…"} → ArchiveListing         (lo
 POST /api/v1/archives/extract    C {"path":"…","entries":[…]|null,"destination":"…"} → {"extracted":n}  (local only)
 GET  /api/v1/export?tasks=true&history=false   X → ExportBundle
 POST /api/v1/import              X {"bundle":ExportBundle,"options":ImportOptions} → ImportReport
-POST /api/v1/updates/check       X → UpdateInfo
-POST /api/v1/updates/download    X → {"path":"…"}
+POST /api/v1/updates/check       X → UpdateInfo   (GitHub Releases; never installs)
+POST /api/v1/updates/download    X → {"path":"…"} (downloads and verifies the signed DMG only)
 GET  /api/v1/plugins             X   POST /api/v1/plugins/{id}/enable {"enabled":bool,"permissions":[…]}   DELETE /api/v1/plugins/{id}
 ```
+
+`UpdateInfo` is `{current_version, status, available, skipped, latest_version, name, notes,
+notes_url, published_at, prerelease, download_url, size, message, signature_valid, checked_at}`.
+`status` is `available`, `up_to_date`, `no_releases`, `offline`, `rate_limited` or `error`; the
+last four are quiet states with a `message`, not HTTP errors.
 
 ## Health
 `GET /healthz` (no auth, all listeners) → `{"status":"ok","version":"…"}`.
