@@ -67,6 +67,20 @@ public final class AppModel {
 
     public static let speedHistoryCapacity = 300
 
+    /// When set, live stats from the engine are ignored and only `injectStats` updates them.
+    /// Used by snapshot runs so sample figures are not interleaved with real readings.
+    @ObservationIgnored public var liveStatsMuted = false
+
+    /// Records a stats sample directly, bypassing `liveStatsMuted`.
+    public func injectStats(_ s: GlobalStatsData) { record(s) }
+
+    private func record(_ s: GlobalStatsData) {
+        stats = s
+        networkAvailable = s.networkAvailable
+        speedHistory.append(SpeedSampleData(at: s.at > 0 ? s.at : Date().millis, download: s.downloadSpeed, upload: s.uploadSpeed))
+        if speedHistory.count > Self.speedHistoryCapacity { speedHistory.removeFirst(speedHistory.count - Self.speedHistoryCapacity) }
+    }
+
     public init(engine: EngineClient) {
         self.engine = engine
     }
@@ -177,10 +191,7 @@ public final class AppModel {
         case .settingsChanged:
             settings = SettingsDoc(text: engine.settingsJSON())
         case .globalStats(let s):
-            stats = s
-            networkAvailable = s.networkAvailable
-            speedHistory.append(SpeedSampleData(at: s.at > 0 ? s.at : Date().millis, download: s.downloadSpeed, upload: s.uploadSpeed))
-            if speedHistory.count > Self.speedHistoryCapacity { speedHistory.removeFirst(speedHistory.count - Self.speedHistoryCapacity) }
+            if !liveStatsMuted { record(s) }
         case .devicesChanged:
             reloadIfLoaded("devices")
         case .pairingStarted(let code, let expiresAt, let url):

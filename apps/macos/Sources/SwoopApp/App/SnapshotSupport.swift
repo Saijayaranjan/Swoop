@@ -331,6 +331,7 @@ enum SnapshotSample {
             s.uploadSpeed = 1_150_000
         }
         s.at = Date().millis
-        model.apply([.globalStats(s)])
+        model.liveStatsMuted = true
+        model.injectStats(s)
     }
 }
