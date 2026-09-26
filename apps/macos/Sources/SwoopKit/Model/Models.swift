@@ -659,16 +659,44 @@ public struct EngineInfoData: Equatable, Sendable {
     public init() {}
 }
 
+/// Result of an update check against GitHub Releases (`FfiUpdateInfo`).
 public struct UpdateInfoData: Equatable, Sendable {
     public var currentVersion: String
+    /// `up_to_date`, `available`, `no_releases`, `offline`, `rate_limited` or `error`.
+    public var status: String = "up_to_date"
     public var available: Bool
+    /// The release is the version the user chose to skip.
+    public var skipped = false
     public var latestVersion: String?
+    public var name: String?
+    /// Release notes (Markdown).
     public var notes: String?
+    public var notesURL: String?
+    public var publishedAt: Date?
+    public var prerelease = false
+    public var size: UInt64?
+    public var message: String?
     public var signatureValid: Bool?
     public var checkedAt: Int64
     public init(currentVersion: String, available: Bool, latestVersion: String?, notes: String?, signatureValid: Bool?, checkedAt: Int64) {
         self.currentVersion = currentVersion; self.available = available; self.latestVersion = latestVersion
         self.notes = notes; self.signatureValid = signatureValid; self.checkedAt = checkedAt
+    }
+
+    /// The check finished without trouble (up to date, or nothing published yet).
+    public var isQuietlyCurrent: Bool { status == "up_to_date" || status == "no_releases" }
+}
+
+/// Download → verification → staging progress of the pending update (`FfiUpdateProgress`).
+public struct UpdateProgressData: Equatable, Sendable {
+    /// `idle`, `downloading`, `verifying`, `verified`, `staging`, `staged` or `failed`.
+    public var phase: String
+    public var version: String?
+    public var received: UInt64
+    public var total: UInt64?
+    public var message: String?
+    public init(phase: String = "idle", version: String? = nil, received: UInt64 = 0, total: UInt64? = nil, message: String? = nil) {
+        self.phase = phase; self.version = version; self.received = received; self.total = total; self.message = message
     }
 }
 

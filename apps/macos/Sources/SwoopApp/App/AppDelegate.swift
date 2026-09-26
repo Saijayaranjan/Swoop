@@ -16,6 +16,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     private var pendingURLs: [URL] = []
     private var launched = false
     let quickLook = QuickLookController()
+    let updates: UpdateController
 
     override init() {
         let version = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.1.0"
@@ -25,6 +26,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .appendingPathComponent("Swoop", isDirectory: true)
         let engine = EngineFactory.open(dataDirectory: support, appVersion: version, bundleId: bundleId)
         model = AppModel(engine: engine)
+        updates = UpdateController(model: model)
         super.init()
     }
 
@@ -67,6 +69,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             environment = EnvironmentMonitor { env in engine.updateEnvironment(env) }
             environment?.start()
             startPeriodicWork()
+            updates.start()
             let urls = pendingURLs
             pendingURLs.removeAll()
             if !urls.isEmpty { self.application(NSApp, open: urls) }
@@ -90,7 +93,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
         let confirm = model.settings.bool("appearance.confirm_on_quit_with_active", default: true)
         let active = model.stats.downloading
-        if confirm, active > 0 {
+        if confirm, active > 0, !updates.isRelaunchingForUpdate {
             let alert = NSAlert()
             alert.messageText = L10n.tr("Quit Swoop?")
             alert.informativeText = String(format: L10n.tr("%d downloads are in progress. They'll resume next time you open Swoop."), active)
@@ -102,6 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             environment?.stop()
             sleepPreventer.update(active: false, enabled: false)
             await model.stop()
+            updates.launchPendingInstall()
             NSApp.reply(toApplicationShouldTerminate: true)
         }
         return .terminateLater

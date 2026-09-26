@@ -121,6 +121,13 @@ public protocol EngineClient: AnyObject, Sendable {
     func importJSON(_ json: String, options: ImportOptionsData) async throws -> ImportReportData
     func checkForUpdates() async throws -> UpdateInfoData
     func downloadUpdate() async throws -> String
+    /// The app's quiet update check; `manual` also reports a skipped version.
+    func checkAppUpdate(manual: Bool) async throws -> UpdateInfoData
+    func updateProgress() -> UpdateProgressData
+    /// Verify, mount and validate the downloaded update, and stage it next to `bundlePath`.
+    func stageUpdate(bundlePath: String) async throws -> String
+    /// The GitHub releases page updates come from.
+    func releasesPageURL() -> String
     func plugins() async throws -> [PluginData]
     func setPluginEnabled(_ id: String, _ enabled: Bool, granted: [String]) async throws
     func uninstallPlugin(_ id: String) async throws
@@ -253,6 +260,10 @@ public final class UnavailableEngineClient: EngineClient, @unchecked Sendable {
     public func importJSON(_ json: String, options: ImportOptionsData) async throws -> ImportReportData { try fail() }
     public func checkForUpdates() async throws -> UpdateInfoData { try fail() }
     public func downloadUpdate() async throws -> String { try fail() }
+    public func checkAppUpdate(manual: Bool) async throws -> UpdateInfoData { try fail() }
+    public func updateProgress() -> UpdateProgressData { UpdateProgressData() }
+    public func stageUpdate(bundlePath: String) async throws -> String { try fail() }
+    public func releasesPageURL() -> String { "" }
     public func plugins() async throws -> [PluginData] { try fail() }
     public func setPluginEnabled(_ id: String, _ enabled: Bool, granted: [String]) async throws { try fail() as Void }
     public func uninstallPlugin(_ id: String) async throws { try fail() as Void }
@@ -495,11 +506,28 @@ public final class LiveEngineClient: EngineClient, @unchecked Sendable {
         return ImportReportData(imported: r.imported, skipped: r.skipped, errors: r.errors)
     }
     public func checkForUpdates() async throws -> UpdateInfoData {
-        let u = try await call { try await engine.checkForUpdates() }
-        return UpdateInfoData(currentVersion: u.currentVersion, available: u.available, latestVersion: u.latestVersion,
-                              notes: u.notes, signatureValid: u.signatureValid, checkedAt: u.checkedAt)
+        Self.update(try await call { try await engine.checkForUpdates() })
     }
     public func downloadUpdate() async throws -> String { try await call { try await engine.downloadUpdate() } }
+    public func checkAppUpdate(manual: Bool) async throws -> UpdateInfoData {
+        Self.update(try await call { try await engine.checkAppUpdate(manual: manual) })
+    }
+    public func updateProgress() -> UpdateProgressData {
+        let p = engine.updateProgress()
+        return UpdateProgressData(phase: p.phase, version: p.version, received: p.received, total: p.total, message: p.message)
+    }
+    public func stageUpdate(bundlePath: String) async throws -> String {
+        try await call { try await engine.stageUpdate(bundlePath: bundlePath) }
+    }
+    public func releasesPageURL() -> String { engine.releasesPageUrl() }
+    private static func update(_ u: FfiUpdateInfo) -> UpdateInfoData {
+        var d = UpdateInfoData(currentVersion: u.currentVersion, available: u.available, latestVersion: u.latestVersion,
+                               notes: u.notes, signatureValid: u.signatureValid, checkedAt: u.checkedAt)
+        d.status = u.status; d.skipped = u.skipped; d.name = u.name; d.notesURL = u.notesUrl
+        d.publishedAt = u.publishedAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+        d.prerelease = u.prerelease; d.size = u.size; d.message = u.message
+        return d
+    }
     public func plugins() async throws -> [PluginData] {
         try await call { try await engine.plugins() }.map {
             PluginData(id: $0.id, name: $0.name, version: $0.version, description: $0.description, author: $0.author,

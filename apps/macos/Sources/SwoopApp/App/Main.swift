@@ -85,6 +85,7 @@ struct SwoopCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .appInfo) {
             Button("About Swoop") { openWindow(id: "about") }
+            Button("Check for Updates…") { delegate.updates.checkNow(showingWindow: true) }
         }
         CommandGroup(replacing: .newItem) {
             Button("New Download…") { delegate.showMainWindow(); ui.openAdd() }

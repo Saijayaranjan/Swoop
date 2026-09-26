@@ -542,6 +542,18 @@ struct StatusBar: View {
 
             Spacer(minLength: 8)
 
+            if let updates = UpdateController.shared, updates.updateReady {
+                Button { updates.showWindow() } label: {
+                    Chip {
+                        Image(systemName: "sparkles").font(.system(size: 11, weight: .semibold)).foregroundStyle(Theme.blue)
+                        Text(updates.phase == .staged ? "Update on quit" : "Update ready")
+                    }
+                }
+                .buttonStyle(.plain)
+                .help(String(format: L10n.tr("Swoop %@ is downloaded and verified"), updates.info?.latestVersion ?? ""))
+                .transition(.opacity.combined(with: .scale(scale: 0.9)))
+            }
+
             if let disk = model.disks.first, let free = disk.free {
                 Chip {
                     Image(systemName: "internaldrive").font(.system(size: 11)).foregroundStyle(.secondary)
