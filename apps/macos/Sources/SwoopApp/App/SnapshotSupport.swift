@@ -6,7 +6,7 @@ import SwiftUI
 /// `SWOOP_SNAPSHOT` is set to a path prefix, Swoop renders its main window into PNGs for each
 /// screen listed in `SWOOP_SNAPSHOT_SCREENS` (comma-separated: `downloads`, `downloads-empty`,
 /// `dashboard`, `inspector`, `add`, `torrents`, `scheduled`, `history`, `grabber`, `queue`,
-/// `settings`, `settings-<pane>` (e.g. `settings-general`), `about`, `menubar`; default `downloads,dashboard`) and `SWOOP_SNAPSHOT_APPEARANCE` (`light`, `dark` or
+/// `settings`, `settings-<pane>` (e.g. `settings-general`), `about`, `menubar`, `update-<state>` (`checking`, `uptodate`, `offline`, `downloading`, `ready`, `failed`); default `downloads,dashboard`) and `SWOOP_SNAPSHOT_APPEARANCE` (`light`, `dark` or
 /// both); `SWOOP_SNAPSHOT_SIZE=WxH` sets the main window size first. With `SWOOP_SNAPSHOT_SAMPLE=1` the in-memory model is filled with sample downloads,
 /// live stats and activity so busy states can be checked; the engine's stored data is untouched.
 /// Inert otherwise.
@@ -71,6 +71,13 @@ enum SnapshotSupport {
                         }
                         continue
                     }
+                    if screen.hasPrefix("update-"), let updates = UpdateController.shared {
+                        let w = updates.showSnapshotState(String(screen.dropFirst("update-".count)))
+                        try? await Task.sleep(nanoseconds: 1_200_000_000)
+                        if let w { save(w, to: "\(prefix)-\(screen)-\(appearance).png") }
+                        updates.closeWindow()
+                        continue
+                    }
                     if screen == "menubar" {
                         await captureMenuBar(ui: ui, model: model, path: "\(prefix)-menubar-\(appearance).png", dark: appearance == "dark")
                         continue
@@ -90,7 +97,9 @@ enum SnapshotSupport {
                 // Close windows first so no view (TimelineView etc.) renders during teardown.
                 for w in NSApp.windows { w.orderOut(nil) }
                 try? await Task.sleep(nanoseconds: 300_000_000)
-                NSApp.terminate(nil)
+                // A run-loop perform, not a direct call: this is a main-actor job, and the
+                // delegate's terminate reply runs as another one.
+                NSApp.perform(#selector(NSApplication.terminate(_:)), with: nil, afterDelay: 0)
             }
         }
     }

@@ -9,17 +9,15 @@ struct UpdateWindowView: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
             WindowWash()
             content
                 .padding(.horizontal, 30)
-                .padding(.top, 38)
+                .padding(.top, 12)
                 .padding(.bottom, 26)
         }
         .frame(width: 600)
         .fixedSize(horizontal: false, vertical: true)
-        .ignoresSafeArea()
-        .animation(.smooth(duration: 0.25), value: updates.phase)
     }
 
     @ViewBuilder
@@ -69,7 +67,7 @@ struct UpdateWindowView: View {
                 }
                 .frame(width: 84, height: 84)
                 VStack(alignment: .leading, spacing: 6) {
-                    Text("A new version of Swoop is ready")
+                    Text("A new version of Swoop is available")
                         .font(.system(size: 23, weight: .bold))
                     Text(String(format: L10n.tr("Swoop %@ is available. You have %@."), info.latestVersion ?? "", updates.currentVersion))
                         .font(.system(size: 13.5))
@@ -205,7 +203,7 @@ private struct UpdateStatusLine: View {
         case .ready: return L10n.tr("Downloaded and verified: signed with Swoop's release key.")
         case .installing: return L10n.tr("Checking and preparing the new version…")
         case .staged: return L10n.tr("Verified and ready. It installs when you quit Swoop.")
-        case .failed(let message): return String(format: L10n.tr("The update wasn't installed: %@"), message)
+        case .failed(let message): return String(format: L10n.tr("The update wasn't installed. %@"), message)
         default: return L10n.tr("Preparing the download…")
         }
     }

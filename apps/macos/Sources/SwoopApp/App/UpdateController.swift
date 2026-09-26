@@ -106,6 +106,14 @@ final class UpdateController {
         }
         await download()
         guard phase == .ready else { return }
+        #if DEBUG
+        // End-to-end testing only (compiled out of release builds): take the "Install and
+        // Relaunch" path as soon as the update is verified.
+        if ProcessInfo.processInfo.environment["SWOOP_UPDATE_TEST_INSTALL"] == "1" {
+            installAndRelaunch()
+            return
+        }
+        #endif
         if model.settings.bool("updates.install_automatically") {
             await stage(relaunch: false)
         } else {
@@ -145,10 +153,10 @@ final class UpdateController {
             } else if result.isQuietlyCurrent || result.skipped {
                 phase = .upToDate
             } else {
-                phase = .couldNotCheck(result.message ?? L10n.tr("GitHub couldn't be reached."))
+                phase = .couldNotCheck(Self.sentence(result.message ?? L10n.tr("GitHub couldn't be reached.")))
             }
         } catch {
-            phase = .couldNotCheck(error.localizedDescription)
+            phase = .couldNotCheck(Self.sentence(error.localizedDescription))
         }
     }
 
@@ -172,7 +180,7 @@ final class UpdateController {
             _ = try await engine.downloadUpdate()
             phase = .ready
         } catch {
-            phase = .failed(error.localizedDescription)
+            phase = .failed(Self.sentence(error.localizedDescription))
         }
     }
 
@@ -210,7 +218,7 @@ final class UpdateController {
             pending = (staged, relaunch)
             if relaunch { quitToInstall() } else { phase = .staged }
         } catch {
-            phase = .failed(error.localizedDescription)
+            phase = .failed(Self.sentence(error.localizedDescription))
             if !relaunch { showWindow() }
         }
     }
@@ -218,7 +226,10 @@ final class UpdateController {
     private func quitToInstall() {
         isRelaunchingForUpdate = true
         closeWindow()
-        NSApp.terminate(nil)
+        // Not `NSApp.terminate(nil)` directly: this often runs inside a main-actor job, and
+        // `applicationShouldTerminate` replies from another main-actor task, which can't run while
+        // this job is blocked in AppKit's terminate loop. A run-loop perform starts it cleanly.
+        NSApp.perform(#selector(NSApplication.terminate(_:)), with: nil, afterDelay: 0)
     }
 
     /// Called by the app delegate once the engine has stopped (downloads paused and persisted).
@@ -242,6 +253,11 @@ final class UpdateController {
         } catch {
             NSLog("Swoop: couldn't start the update helper: \(error.localizedDescription)")
         }
+    }
+
+    /// Engine messages start lower-case ("the update's signature…"); show them as sentences.
+    private static func sentence(_ s: String) -> String {
+        s.prefix(1).uppercased() + s.dropFirst()
     }
 
     func later() {
@@ -280,5 +296,34 @@ final class UpdateController {
 
     func closeWindow() {
         window?.close()
+    }
+
+    /// Snapshot tooling only (`SWOOP_SNAPSHOT_SCREENS=update-ready,…`): shows the window in a given
+    /// state with sample release data. Nothing is checked, downloaded or installed.
+    func showSnapshotState(_ state: String) -> NSWindow? {
+        let notes = """
+        ## Highlights
+        - **Updates install themselves**: verified with Swoop's release key, then swapped in on relaunch.
+        - Smoother segment scheduling on unreliable connections.
+
+        ## Fixes
+        1. Emptying a paused queue no longer crashes.
+        2. The menu bar speed stays steady.
+        """
+        var sample = UpdateInfoData(currentVersion: currentVersion, available: true, latestVersion: "0.2.0",
+                                    notes: notes, signatureValid: nil, checkedAt: 0)
+        sample.status = "available"
+        sample.publishedAt = Date()
+        sample.size = 46_012_714
+        switch state {
+        case "checking": info = nil; phase = .checking
+        case "uptodate": info = nil; phase = .upToDate
+        case "offline": info = nil; phase = .couldNotCheck(L10n.tr("Couldn't reach GitHub: the Internet connection appears to be offline."))
+        case "downloading": info = sample; phase = .downloading(received: 18_874_368, total: 46_012_714)
+        case "failed": info = sample; phase = .failed(Self.sentence(L10n.tr("the update's signature doesn't match Swoop's release key")))
+        default: info = sample; phase = .ready
+        }
+        showWindow()
+        return window
     }
 }
