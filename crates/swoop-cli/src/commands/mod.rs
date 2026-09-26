@@ -8,4 +8,5 @@ pub mod pair;
 pub mod queue;
 pub mod server;
 pub mod tasks;
+pub mod update;
 pub mod watch;

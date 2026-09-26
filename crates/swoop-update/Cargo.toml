@@ -3,11 +3,11 @@ name = "swoop-update"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
-description = "Signed update feed checking and verified download"
+repository.workspace = true
+description = "GitHub Releases update checks, Ed25519-verified downloads and the macOS bundle installer"
 
 [dependencies]
 swoop-domain = { path = "../swoop-domain" }
-swoop-runtime = { path = "../swoop-runtime" }
 tokio = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -17,10 +17,11 @@ semver = { workspace = true }
 base64 = { workspace = true }
 hex = { workspace = true }
 sha2 = { workspace = true }
+rand = { workspace = true }
 tracing = { workspace = true }
 url = { workspace = true }
+libc = "0.2"
 
 [dev-dependencies]
 tempfile = { workspace = true }
 swoop-testserver = { path = "../swoop-testserver" }
-rand = { workspace = true }

@@ -51,11 +51,12 @@ async fn run(mut cli: Cli) -> Result<(), CliError> {
         .take()
         .ok_or_else(|| CliError::Usage("no command given. Try `swoop --help`.".to_owned()))?;
 
-    // These two own their transport (native-host always talks to the local socket; server runs
-    // the engine in-process) and never need a pre-built request client.
+    // These own their transport (native-host always talks to the local socket; server runs
+    // the engine in-process; update talks to GitHub) and never need a pre-built request client.
     let command = match command {
         Commands::Server(args) => return commands::server::run(&cli, args).await,
         Commands::NativeHost(args) => return commands::native_host::run(&cli, args).await,
+        Commands::Update(args) => return commands::update::run(args, json).await,
         other => other,
     };
 
@@ -85,7 +86,7 @@ async fn run(mut cli: Cli) -> Result<(), CliError> {
         Commands::Pair => commands::pair::run(&client, json).await,
         Commands::Devices(args) => commands::devices::run(&client, args, json).await,
         Commands::Diagnostics(args) => commands::diagnostics::run(&client, args, json).await,
-        Commands::Server(_) | Commands::NativeHost(_) => {
+        Commands::Server(_) | Commands::NativeHost(_) | Commands::Update(_) => {
             unreachable!("handled above before the client was built")
         }
     }
@@ -97,11 +98,18 @@ mod tests {
 
     #[test]
     fn browser_launch_maps_to_native_host() {
-        let argv = |v: &[&str]| v.iter().map(Into::into).collect::<Vec<std::ffi::OsString>>();
+        let argv = |v: &[&str]| {
+            v.iter()
+                .map(Into::into)
+                .collect::<Vec<std::ffi::OsString>>()
+        };
         assert_eq!(
             native_host_argv(argv(&["swoop", "chrome-extension://abc/"])),
             argv(&["swoop", "native-host"])
         );
-        assert_eq!(native_host_argv(argv(&["swoop", "list"])), argv(&["swoop", "list"]));
+        assert_eq!(
+            native_host_argv(argv(&["swoop", "list"])),
+            argv(&["swoop", "list"])
+        );
     }
 }

@@ -1154,6 +1154,42 @@ impl SwoopEngine {
         ffi_async!(self, |api| Ok(path_str(&api.download_update().await?)))
     }
 
+    /// The app's own update check: quiet (no engine notification). `manual` shows a release the
+    /// user chose to skip.
+    pub async fn check_app_update(&self, manual: bool) -> Result<FfiUpdateInfo, FfiError> {
+        let engine = self.engine.clone();
+        join(
+            self.handle
+                .spawn(async move { Ok((&engine.check_app_update(manual).await?).into()) })
+                .await,
+        )
+    }
+
+    /// The GitHub releases page updates come from.
+    pub fn releases_page_url(&self) -> String {
+        swoop_update::releases_page()
+    }
+
+    /// Progress of the update download / verification / staging.
+    pub fn update_progress(&self) -> FfiUpdateProgress {
+        self.engine.update_progress().into()
+    }
+
+    /// Re-verify the downloaded update, mount it, validate the app inside and stage a copy next
+    /// to `bundle_path` (the running Swoop.app). Returns the staged bundle's path.
+    pub async fn stage_update(&self, bundle_path: String) -> Result<String, FfiError> {
+        let engine = self.engine.clone();
+        join(
+            self.handle
+                .spawn(async move {
+                    Ok(path_str(
+                        &engine.stage_update(PathBuf::from(bundle_path)).await?,
+                    ))
+                })
+                .await,
+        )
+    }
+
     pub async fn plugins(&self) -> Result<Vec<FfiPluginInfo>, FfiError> {
         ffi_async!(self, |api| Ok(api
             .list_plugins()

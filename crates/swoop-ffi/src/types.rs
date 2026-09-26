@@ -2054,10 +2054,21 @@ impl From<&s::ImportReport> for FfiImportReport {
 #[derive(Clone, Debug, PartialEq, uniffi::Record)]
 pub struct FfiUpdateInfo {
     pub current_version: String,
+    /// `up_to_date`, `available`, `no_releases`, `offline`, `rate_limited` or `error`.
+    pub status: String,
     pub available: bool,
+    pub skipped: bool,
     pub latest_version: Option<String>,
+    pub name: Option<String>,
+    /// Release notes (Markdown).
     pub notes: Option<String>,
+    pub notes_url: Option<String>,
+    /// RFC 3339.
+    pub published_at: Option<String>,
+    pub prerelease: bool,
     pub download_url: Option<String>,
+    pub size: Option<u64>,
+    pub message: Option<String>,
     pub signature_valid: Option<bool>,
     pub checked_at: i64,
 }
@@ -2066,12 +2077,43 @@ impl From<&s::UpdateInfo> for FfiUpdateInfo {
     fn from(u: &s::UpdateInfo) -> Self {
         Self {
             current_version: u.current_version.clone(),
+            status: u.status.clone(),
             available: u.available,
+            skipped: u.skipped,
             latest_version: u.latest_version.clone(),
+            name: u.name.clone(),
             notes: u.notes.clone(),
+            notes_url: u.notes_url.clone(),
+            published_at: u.published_at.clone(),
+            prerelease: u.prerelease,
             download_url: u.download_url.clone(),
+            size: u.size,
+            message: u.message.clone(),
             signature_valid: u.signature_valid,
             checked_at: ms(u.checked_at),
+        }
+    }
+}
+
+/// Download / verification / staging progress of the pending update.
+#[derive(Clone, Debug, PartialEq, uniffi::Record)]
+pub struct FfiUpdateProgress {
+    /// `idle`, `downloading`, `verifying`, `verified`, `staging`, `staged` or `failed`.
+    pub phase: String,
+    pub version: Option<String>,
+    pub received: u64,
+    pub total: Option<u64>,
+    pub message: Option<String>,
+}
+
+impl From<swoop_services::updates::UpdateProgress> for FfiUpdateProgress {
+    fn from(p: swoop_services::updates::UpdateProgress) -> Self {
+        Self {
+            phase: p.phase,
+            version: p.version,
+            received: p.received,
+            total: p.total,
+            message: p.message,
         }
     }
 }

@@ -14,6 +14,7 @@ swoop-domain = { path = "../swoop-domain" }
 swoop-runtime = { path = "../swoop-runtime" }
 swoop-services = { path = "../swoop-services" }
 swoop-server = { path = "../swoop-server" }
+swoop-update = { path = "../swoop-update" }
 clap = { workspace = true }
 tokio = { workspace = true }
 serde = { workspace = true }

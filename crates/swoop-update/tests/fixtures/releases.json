@@ -1,0 +1,317 @@
+[
+  {
+    "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/5",
+    "assets_url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/5/assets",
+    "upload_url": "https://uploads.github.com/repos/Saijayaranjan/Swoop/releases/5/assets{?name,label}",
+    "html_url": "https://github.com/Saijayaranjan/Swoop/releases/tag/v0.4.0",
+    "id": 5,
+    "author": {
+      "login": "Saijayaranjan",
+      "id": 1,
+      "type": "User"
+    },
+    "node_id": "RE_kwDO5",
+    "tag_name": "v0.4.0",
+    "target_commitish": "main",
+    "name": "Swoop 0.4.0",
+    "draft": true,
+    "immutable": false,
+    "prerelease": false,
+    "created_at": "2026-10-01T09:30:00Z",
+    "updated_at": "2026-10-01T09:30:00Z",
+    "published_at": null,
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/51",
+        "id": 51,
+        "node_id": "RA_kwDO51",
+        "name": "Swoop-0.4.0.dmg",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/x-apple-diskimage",
+        "state": "uploaded",
+        "size": 18874368,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.4.0/Swoop-0.4.0.dmg"
+      },
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/52",
+        "id": 52,
+        "node_id": "RA_kwDO52",
+        "name": "Swoop-0.4.0.dmg.sig",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/octet-stream",
+        "state": "uploaded",
+        "size": 89,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.4.0/Swoop-0.4.0.dmg.sig"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/tarball/v0.4.0",
+    "zipball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/zipball/v0.4.0",
+    "body": "## What's new\n\n- Faster segment scheduling\n- **Fixed** a crash when a queue was empty\n\nSee [the changelog](https://github.com/Saijayaranjan/Swoop/blob/main/CHANGELOG.md)."
+  },
+  {
+    "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/2",
+    "assets_url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/2/assets",
+    "upload_url": "https://uploads.github.com/repos/Saijayaranjan/Swoop/releases/2/assets{?name,label}",
+    "html_url": "https://github.com/Saijayaranjan/Swoop/releases/tag/v0.2.0",
+    "id": 2,
+    "author": {
+      "login": "Saijayaranjan",
+      "id": 1,
+      "type": "User"
+    },
+    "node_id": "RE_kwDO2",
+    "tag_name": "v0.2.0",
+    "target_commitish": "main",
+    "name": "Swoop 0.2.0",
+    "draft": false,
+    "immutable": false,
+    "prerelease": false,
+    "created_at": "2026-10-01T09:30:00Z",
+    "updated_at": "2026-10-01T09:30:00Z",
+    "published_at": "2026-10-01T09:30:00Z",
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/21",
+        "id": 21,
+        "node_id": "RA_kwDO21",
+        "name": "Swoop-0.2.0.dmg",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/x-apple-diskimage",
+        "state": "uploaded",
+        "size": 18874368,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.2.0/Swoop-0.2.0.dmg"
+      },
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/22",
+        "id": 22,
+        "node_id": "RA_kwDO22",
+        "name": "Swoop-0.2.0.dmg.sig",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/octet-stream",
+        "state": "uploaded",
+        "size": 89,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.2.0/Swoop-0.2.0.dmg.sig"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/tarball/v0.2.0",
+    "zipball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/zipball/v0.2.0",
+    "body": "## What's new\n\n- Faster segment scheduling\n- **Fixed** a crash when a queue was empty\n\nSee [the changelog](https://github.com/Saijayaranjan/Swoop/blob/main/CHANGELOG.md)."
+  },
+  {
+    "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/4",
+    "assets_url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/4/assets",
+    "upload_url": "https://uploads.github.com/repos/Saijayaranjan/Swoop/releases/4/assets{?name,label}",
+    "html_url": "https://github.com/Saijayaranjan/Swoop/releases/tag/v0.3.0-beta.1",
+    "id": 4,
+    "author": {
+      "login": "Saijayaranjan",
+      "id": 1,
+      "type": "User"
+    },
+    "node_id": "RE_kwDO4",
+    "tag_name": "v0.3.0-beta.1",
+    "target_commitish": "main",
+    "name": "Swoop 0.3.0-beta.1",
+    "draft": false,
+    "immutable": false,
+    "prerelease": true,
+    "created_at": "2026-10-05T12:00:00Z",
+    "updated_at": "2026-10-05T12:00:00Z",
+    "published_at": "2026-10-05T12:00:00Z",
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/41",
+        "id": 41,
+        "node_id": "RA_kwDO41",
+        "name": "Swoop-0.3.0-beta.1.dmg",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/x-apple-diskimage",
+        "state": "uploaded",
+        "size": 18874368,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.3.0-beta.1/Swoop-0.3.0-beta.1.dmg"
+      },
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/42",
+        "id": 42,
+        "node_id": "RA_kwDO42",
+        "name": "Swoop-0.3.0-beta.1.dmg.sig",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/octet-stream",
+        "state": "uploaded",
+        "size": 89,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.3.0-beta.1/Swoop-0.3.0-beta.1.dmg.sig"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/tarball/v0.3.0-beta.1",
+    "zipball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/zipball/v0.3.0-beta.1",
+    "body": "## What's new\n\n- Faster segment scheduling\n- **Fixed** a crash when a queue was empty\n\nSee [the changelog](https://github.com/Saijayaranjan/Swoop/blob/main/CHANGELOG.md)."
+  },
+  {
+    "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/3",
+    "assets_url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/3/assets",
+    "upload_url": "https://uploads.github.com/repos/Saijayaranjan/Swoop/releases/3/assets{?name,label}",
+    "html_url": "https://github.com/Saijayaranjan/Swoop/releases/tag/v0.2.1",
+    "id": 3,
+    "author": {
+      "login": "Saijayaranjan",
+      "id": 1,
+      "type": "User"
+    },
+    "node_id": "RE_kwDO3",
+    "tag_name": "v0.2.1",
+    "target_commitish": "main",
+    "name": "Swoop 0.2.1",
+    "draft": false,
+    "immutable": false,
+    "prerelease": false,
+    "created_at": "2026-10-03T08:00:00Z",
+    "updated_at": "2026-10-03T08:00:00Z",
+    "published_at": "2026-10-03T08:00:00Z",
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/31",
+        "id": 31,
+        "node_id": "RA_kwDO31",
+        "name": "Swoop-0.2.1.dmg",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/x-apple-diskimage",
+        "state": "uploaded",
+        "size": 18874368,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.2.1/Swoop-0.2.1.dmg"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/tarball/v0.2.1",
+    "zipball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/zipball/v0.2.1",
+    "body": "## What's new\n\n- Faster segment scheduling\n- **Fixed** a crash when a queue was empty\n\nSee [the changelog](https://github.com/Saijayaranjan/Swoop/blob/main/CHANGELOG.md)."
+  },
+  {
+    "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/1",
+    "assets_url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/1/assets",
+    "upload_url": "https://uploads.github.com/repos/Saijayaranjan/Swoop/releases/1/assets{?name,label}",
+    "html_url": "https://github.com/Saijayaranjan/Swoop/releases/tag/v0.1.0",
+    "id": 1,
+    "author": {
+      "login": "Saijayaranjan",
+      "id": 1,
+      "type": "User"
+    },
+    "node_id": "RE_kwDO1",
+    "tag_name": "v0.1.0",
+    "target_commitish": "main",
+    "name": "Swoop 0.1.0",
+    "draft": false,
+    "immutable": false,
+    "prerelease": false,
+    "created_at": "2026-09-25T10:00:00Z",
+    "updated_at": "2026-09-25T10:00:00Z",
+    "published_at": "2026-09-25T10:00:00Z",
+    "assets": [
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/11",
+        "id": 11,
+        "node_id": "RA_kwDO11",
+        "name": "Swoop-0.1.0.dmg",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/x-apple-diskimage",
+        "state": "uploaded",
+        "size": 18874368,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.1.0/Swoop-0.1.0.dmg"
+      },
+      {
+        "url": "https://api.github.com/repos/Saijayaranjan/Swoop/releases/assets/12",
+        "id": 12,
+        "node_id": "RA_kwDO12",
+        "name": "Swoop-0.1.0.dmg.sig",
+        "label": "",
+        "uploader": {
+          "login": "Saijayaranjan",
+          "id": 1,
+          "type": "User"
+        },
+        "content_type": "application/octet-stream",
+        "state": "uploaded",
+        "size": 89,
+        "digest": null,
+        "download_count": 3,
+        "created_at": "2026-10-01T09:20:00Z",
+        "updated_at": "2026-10-01T09:21:00Z",
+        "browser_download_url": "https://github.com/Saijayaranjan/Swoop/releases/download/v0.1.0/Swoop-0.1.0.dmg.sig"
+      }
+    ],
+    "tarball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/tarball/v0.1.0",
+    "zipball_url": "https://api.github.com/repos/Saijayaranjan/Swoop/zipball/v0.1.0",
+    "body": "## What's new\n\n- Faster segment scheduling\n- **Fixed** a crash when a queue was empty\n\nSee [the changelog](https://github.com/Saijayaranjan/Swoop/blob/main/CHANGELOG.md)."
+  }
+]

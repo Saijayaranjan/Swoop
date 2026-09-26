@@ -261,13 +261,32 @@ pub struct PairingInfo {
     pub tls_fingerprint: Option<String>,
 }
 
+/// Result of an update check against GitHub Releases.
 #[derive(Clone, Debug, Default, PartialEq, Serialize, Deserialize)]
+#[serde(default)]
 pub struct UpdateInfo {
     pub current_version: String,
+    /// `up_to_date`, `available`, `no_releases`, `offline`, `rate_limited` or `error`. Only
+    /// `available` needs attention; the others are quiet states.
+    pub status: String,
+    /// A newer release exists and the user hasn't skipped it (manual checks ignore skipping).
     pub available: bool,
+    /// The newer release is the version the user chose to skip.
+    pub skipped: bool,
     pub latest_version: Option<String>,
+    /// Release title.
+    pub name: Option<String>,
+    /// Release notes (Markdown).
     pub notes: Option<String>,
+    /// The release page.
+    pub notes_url: Option<String>,
+    /// RFC 3339.
+    pub published_at: Option<String>,
+    pub prerelease: bool,
     pub download_url: Option<String>,
+    pub size: Option<u64>,
+    /// Why a check couldn't complete (offline, rate limited, …).
+    pub message: Option<String>,
     pub signature_valid: Option<bool>,
     pub checked_at: Millis,
 }

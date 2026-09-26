@@ -53,6 +53,11 @@ impl ClientFactory {
         self.settings.lock().clone()
     }
 
+    /// The resolved global proxy URL (with credentials), if one is configured.
+    pub fn global_proxy_url(&self) -> Option<String> {
+        self.global_proxy_url.lock().clone()
+    }
+
     pub fn client(&self, profile: &ClientProfile) -> Result<reqwest::Client, TaskError> {
         if let Some(c) = self.cache.lock().get(profile) {
             return Ok(c.clone());

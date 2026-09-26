@@ -67,13 +67,40 @@ pub async fn run(cli: &Cli, args: ServerArgs) -> CliResult<()> {
         tracing::info!(addr = %a, "remote TCP listening");
     }
     tracing::info!("swoop server ready");
+    let update_notifier = tokio::spawn(notify_updates(engine.clone()));
 
     wait_for_shutdown_signal().await;
 
     tracing::info!("shutting down");
+    update_notifier.abort();
     engine.shutdown().await;
     handle.shutdown().await;
     Ok(())
+}
+
+/// Headless servers only *notify* about updates (log line, notification, webhooks); they never
+/// download or install one. Checks run shortly after start and then daily, when enabled.
+async fn notify_updates(engine: swoop_services::SharedEngine) {
+    const DAY_MS: i64 = 24 * 60 * 60 * 1000;
+    tokio::time::sleep(std::time::Duration::from_secs(60)).await;
+    loop {
+        let s = engine.settings();
+        let due = s
+            .updates
+            .last_check_at
+            .is_none_or(|t| swoop_domain::Millis::now().0 - t.0 >= DAY_MS);
+        if s.updates.check_automatically && due {
+            match engine.check_for_updates().await {
+                Ok(u) if u.available => tracing::info!(
+                    version = u.latest_version.as_deref().unwrap_or("?"),
+                    "a newer Swoop release is available (update the host manually)"
+                ),
+                Ok(u) => tracing::debug!(status = %u.status, "update check"),
+                Err(e) => tracing::debug!(error = %e, "update check skipped"),
+            }
+        }
+        tokio::time::sleep(std::time::Duration::from_secs(60 * 60)).await;
+    }
 }
 
 async fn wait_for_shutdown_signal() {

@@ -110,6 +110,8 @@ pub enum Commands {
     Server(ServerArgs),
     /// Run the browser native-messaging host relay (invoked by Chrome/Firefox, not humans).
     NativeHost(NativeHostArgs),
+    /// Check for a newer Swoop release on GitHub.
+    Update(crate::commands::update::UpdateArgs),
 }
 
 #[derive(clap::Args, Debug)]
