@@ -33,7 +33,8 @@
     "webRequest",
     "tabs",
     "activeTab",
-    "cookies"
+    "cookies",
+    "webNavigation"
   ],
   "host_permissions": ["<all_urls>"],
   "commands": {
